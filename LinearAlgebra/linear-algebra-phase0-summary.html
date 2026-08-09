@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Linear Algebra — Phase 0 Summary &amp; Discussions</title>
+<style>
+  :root {
+    --bg: #0f172a;
+    --bg2: #1e293b;
+    --card: #1e293b;
+    --card2: #26334d;
+    --ink: #e2e8f0;
+    --ink-dim: #94a3b8;
+    --accent: #38bdf8;
+    --accent2: #a78bfa;
+    --good: #34d399;
+    --warn: #fbbf24;
+    --bad: #f87171;
+    --line: #334155;
+    --code-bg: #0b1220;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.6;
+    padding: 2rem 1rem;
+  }
+  .wrap { max-width: 900px; margin: 0 auto; }
+
+  header { text-align: center; padding: 2rem 1rem 2.5rem; border-bottom: 1px solid var(--line); margin-bottom: 2rem; }
+  header h1 { font-size: 2rem; color: var(--accent); letter-spacing: -0.02em; }
+  header p { color: var(--ink-dim); margin-top: 0.5rem; }
+  .badge {
+    display: inline-block; background: var(--card2); border: 1px solid var(--line);
+    border-radius: 999px; padding: 0.25rem 0.9rem; font-size: 0.8rem; color: var(--ink-dim); margin: 0.25rem;
+  }
+
+  h2 {
+    font-size: 1.4rem; color: var(--accent); margin: 3rem 0 1rem;
+    padding-bottom: 0.4rem; border-bottom: 2px solid var(--line);
+  }
+  h2 .num {
+    display: inline-block; background: var(--accent); color: #06283d;
+    border-radius: 8px; padding: 0.05rem 0.6rem; font-size: 1rem; margin-right: 0.6rem;
+  }
+  h3 { color: var(--accent2); margin: 1.4rem 0 0.5rem; font-size: 1.05rem; }
+
+  p { margin: 0.6rem 0; }
+  .dim { color: var(--ink-dim); }
+
+  .card {
+    background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+    padding: 1.2rem 1.4rem; margin: 1rem 0;
+  }
+  .card.tip { border-left: 4px solid var(--good); }
+  .card.warn { border-left: 4px solid var(--warn); }
+  .card.key { border-left: 4px solid var(--accent2); }
+
+  code {
+    background: var(--code-bg); border: 1px solid var(--line); border-radius: 5px;
+    padding: 0.1rem 0.4rem; font-family: "SF Mono", Menlo, Consolas, monospace; font-size: 0.88em; color: #7dd3fc;
+  }
+  pre {
+    background: var(--code-bg); border: 1px solid var(--line); border-radius: 8px;
+    padding: 1rem; overflow-x: auto; font-size: 0.85rem; line-height: 1.5;
+  }
+  pre code { border: none; background: none; color: #a5f3fc; }
+
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.92rem; }
+  th { background: var(--card2); color: var(--accent); text-align: left; padding: 0.5rem 0.8rem; border: 1px solid var(--line); }
+  td { padding: 0.5rem 0.8rem; border: 1px solid var(--line); vertical-align: top; }
+
+  /* ============ CSS RENDERS ============ */
+  .stage {
+    background: var(--card2); border: 1px solid var(--line); border-radius: 12px;
+    padding: 1.5rem; margin: 1rem 0; text-align: center;
+  }
+  .stage .caption { color: var(--ink-dim); font-size: 0.85rem; margin-top: 0.8rem; }
+  .stage-title { color: var(--accent2); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; }
+
+  .grid-canvas {
+    position: relative; width: 280px; height: 280px; margin: 0 auto;
+    background:
+      repeating-linear-gradient(0deg, var(--line) 0 1px, transparent 1px 40px),
+      repeating-linear-gradient(90deg, var(--line) 0 1px, transparent 1px 40px);
+    border: 1px solid var(--line);
+  }
+  .grid-canvas .origin { position: absolute; left: 50%; top: 50%; }
+
+  .arrow {
+    position: absolute; left: 50%; top: 50%;
+    width: 0; height: 0;
+  }
+  .arrow .shaft {
+    position: absolute; left: 0; top: -1.5px; width: 100px; height: 3px;
+    transform-origin: 0 50%;
+  }
+  .arrow .head {
+    position: absolute; left: 93px; top: -5px;
+    width: 0; height: 0;
+    border-left: 11px solid transparent; border-bottom: 7px solid transparent; border-top: 7px solid transparent;
+  }
+
+  /* i-hat (x) */
+  .a-ix { transform: rotate(0deg); }
+  .a-ix .shaft { background: var(--accent); }
+  .a-ix .head { border-left-color: var(--accent); }
+  /* j-hat (y) */
+  .a-iy { transform: rotate(90deg); }
+  .a-iy .shaft { background: var(--good); }
+  .a-iy .head { border-left-color: var(--good); }
+
+  /* shear demo: transform the grid itself */
+  .shear-grid {
+    width: 200px; height: 200px; margin: 0 auto; position: relative;
+    background:
+      repeating-linear-gradient(0deg, rgba(56,189,248,0.35) 0 1px, transparent 1px 40px),
+      repeating-linear-gradient(90deg, rgba(56,189,248,0.35) 0 1px, transparent 1px 40px);
+    border: 1px solid var(--accent);
+    transition: transform 0.6s ease;
+  }
+  .shear-apply { transform: skewX(-20deg); }
+  .shear-demo .btn {
+    margin-top: 1rem; background: var(--card2); color: var(--accent);
+    border: 1px solid var(--accent); border-radius: 8px; padding: 0.5rem 1.2rem;
+    font-size: 0.9rem; cursor: pointer;
+  }
+  .shear-demo .btn:hover { background: var(--accent); color: #06283d; }
+
+  /* circle -> ellipse */
+  .ellipse-wrap { position: relative; width: 300px; height: 300px; margin: 0 auto; }
+  .circle {
+    position: absolute; inset: 50px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(167,139,250,0.35), rgba(167,139,250,0.15));
+    border: 2px solid var(--accent2);
+    transition: transform 0.8s ease;
+  }
+  .svd-axis { position: absolute; height: 2px; top: 50%; left: 50%; transform-origin: center; transition: transform 0.8s ease, width 0.8s ease, background 0.8s ease; }
+  .svd-pills { display: flex; justify-content: center; gap: 0.6rem; margin-bottom: 1rem; flex-wrap: wrap; }
+  .pill { background: var(--card); border: 1px solid var(--line); color: var(--ink-dim); border-radius: 999px; padding: 0.3rem 0.9rem; font-size: 0.8rem; transition: all 0.3s; }
+  .pill.active { background: var(--accent); color: #06283d; border-color: var(--accent); font-weight: 700; }
+  .step-desc { margin-top: 1rem; color: var(--ink); min-height: 3.4em; max-width: 520px; margin-left: auto; margin-right: auto; }
+  .step-formula { font-family: "SF Mono", Menlo, Consolas, monospace; color: var(--accent); margin-top: 0.5rem; font-size: 0.9rem; }
+
+  /* column space line */
+  .line-stage { position: relative; width: 300px; height: 300px; margin: 0 auto; overflow: hidden;
+    background:
+      repeating-linear-gradient(0deg, var(--line) 0 1px, transparent 1px 30px),
+      repeating-linear-gradient(90deg, var(--line) 0 1px, transparent 1px 30px);
+    border: 1px solid var(--line);
+  }
+  .col-line { position: absolute; left: 50%; top: 50%; width: 300px; height: 3px; background: var(--warn); transform-origin: center; transform: translate(-50%,-50%) rotate(63.43deg); }
+  .dot { position: absolute; width: 12px; height: 12px; border-radius: 50%; background: var(--good); transform: translate(-50%,-50%); }
+  .dot.off { background: var(--bad); }
+
+  /* level lines (duality) */
+  .level-stage { position: relative; width: 300px; height: 300px; margin: 0 auto; border: 1px solid var(--line); overflow: hidden;
+    background:
+      repeating-linear-gradient(-33.69deg, rgba(56,189,248,0.45) 0 2px, transparent 2px 26px),
+      var(--card2);
+  }
+  .dual-vec { position: absolute; left: 50%; top: 50%; width: 130px; height: 4px; background: var(--good); transform-origin: 0 50%; }
+  .dual-vec::after { content: ''; position: absolute; right: -10px; top: -4px; border-left: 12px solid var(--good); border-top: 6px solid transparent; border-bottom: 6px solid transparent; }
+
+  /* SVD pipeline */
+  .pipeline { display: flex; align-items: center; justify-content: center; gap: 0.6rem; flex-wrap: wrap; margin: 1rem 0; }
+  .pipe-box {
+    background: var(--card2); border: 2px solid var(--accent); border-radius: 10px;
+    padding: 0.9rem 1.2rem; min-width: 130px; text-align: center;
+  }
+  .pipe-box.rot { border-color: var(--accent); }
+  .pipe-box.stretch { border-color: var(--warn); }
+  .pipe-box label { display: block; font-size: 0.72rem; color: var(--ink-dim); text-transform: uppercase; letter-spacing: 0.06em; }
+  .pipe-box .sym { font-size: 1.6rem; font-weight: 700; color: var(--accent); }
+  .pipe-box.stretch .sym { color: var(--warn); }
+  .pipe-arrow { color: var(--ink-dim); font-size: 1.4rem; }
+
+  /* formula */
+  .formula {
+    background: var(--code-bg); border: 1px solid var(--line); border-radius: 10px;
+    padding: 1.2rem; text-align: center; font-size: 1.25rem; margin: 1rem 0; color: #a5f3fc;
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+  }
+  .formula .c1 { color: var(--accent); }
+  .formula .c2 { color: var(--warn); }
+  .formula .c3 { color: var(--good); }
+
+  /* cheat sheet */
+  .cheat { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; margin: 1rem 0; }
+  .cheat .cell { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 1rem; }
+  .cheat .cell h4 { color: var(--accent); margin-bottom: 0.4rem; font-size: 0.95rem; }
+
+  ul, ol { margin: 0.6rem 0 0.6rem 1.4rem; }
+  li { margin: 0.3rem 0; }
+  .eq { font-family: "SF Mono", Menlo, Consolas, monospace; }
+
+  footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--line); color: var(--ink-dim); font-size: 0.85rem; text-align: center; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>Linear Algebra — Phase 0</h1>
+  <p>Complete summary of the 3Blue1Brown course + every discussion we've had, with visual renders</p>
+  <div>
+    <span class="badge">Spans &amp; Bases</span>
+    <span class="badge">Matrices as Transformations</span>
+    <span class="badge">Rank &amp; Column Space</span>
+    <span class="badge">Determinants</span>
+    <span class="badge">Dot Products &amp; Duality</span>
+    <span class="badge">SVD</span>
+  </div>
+</header>
+
+<!-- ============ 1. THE MAP ============ -->
+<h2><span class="num">01</span>The Big Picture</h2>
+<p>Everything in this course is one story told from six angles:</p>
+<ol>
+  <li><strong>Vectors &amp; spans</strong> — the raw material (arrows, lines, planes).</li>
+  <li><strong>Matrices as transformations</strong> — what matrices <em>do</em>: they move the grid.</li>
+  <li><strong>Rank &amp; column space</strong> — which directions survive the transformation.</li>
+  <li><strong>Determinants</strong> — how much area/volume the transformation scales.</li>
+  <li><strong>Dot products &amp; duality</strong> — measuring, projecting, and the hidden arrows inside 1×2 matrices.</li>
+  <li><strong>SVD</strong> — the grand finale: every transformation is rotate → stretch → rotate.</li>
+</ol>
+<div class="card key">
+  <strong>The master intuition:</strong> a matrix's <strong>columns are where the basis vectors land</strong>. Nearly everything else — rank, column space, determinants, SVD — is just asking "what happens to the grid?"
+</div>
+
+<!-- ============ 2. SPANS & BASES ============ -->
+<h2><span class="num">02</span>Spans, Bases &amp; Subspaces</h2>
+
+<h3>Span</h3>
+<p>The <strong>span</strong> of a set of vectors = all vectors you can reach by scaling and adding them (all linear combinations). Visualize: the largest flat thing you can sweep out from the origin using those vectors' directions.</p>
+<ul>
+  <li>1 independent vector → a <strong>line</strong> (1D)</li>
+  <li>2 independent vectors → a <strong>plane</strong> (2D)</li>
+  <li>k independent vectors → a k-dimensional subspace</li>
+</ul>
+
+<div class="stage">
+  <div class="stage-title">Span of two vectors in a plane</div>
+  <div class="grid-canvas">
+    <div class="origin" style="transform: translate(-50%,-50%)">
+      <div class="arrow a-ix" style="transform: translate(-50%,-50%) rotate(30deg)"><div class="shaft"></div><div class="head"></div></div>
+      <div class="arrow a-iy" style="transform: translate(-50%,-50%) rotate(120deg)"><div class="shaft"></div><div class="head"></div></div>
+    </div>
+    <div class="arrow" style="transform: translate(-50%,-50%)">
+      <div class="shaft" style="width:120px;background:rgba(248,113,113,0.5)"></div>
+      <div class="head" style="left:113px;border-left-color:rgba(248,113,113,0.5)"></div>
+    </div>
+  </div>
+  <div class="caption">Two independent vectors (blue, green) + a reachable combination (red) — the shaded region they sweep out is the span.</div>
+</div>
+
+<h3>Basis</h3>
+<p>A <strong>basis</strong> = a linearly independent spanning set. Your understanding, refined:</p>
+<div class="card tip">
+  <strong>"Bare minimum" is right — but there's no unique minimum.</strong> Infinitely many bases exist (rotate {(1,0),(0,1)} and you get another one). What <em>is</em> unique is the <strong>number</strong> of vectors — the dimension. The real reason bases matter: every vector has <strong>exactly one</strong> representation in a given basis — a unique "address." Too few vectors → no address; too many → many addresses (ambiguity).
+</div>
+<p>The "remove redundant vectors" algorithm works, with one nuance: dependence doesn't partition cleanly. The correct rule is <strong>iterative</strong> — remove any vector expressible via the rest, repeat. Which basis you end with depends on removal order; the <em>size</em> never does.</p>
+
+<h3>Subspaces — "whole space" is relative</h3>
+<p>In ℝ³ (ambient space): 1 vector spans a <strong>line</strong>, 2 independent vectors span a <strong>plane</strong> — a proper <em>subspace</em>, a 2D sheet floating inside the 3D room. Only 3 independent vectors span the <em>whole</em> space.</p>
+<ul>
+  <li>"Whole space" ≠ infinite dimensions. It means "fills all n dimensions of the ambient space."</li>
+  <li>Infinite-dimensional spaces exist, but every <em>finite</em> set of vectors spans a finite-dimensional subspace — not the case to worry about here.</li>
+  <li>Every subspace is itself a complete vector space; "subspace" just means "viewed from inside a bigger space."</li>
+</ul>
+
+<!-- ============ 3. MATRICES ============ -->
+<h2><span class="num">03</span>Matrices as Transformations</h2>
+
+<h3>The one rule that unlocks everything</h3>
+<div class="formula">columns = images of i-hat, j-hat, k-hat</div>
+<p>A matrix is fully described by <em>where it sends the basis vectors</em>. The i-th column is the landing spot of the i-th basis vector. This is why every matrix property reduces to "what happens to the grid."</p>
+
+<h3>Visualizing a shear with CSS</h3>
+<div class="stage shear-demo">
+  <div class="stage-title">The shear [[1,1],[0,1]] — click to apply</div>
+  <div class="shear-grid" id="shearGrid"></div>
+  <br>
+  <button class="btn" onclick="document.getElementById('shearGrid').classList.toggle('shear-apply'); this.textContent = this.textContent === 'Apply shear' ? 'Reset' : 'Apply shear'">Apply shear</button>
+  <div class="caption">i-hat stays put (first column (1,0)); j-hat tips right (second column (1,1)). The grid deforms; a vector at address (2,3) stays at address (2,3) <em>on the new grid</em> — which is the physical point (5,3).</div>
+</div>
+
+<h3>Composition order (AB vs BA)</h3>
+<div class="card warn">
+  <strong>AB means "apply B first, then A" — read right-to-left:</strong> (AB)v = A(Bv). AB ≠ BA in general — socks before shoes vs shoes before socks. But <em>determinants</em> commute: det(AB) = det(BA), because scalars commute even when matrices don't.
+</div>
+
+<h3>Rows vs Columns — the two personalities</h3>
+<table>
+  <tr><th></th><th>Columns</th><th>Rows</th></tr>
+  <tr><td><strong>Question answered</strong></td><td>"Where does the vector land?"</td><td>"What are the coordinates of the landing spot?"</td></tr>
+  <tr><td><strong>Mental model</strong></td><td>Weighted sum of columns: Av = v₁·col₁ + v₂·col₂ + …</td><td>Dot each row with v: (Av)ᵢ = rowᵢ·v</td></tr>
+  <tr><td><strong>For basis vectors</strong></td><td>Columns ARE their images</td><td>Each row is a "measuring stick" for one output axis</td></tr>
+</table>
+<div class="card tip">A programmer's hook: a linear system Ax = b reads <strong>row by row</strong> — each row is one equation (one constraint). The columns describe how each variable behaves across all equations.</div>
+
+<!-- ============ 4. RANK & COLUMN SPACE ============ -->
+<h2><span class="num">04</span>Rank &amp; Column Space</h2>
+
+<h3>Rank</h3>
+<p><strong>Rank = number of linearly independent columns = the dimension of the output space</strong> = how many dimensions the transformation preserves.</p>
+<ul>
+  <li>Full rank (n×n): invertible, det ≠ 0, columns independent, every b solvable with a <em>unique</em> solution.</li>
+  <li>Rank &lt; n: some dimension got squished. det = 0. The squish direction maps to zero (the kernel).</li>
+  <li>Rank-nullity theorem: <span class="eq">rank + nullity = number of columns</span>. What survives + what gets annihilated = input dimension.</li>
+</ul>
+
+<h3>Column space — everything the transformation can reach</h3>
+<div class="card key">
+  <strong>Column space = span of the columns = set of ALL possible outputs.</strong> Because Av = v₁·col₁ + v₂·col₂ + …, every output is a combination of columns — so "span of columns" and "set of reachable outputs" are the same set.
+</div>
+<div class="formula">Ax = b has a solution ⟺ b is in the column space of A</div>
+<p>For a programmer: the column space is the <strong>range</strong> of the function f(v) = Av. The codomain is where outputs nominally live; the column space is which outputs actually occur.</p>
+
+<div class="stage">
+  <div class="stage-title">Column space of A = [[1,3],[2,6]] — the line y = 2x (rank 1)</div>
+  <div class="line-stage">
+    <div class="col-line"></div>
+    <div class="dot" style="left: calc(50% + 20px); top: calc(50% + 40px);"></div>
+    <div class="dot" style="left: calc(50% - 15px); top: calc(50% - 30px);"></div>
+    <div class="dot off" style="left: calc(50% + 60px); top: calc(50% + 5px);"></div>
+    <div class="dot off" style="left: calc(50% - 70px); top: calc(50% - 40px);"></div>
+  </div>
+  <div class="caption">Green dots = reachable b's (on the line) — solvable. Red dots = off the line — no solution exists, no matter what x you try.</div>
+</div>
+
+<h3>Solvability + uniqueness, decoded</h3>
+<table>
+  <tr><th>Question</th><th>Answered by</th><th>Logic</th></tr>
+  <tr><td>Does Ax = b have a solution?</td><td>Column space</td><td>Is b reachable? Is b a combination of columns?</td></tr>
+  <tr><td>Is the solution unique?</td><td>Kernel (null space)</td><td>Is there a nonzero v mapping to zero (addable for free)?</td></tr>
+  <tr><td>How big is the reachable set?</td><td>Rank = dim(column space)</td><td>How many independent directions survive?</td></tr>
+</table>
+
+<div class="card tip">
+  <strong>E.1 worked example:</strong> A = [[1,2],[2,4]] collapses to (x₁ + 2x₂)·(1,2) = b. For b = (3,6): x₁ + 2x₂ = 3 → infinitely many solutions along a line: x = (3,0) + t·(−2,1), where (−2,1) is the <em>kernel direction</em> (maps to zero, addable for free). Its SVD: σ = (5, 0) — the zero singular value is the squished dimension made literal.
+</div>
+
+<!-- ============ 5. DETERMINANTS ============ -->
+<h2><span class="num">05</span>Determinants</h2>
+
+<h3>The core idea</h3>
+<p><strong>det(M) = the factor by which M scales all areas (2D) / volumes (3D)</strong> — uniformly, for <em>every</em> shape. Not just the unit square — any shape gets scaled by exactly |det|. The sign encodes orientation flip (reflection = negative).</p>
+
+<h3>Why det(M1M2) = det(M1)·det(M2)</h3>
+<p>One sentence: <em>area-scaling factors compose multiplicatively — scale by det(M2), then by det(M1), gives total det(M1)·det(M2).</em></p>
+<div class="card warn">
+  The hidden assumption that makes it work: <strong>det(M1) scales every shape by the same factor regardless of what M2 produced.</strong> If M1 scaled different shapes differently, the product formula would break. That uniformity is the whole point of the determinant — it's why the product representation is valid.
+</div>
+
+<h3>det = 0 means a dimension died</h3>
+<p>When a matrix's columns are linearly dependent, the transformation squishes space onto a lower-dimensional flat — volume collapses to zero, det = 0.</p>
+<div class="card tip">
+  <strong>D.3 spotting skill:</strong> B = [[0,1,2],[3,4,5],[6,7,8]] has columns (0,3,6), (1,4,7), (2,5,8) — <em>collinear</em>, each the previous + (1,1,1). Three basis vectors landing on one line can't enclose volume → det = 0, rank 2. Rows equally spaced too — any matrix with evenly-spaced rows/columns is rank-deficient in disguise. And det(AB) = det(A)·det(B) = 18·0 = 0: once squished, never un-squished.
+</div>
+
+<div class="stage">
+  <div class="stage-title">Area scaling, live: the unit square under different matrices</div>
+  <div style="display:flex; justify-content:center; gap:2rem; flex-wrap:wrap;">
+    <div style="text-align:center">
+      <div class="shear-grid" style="width:140px;height:140px;"></div>
+      <div class="caption">Identity — area 1</div>
+    </div>
+    <div style="text-align:center">
+      <div class="shear-grid" style="width:140px;height:140px;transform:scale(1.6,0.4)"></div>
+      <div class="caption">[[1.6,0],[0,0.4]] — area 0.64</div>
+    </div>
+    <div style="text-align:center">
+      <div class="shear-grid" style="width:140px;height:140px;transform:skewX(-20deg)"></div>
+      <div class="caption">Shear — area still 1! (skew preserves area)</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 6. DOT PRODUCTS ============ -->
+<h2><span class="num">06</span>Dot Products</h2>
+
+<h3>Two faces of the same coin</h3>
+<div class="formula">u·v = u₁v₁ + u₂v₂ = |u|·|v|·cos θ</div>
+<ul>
+  <li><strong>Algebraic face:</strong> multiply coordinates, add. Easy to compute, zero intuition.</li>
+  <li><strong>Geometric face:</strong> |u| × (projection of v onto u) — "how much of v points along u, scaled by u's length."</li>
+</ul>
+
+<h3>Where cos θ comes from</h3>
+<p>Rearrange the geometric definition: <span class="eq">cos θ = (u·v)/(|u|·|v|)</span> — divide the dot product by the product of lengths to strip out magnitude, leaving pure alignment. (E.g., u=(1,2), v=(3,1): 5/(√5·√10) = 1/√2 → 45°.) It's provable via the law of cosines or by rotating u onto the x-axis.</p>
+
+<h3>The alignment meter</h3>
+<table>
+  <tr><th>cos θ</th><th>θ</th><th>Meaning</th></tr>
+  <tr><td>1</td><td>0°</td><td>Perfectly aligned (same direction)</td></tr>
+  <tr><td>&gt; 0</td><td>acute</td><td>Pointing mostly the same way</td></tr>
+  <tr><td>0</td><td>90°</td><td>Perpendicular — zero alignment</td></tr>
+  <tr><td>&lt; 0</td><td>obtuse</td><td>Pointing mostly opposite ways</td></tr>
+  <tr><td>−1</td><td>180°</td><td>Perfectly anti-aligned</td></tr>
+</table>
+<div class="card tip">For <strong>unit vectors</strong>, dot product = cos θ exactly — the dot product IS the alignment score when lengths are normalized. Sanity checks: u·u = |u|², perpendicular → 0, v = −u → −|u|².</div>
+
+<!-- ============ 7. DUALITY ============ -->
+<h2><span class="num">07</span>Duality &amp; The Transpose</h2>
+
+<h3>The discovery</h3>
+<p>A fixed vector u = (2,3) defines a map f(v) = u·v from the plane to the number line — a 1×2 matrix [2 3]. The surprise:</p>
+<div class="formula">every 2D → 1D linear map is "dot with some vector"</div>
+<p>Vectors (arrows) and 1×2 matrices (machines) are <strong>the same object wearing two hats</strong>. This is a one-to-one, structure-preserving correspondence (an isomorphism) — not a coincidence.</p>
+
+<div class="stage">
+  <div class="stage-title">Level lines of f(x,y) = 2x + 3y — the machine's measuring grid</div>
+  <div class="level-stage">
+    <div class="dual-vec" style="transform:translate(0,-50%) rotate(56.31deg)"></div>
+  </div>
+  <div class="caption">Level lines 2x+3y = c (blue) are <strong>perpendicular to u = (2,3)</strong> (green) — the "hidden arrow" behind the machine. The map counts lines along u's direction; the lines must cut across it like ruler ticks.</div>
+</div>
+
+<h3>Why (a,b) is perpendicular to the line ax + by = c</h3>
+<p>Take two points P, Q on the line. Both satisfy ax + by = c. Subtract: a(Pₓ−Qₓ) + b(P_y−Q_y) = 0, i.e. <strong>(a,b)·(P−Q) = 0</strong>. Since P−Q is a direction along the line, (a,b) is perpendicular to it. The line's coefficients ARE its normal vector.</p>
+<div class="card tip">
+  Your E.4 guess −3x + 2y = 0 was the <em>perpendicular line through the origin</em> — geometrically correct, just one level of abstraction lower than the answer (the vector (2,3)). The line sweeps out u's direction; the vector IS u.
+</div>
+
+<h3>The transpose as translation device</h3>
+<div class="formula">(Mv)·w = v·(Mᵀw)</div>
+<p><strong>Transposing a transformation = applying its inverse action to the measuring direction instead of the vector.</strong> 2D example: M = 90° rotation, Mᵀ = −90° rotation. Rotating the vector +90° then measuring against w equals measuring against w rotated −90°.</p>
+<p>Orthonormal matrices make this concrete: for rotations Q, <strong>Qᵀ = Q⁻¹</strong> (rotate back).</p>
+
+<!-- ============ 8. MATRIX MULTIPLICATION ============ -->
+<h2><span class="num">08</span>Matrix Multiplication — The Two Views</h2>
+
+<h3>Matrix × vector</h3>
+<table>
+  <tr><th></th><th>Row view</th><th>Column view</th></tr>
+  <tr><td><strong>What it does</strong></td><td>Dot each row with v</td><td>Weight the columns by v's coordinates, add</td></tr>
+  <tr><td><strong>Formula</strong></td><td>(Av)ᵢ = rowᵢ·v</td><td>Av = v₁·col₁ + v₂·col₂ + …</td></tr>
+  <tr><td><strong>Flavor</strong></td><td>Coordinate read-out (measuring)</td><td>Build-up (geometric landing spot)</td></tr>
+</table>
+<div class="card key">
+  Same answer, two mental paths. Both use the dot product — it's the <strong>engine</strong> of matrix multiplication: a matrix product is just a grid of dot products (rowᵢ·colⱼ). The 3D cross product plays no role here at all.
+</div>
+
+<h3>Matrix × matrix = composition</h3>
+<pre><code>A = [[0,-2,2],[5,1,5],[1,4,-1]],  B = [[0,1,2],[3,4,5],[6,7,8]]
+AB = [[6,6,6],[33,44,55],[6,10,14]]
+
+Each entry: row of A · column of B.   Each column of AB = A applied to a column of B.
+Conceptually: apply B first (columns = where i,j,k went under B), then A acts on those.</code></pre>
+
+<!-- ============ 9. SVD ============ -->
+<h2><span class="num">09</span>SVD — The Grand Finale</h2>
+
+<h3>The one-line definition</h3>
+<div class="formula"><span class="c1">M = U</span> <span class="c2">Σ</span> <span class="c3">Vᵀ</span></div>
+<p>U and V orthonormal (rotations), Σ diagonal non-negative (stretches). <strong>Every matrix, no matter how sheary or rectangular, decomposes this way.</strong></p>
+
+<div class="stage">
+  <div class="stage-title">The geometric meaning: rotate → stretch → rotate</div>
+  <div class="pipeline">
+    <div class="pipe-box rot"><label>first</label><div class="sym">Vᵀ</div><label>rotate into stretch frame</label></div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-box stretch"><label>then</label><div class="sym">Σ</div><label>stretch along axes</label></div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-box rot"><label>finally</label><div class="sym">U</div><label>rotate into output frame</label></div>
+  </div>
+</div>
+
+<h3>Circle → ellipse: the SVD pipeline, step by step</h3>
+<div class="stage">
+  <div class="stage-title">M = U Σ Vᵀ — the shear [[1,1],[0,1]] acting on the unit circle</div>
+  <div class="svd-pills">
+    <span class="pill" id="pill0">1 · Vᵀ rotate</span>
+    <span class="pill" id="pill1">2 · Σ stretch</span>
+    <span class="pill" id="pill2">3 · U rotate</span>
+  </div>
+  <div class="ellipse-wrap" id="ellipseWrap">
+    <div class="circle" id="svdCircle"></div>
+    <div class="svd-axis" id="svdAxisA"></div>
+    <div class="svd-axis" id="svdAxisB"></div>
+  </div>
+  <div class="step-desc" id="svdDesc"></div>
+  <div class="step-formula" id="svdFormula"></div>
+  <div style="display:flex;justify-content:center;gap:1rem;margin-top:1rem;flex-wrap:wrap;">
+    <button class="btn" onclick="svd.next()">▶ Next step</button>
+    <button class="btn" onclick="svd.reset()">↺ Reset</button>
+  </div>
+  <div class="caption">Each click advances one stage of M = UΣVᵀ. Watch the axes: V's stretch axes (purple) rotate into alignment, get stretched by σ = (φ, 1/φ) (yellow), then rotate into U's frame. The final ellipse is exactly what the shear does to the circle in one shot.</div>
+</div>
+
+<script>
+(function () {
+  var circle = document.getElementById('svdCircle');
+  var axA = document.getElementById('svdAxisA');
+  var axB = document.getElementById('svdAxisB');
+  var desc = document.getElementById('svdDesc');
+  var formula = document.getElementById('svdFormula');
+  var states = [
+    { c: "rotate(0deg) scaleX(1) scaleY(1) rotate(0deg)", a: "rotate(58.3deg)", b: "rotate(-31.7deg)", aw: 200, bw: 200, col: "var(--accent2)",
+      d: "Input: the unit circle, with V stretch axes drawn (58.3° and −31.7°). The shear hides inside two rotations around this stretch.",
+      f: "M = U Σ Vᵀ — ready. Step 1: Vᵀ" },
+    { c: "rotate(0deg) scaleX(1) scaleY(1) rotate(-58.3deg)", a: "rotate(0deg)", b: "rotate(-90deg)", aw: 200, bw: 200, col: "var(--accent2)",
+      d: "Vᵀ applied: rotate −58.3°. A rotation leaves the circle a circle — but now the stretch axes align with the screen axes, ready for pure stretching.",
+      f: "Vᵀ applied. Step 2: Σ" },
+    { c: "rotate(0deg) scaleX(1.618) scaleY(0.618) rotate(-58.3deg)", a: "rotate(0deg)", b: "rotate(-90deg)", aw: 323.6, bw: 123.6, col: "var(--warn)",
+      d: "Σ applied: stretch ×φ ≈ 1.62 horizontally, ×1/φ ≈ 0.62 vertically. Circle → ellipse; σ₁ = φ and σ₂ = 1/φ are its semi-axis lengths.",
+      f: "Σ applied. Step 3: U" },
+    { c: "rotate(31.7deg) scaleX(1.618) scaleY(0.618) rotate(-58.3deg)", a: "rotate(31.7deg)", b: "rotate(-58.3deg)", aw: 323.6, bw: 123.6, col: "var(--warn)",
+      d: "U applied: rotate +31.7° into the output frame. Final ellipse = the shear [[1,1],[0,1]] applied to the circle — major axis at 31.7°, which is U first column.",
+      f: "M = U Σ Vᵀ complete — the shear, decomposed" }
+  ];
+  var step = 0;
+  function apply() {
+    var s = states[step];
+    circle.style.transform = s.c;
+    axA.style.transform = "translate(-50%,-50%) " + s.a; axA.style.width = s.aw + "px"; axA.style.background = s.col;
+    axB.style.transform = "translate(-50%,-50%) " + s.b; axB.style.width = s.bw + "px"; axB.style.background = s.col;
+    desc.textContent = s.d;
+    formula.textContent = s.f;
+    for (var i = 0; i < 3; i++) {
+      document.getElementById('pill' + i).classList.toggle('active', i === step);
+    }
+  }
+  window.svd = {
+    next: function () { step = (step + 1) % states.length; apply(); },
+    reset: function () { step = 0; apply(); }
+  };
+  apply();
+})();
+</script>
+
+<h3>The shear resolved (your question)</h3>
+<div class="card key">
+  <strong>"Doesn't a shear ruin perpendicularity?"</strong> Yes — of the <em>standard</em> basis: (1,0) and (1,1) aren't perpendicular. But SVD never promises that. It promises: <em>there exists a hidden perpendicular pair (V's columns) that gets stretched purely, landing on another perpendicular pair (U's columns).</em> The shear [[1,1],[0,1]] has σ = (φ, 1/φ) ≈ (1.618, 0.618) — the golden ratio! — with stretch axes at 58.3°/−31.7° (input) mapping to 31.7°/−58.3° (output). The images of those special axes are still perpendicular: (1.377,0.851)·(−0.325,0.526) = 0.
+  <br><br>
+  <strong>One-liner:</strong> SVD finds the frame where the map is simple (pure stretch), then translates back. The shear "looks" like a shear only through the standard grid.
+</div>
+
+<h3>How U and V are determined — you only have M</h3>
+<pre><code>U, S, Vt = np.linalg.svd(M)   # M in → everything out. U, Σ, V are OUTPUTS, forced by M.
+
+The recipe (conceptually):
+1. Build MᵀM            ← "M's length fingerprint": |Mx|² = xᵀMᵀMx
+2. Eigen-decompose it   ← eigenvectors (sorted) = V's columns; eigenvalues = σ²
+3. uᵢ = Mvᵢ / σᵢ        ← push V through M, normalize → U
+
+Demo (M = [[1,1],[0,2]]):  MᵀM = [[1,1],[1,5]] → eigenvalues (0.764, 5.236)
+→ σ = (0.874, 2.288) ✓ matches np.linalg.svd output. Mvᵢ = σᵢuᵢ verified numerically.</code></pre>
+
+<h3>Why MᵀM? Because it cancels U.</h3>
+<div class="formula">MᵀM = (UΣVᵀ)ᵀ(UΣVᵀ) = VΣ²UᵀUΣVᵀ = <span class="c3">VΣ²Vᵀ</span></div>
+<ul>
+  <li>The output rotation <strong>U cancels itself</strong> (UᵀU = I) — MᵀM isolates exactly V and σ².</li>
+  <li>MᵀM is <strong>symmetric</strong> → its eigenvectors are <em>guaranteed</em> perpendicular. That's where SVD's perpendicularity promise comes from — not from M, but from the symmetry of MᵀM.</li>
+  <li>Perpendicular in → perpendicular out: (Mvᵢ)·(Mvⱼ) = vᵢᵀMᵀMvⱼ = σⱼ²(vᵢ·vⱼ) = 0 for i ≠ j.</li>
+  <li>Geometric view: the pullback of the unit circle through M is an ellipse in the <em>input</em> space, equation xᵀMᵀMx = 1. Its axes are V's columns; lengths 1/σ.</li>
+</ul>
+<div class="card tip"><strong>"MᵀM is M's confession."</strong> It converts any messy rotation+stretch+rotation into a symmetric pure-stretch matrix, and symmetry is what forces perpendicularity. Every piece of SVD's elegance traces back to this one move.</div>
+
+<h3>Why Vᵀ and not V? (your confusion, resolved)</h3>
+<table>
+  <tr><th>Operation</th><th>What it does</th><th>Example (V = 45° rotation, x = (1,1))</th></tr>
+  <tr><td><strong>V·x</strong></td><td>Physically rotates the vector — it MOVES</td><td>(0, 1.414)</td></tr>
+  <tr><td><strong>Vᵀx</strong></td><td>Re-describes x with V's ruler — the vector stays put</td><td>(1.414, 0) = "x is 1.414 along v₁, 0 along v₂" ✓</td></tr>
+</table>
+<p>Vᵀx = (v₁·x, v₂·x) — dotting with each column extracts the coordinate along it (your transpose-duality!). The pipeline: <strong>Vᵀ converts standard → V-coordinates, Σ stretches, U converts U-coordinates → standard.</strong> The transpose is structurally required, not a notation choice.</p>
+
+<h3>The key properties to keep in mind</h3>
+<table>
+  <tr><th>Property</th><th>Meaning</th></tr>
+  <tr><td>U, V orthonormal</td><td>Pure rotations; preserve lengths and angles</td></tr>
+  <tr><td>Σ diagonal, descending</td><td>σ₁ ≥ σ₂ ≥ … ≥ 0 — the honest stretch report</td></tr>
+  <tr><td>Mvᵢ = σᵢuᵢ</td><td>The defining bridge equation</td></tr>
+  <tr><td>rank = # nonzero σ</td><td>The squished dimension is a literal zero in Σ</td></tr>
+  <tr><td>σ₁·σ₂·…·σₙ = |det M|</td><td>Volume scaling = product of stretches</td></tr>
+  <tr><td>Exists for ANY matrix</td><td>Even rectangular (U and V live in different-sized spaces)</td></tr>
+  <tr><td>Eckart–Young</td><td>Top-k σ's = best rank-k approximation (compression)</td></tr>
+</table>
+
+<h3>U and V: related but independent</h3>
+<ul>
+  <li>Both <strong>determined by M</strong> (never chosen by you) — but computed separately: V from MᵀM (input space), U from MMᵀ (output space).</li>
+  <li>The only bridge: Mvᵢ = σᵢuᵢ (and Mᵀuᵢ = σᵢvᵢ).</li>
+  <li>Symmetric M → U = V (SVD = eigendecomposition). Rectangular M → U is m×m, V is n×n, living in different rooms.</li>
+</ul>
+
+<h3>Why SVD actually helps (applications)</h3>
+<table>
+  <tr><th>Application</th><th>How SVD powers it</th></tr>
+  <tr><td>Compression</td><td>Eckart–Young: keep top-k σ's → best rank-k approximation (images, embeddings)</td></tr>
+  <tr><td>PCA</td><td>Dimensionality reduction <em>is</em> SVD on centered data</td></tr>
+  <tr><td>Least squares</td><td>Pseudoinverse A⁺ = VΣ⁻¹Uᵀ — best approximate solution when none exists</td></tr>
+  <tr><td>Recommendation systems / LSA</td><td>Latent factors from user×item / word×doc matrices — the ancestor of word2vec</td></tr>
+  <tr><td>LoRA &amp; LLMs</td><td>Weight matrices have fast-decaying σ spectra → low-rank updates capture most of the signal</td></tr>
+  <tr><td>Numerical stability</td><td>σ_max/σ_min = condition number — warns of near-singular, garbage-prone systems</td></tr>
+</table>
+
+<!-- ============ 10. CHEAT SHEET ============ -->
+<h2><span class="num">10</span>Key Intuitions Cheat Sheet</h2>
+<div class="cheat">
+  <div class="cell"><h4>Columns are everything</h4>A matrix's columns are where the basis vectors land. Rank, column space, det, SVD all reduce to "what happens to the grid."</div>
+  <div class="cell"><h4>Basis</h4>Minimal spanning set; many bases, unique count (dimension); every vector has a unique address.</div>
+  <div class="cell"><h4>Column space = range</h4>Span of columns = all reachable outputs. Ax = b solvable ⟺ b in column space.</div>
+  <div class="cell"><h4>Rank = surviving dimensions</h4># independent columns = dimension of output. Rank + nullity = # columns.</div>
+  <div class="cell"><h4>det = uniform area scaling</h4>Scales every shape by the same factor; composes multiplicatively; zero ⟺ squished.</div>
+  <div class="cell"><h4>Dot product = shadow × scale</h4>|u| × (v's shadow on u). For unit vectors it IS cos θ — the alignment score.</div>
+  <div class="cell"><h4>Duality</h4>Every 2D→1D map is "dot with some vector." Level lines are perpendicular to that hidden arrow. Transpose switches hats.</div>
+  <div class="cell"><h4>SVD</h4>M = UΣVᵀ = rotate → stretch → rotate. MᵀM cancels U; symmetry forces perpendicularity. σ's are the stretch report; zero σ = dead dimension.</div>
+</div>
+
+<!-- ============ 11. WHERE TO GO NEXT ============ -->
+<h2><span class="num">11</span>What's Next</h2>
+<ul>
+  <li><strong>Eigenvalues &amp; eigenvectors</strong> — 3B1B chapter 14 (you've seen them via MᵀM; the direct picture is next).</li>
+  <li><strong>Change of basis</strong> — the formal version of "Vᵀ expresses in V's frame."</li>
+  <li><strong>3B1B's dedicated SVD video</strong> — his visual style applied to everything above.</li>
+  <li>Then on to <strong>calculus (gradients, chain rule)</strong> → micrograd → backprop.</li>
+</ul>
+
+<footer>
+  Phase 0 Linear Algebra — completed with 3Blue1Brown + deep-dive discussions &amp; practice · Generated 2025-08-09
+</footer>
+
+</div>
+</body>
+</html>
