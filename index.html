@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Learning Track — Hub</title>
+<style>
+  :root {
+    --bg: #0f172a;
+    --card: #1e293b;
+    --card2: #26334d;
+    --ink: #e2e8f0;
+    --ink-dim: #94a3b8;
+    --accent: #38bdf8;
+    --accent2: #a78bfa;
+    --good: #34d399;
+    --warn: #fbbf24;
+    --line: #334155;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg); color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.6; padding: 2rem 1rem 3rem;
+  }
+  .wrap { max-width: 900px; margin: 0 auto; }
+
+  header { text-align: center; padding: 2.5rem 1rem 2rem; border-bottom: 1px solid var(--line); margin-bottom: 2rem; }
+  header h1 { font-size: 2.1rem; color: var(--accent); letter-spacing: -0.02em; }
+  header .sub { color: var(--ink-dim); margin-top: 0.5rem; max-width: 560px; margin-left: auto; margin-right: auto; }
+  .badge { display: inline-block; background: var(--card2); border: 1px solid var(--line); border-radius: 999px; padding: 0.25rem 0.9rem; font-size: 0.78rem; color: var(--ink-dim); margin: 0.2rem; }
+
+  h2 { font-size: 1.15rem; color: var(--accent2); text-transform: uppercase; letter-spacing: 0.1em; margin: 2.2rem 0 0.8rem; }
+
+  /* Card grid */
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; }
+  a.card {
+    display: flex; flex-direction: column; text-decoration: none; color: var(--ink);
+    background: var(--card); border: 1px solid var(--line); border-radius: 14px;
+    padding: 1.2rem 1.3rem; transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+  a.card:hover { transform: translateY(-3px); border-color: var(--accent); box-shadow: 0 8px 24px rgba(56,189,248,0.12); }
+  a.card .topic {
+    font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--accent); margin-bottom: 0.4rem;
+  }
+  a.card h3 { font-size: 1.05rem; color: var(--ink); margin-bottom: 0.4rem; }
+  a.card p { font-size: 0.88rem; color: var(--ink-dim); flex: 1; }
+  a.card .tags { margin-top: 0.8rem; }
+  a.card .go { margin-top: 0.8rem; color: var(--accent); font-size: 0.85rem; font-weight: 600; }
+
+  .card.soon { pointer-events: none; opacity: 0.45; border-style: dashed; }
+  .card.soon .topic { color: var(--ink-dim); }
+  .card.soon .go { color: var(--ink-dim); }
+
+  /* Track sections */
+  .track-llm { border-left: 3px solid var(--accent); padding-left: 0.8rem; }
+  .track-emb { border-left: 3px solid var(--good); padding-left: 0.8rem; }
+
+  footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--line); color: var(--ink-dim); font-size: 0.85rem; text-align: center; }
+  code { background: #0b1220; border: 1px solid var(--line); border-radius: 5px; padding: 0.1rem 0.4rem; font-size: 0.85em; color: #7dd3fc; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>Learning Track — Hub</h1>
+  <p class="sub">Central navigation for all guides, summaries and study materials. Each topic gets its own page as it's completed; new pages appear as cards below.</p>
+  <div>
+    <span class="badge">🧠 LLMs</span>
+    <span class="badge">🔧 Embedded Firmware</span>
+    <span class="badge">📐 Mathematics</span>
+  </div>
+</header>
+
+<!--
+  HOW TO ADD A NEW PAGE:
+  1. Save your new html file somewhere under ~/Documents/LearningPlans/
+  2. Copy one <a class="card">...</a> block below, set the href to the relative path,
+     pick a topic label + title + description + tags, and move it from "soon" to a real link.
+  3. Run ./git-sync.sh push "add <topic> page"
+-->
+
+<h2 class="track-llm">🧠 LLM Track</h2>
+<div class="grid">
+  <a class="card" href="LinearAlgebra/linear-algebra-phase0-summary.html">
+    <div class="topic">Mathematics · Phase 0</div>
+    <h3>Linear Algebra — Complete Summary</h3>
+    <p>Full walkthrough of 3Blue1Brown's course plus deep-dive discussions: spans &amp; bases, matrices as transformations, rank &amp; column space, determinants, dot products &amp; duality, and SVD with interactive step-through demos.</p>
+    <div class="tags"><span class="badge">3B1B</span><span class="badge">SVD</span><span class="badge">Duality</span><span class="badge">interactive</span></div>
+    <div class="go">Open →</div>
+  </a>
+
+  <div class="card soon">
+    <div class="topic">Mathematics · Phase 0</div>
+    <h3>Calculus &amp; Chain Rule</h3>
+    <p>Gradients, partial derivatives, the chain rule, and backprop from first principles.</p>
+    <div class="go">Coming soon</div>
+  </div>
+
+  <div class="card soon">
+    <div class="topic">History · Phase 1</div>
+    <h3>History of NLP &amp; LLMs</h3>
+    <p>From symbolic NLP to transformers — the problems that drove every architecture change.</p>
+    <div class="go">Coming soon</div>
+  </div>
+
+  <div class="card soon">
+    <div class="topic">Architecture · Phase 2</div>
+    <h3>How Transformers Work</h3>
+    <p>Tokenization, attention, KV cache, and the full GPT architecture.</p>
+    <div class="go">Coming soon</div>
+  </div>
+</div>
+
+<h2 class="track-emb">🔧 Embedded Firmware Track</h2>
+<div class="grid">
+  <div class="card soon">
+    <div class="topic">Fundamentals · Phase 1</div>
+    <h3>C for Embedded &amp; Digital Basics</h3>
+    <p>Pointers, bit manipulation, memory layout, and computer architecture essentials.</p>
+    <div class="go">Coming soon</div>
+  </div>
+
+  <div class="card soon">
+    <div class="topic">Hardware · Phase 2</div>
+    <h3>ARM Cortex-M &amp; Bare-Metal</h3>
+    <p>Registers, interrupts, UART/SPI/I2C — register-level STM32 programming.</p>
+    <div class="go">Coming soon</div>
+  </div>
+
+  <div class="card soon">
+    <div class="topic">Real-Time · Phase 3</div>
+    <h3>RTOS &amp; FreeRTOS</h3>
+    <p>Tasks, queues, semaphores, scheduling, and real-time patterns.</p>
+    <div class="go">Coming soon</div>
+  </div>
+</div>
+
+<footer>
+  Learning track hub · add pages as cards above, then <code>./git-sync.sh push</code>
+</footer>
+
+</div>
+</body>
+</html>
