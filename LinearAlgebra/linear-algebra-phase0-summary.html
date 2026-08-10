@@ -218,13 +218,14 @@
 
 <!-- ============ 1. THE MAP ============ -->
 <h2><span class="num">01</span>The Big Picture</h2>
-<p>Everything in this course is one story told from six angles:</p>
+<p>Everything in this course is one story told from seven angles:</p>
 <ol>
   <li><strong>Vectors &amp; spans</strong> — the raw material (arrows, lines, planes).</li>
   <li><strong>Matrices as transformations</strong> — what matrices <em>do</em>: they move the grid.</li>
   <li><strong>Rank &amp; column space</strong> — which directions survive the transformation.</li>
   <li><strong>Determinants</strong> — how much area/volume the transformation scales.</li>
   <li><strong>Dot products &amp; duality</strong> — measuring, projecting, and the hidden arrows inside 1×2 matrices.</li>
+  <li><strong>Eigenvalues &amp; change of basis</strong> — the directions that don't tilt, and the rulers we choose to describe vectors.</li>
   <li><strong>SVD</strong> — the grand finale: every transformation is rotate → stretch → rotate.</li>
 </ol>
 <div class="card key">
@@ -452,8 +453,72 @@ AB = [[6,6,6],[33,44,55],[6,10,14]]
 Each entry: row of A · column of B.   Each column of AB = A applied to a column of B.
 Conceptually: apply B first (columns = where i,j,k went under B), then A acts on those.</code></pre>
 
-<!-- ============ 9. SVD ============ -->
-<h2><span class="num">09</span>SVD — The Grand Finale</h2>
+<!-- ============ 9. EIGENVALUES & CHANGE OF BASIS ============ -->
+<h2><span class="num">09</span>Eigenvalues, Eigenvectors &amp; Change of Basis</h2>
+
+<h3>Geometric intuition — directions that refuse to tilt</h3>
+<p>Most directions get <em>tilted</em> by a transformation. But some directions get special treatment: the transformation leaves them <strong>on their own line</strong>, only scaling them (or flipping sign). Those are the <strong>eigenvectors</strong>; the scale factor is the <strong>eigenvalue</strong> λ.</p>
+
+<div class="stage">
+  <div class="stage-title">Eigenvectors of [[1.5, 0.5],[0.5, 1.5]] — the diagonal directions never tilt</div>
+  <div style="display:flex;justify-content:center;gap:2rem;flex-wrap:wrap;align-items:center;">
+    <div style="text-align:center">
+      <div class="grid-canvas" style="width:220px;height:220px;">
+        <div class="arrow" style="transform: translate(-50%,-50%) rotate(45deg)"><div class="shaft" style="width:70px;background:var(--warn)"></div><div class="head" style="left:63px;border-left-color:var(--warn)"></div></div>
+        <div class="arrow" style="transform: translate(-50%,-50%) rotate(-45deg)"><div class="shaft" style="width:70px;background:var(--good)"></div><div class="head" style="left:63px;border-left-color:var(--good)"></div></div>
+      </div>
+      <div class="caption">Before — arrows along (1,1) and (1,−1)</div>
+    </div>
+    <div style="text-align:center">
+      <div class="grid-canvas" style="width:220px;height:220px;transform:matrix(1.5,0.5,0.5,1.5,0,0);">
+        <div class="arrow" style="transform: translate(-50%,-50%) rotate(45deg)"><div class="shaft" style="width:70px;background:var(--warn)"></div><div class="head" style="left:63px;border-left-color:var(--warn)"></div></div>
+        <div class="arrow" style="transform: translate(-50%,-50%) rotate(-45deg)"><div class="shaft" style="width:70px;background:var(--good)"></div><div class="head" style="left:63px;border-left-color:var(--good)"></div></div>
+      </div>
+      <div class="caption">After — (1,1) doubled (λ=2, yellow); (1,−1) untouched (λ=1, green)</div>
+    </div>
+  </div>
+  <div class="caption">Every other direction gets tilted; these two stay on their lines, only scaled. That's the whole idea.</div>
+</div>
+
+<div class="card key">
+  <strong>Why they matter:</strong> eigenvectors are the directions the transformation "respects" — the lines along which it acts as pure scaling. Everything else is just a mix of those pure behaviors. det = <strong>product</strong> of eigenvalues (volume = product of stretches along the eigen-directions); trace = <strong>sum</strong> of eigenvalues. If λ = 0 is an eigenvalue, the transformation squishes along that direction — your det = 0 ⟺ rank-deficient intuition, restated.
+</div>
+
+<h3>Mathematical / computational model</h3>
+<p>Find them by solving the <strong>characteristic equation</strong>:</p>
+<div class="formula">det(A − λI) = 0 → eigenvalues λ; then (A − λI)v = 0 → eigenvectors v</div>
+<ul>
+  <li><strong>Diagonalization:</strong> if A has a full set of eigenvectors, A = QΛQ⁻¹ — rotate to the eigenbasis, scale by the λ's, rotate back. <strong>Same basis at both ends.</strong></li>
+  <li><strong>The contrast with SVD:</strong> eigendecomposition must use the <em>same</em> basis on input and output — and it fails when eigenvectors are missing (the shear [[1,1],[0,1]] has only ONE eigenvector; it can't be diagonalized). SVD allows <em>different</em> input/output bases — that's exactly why it always exists.</li>
+  <li><strong>Symmetry ⟹ orthonormal eigenvectors:</strong> symmetric matrices have perpendicular unit eigenvectors — precisely why MᵀM's eigenvectors (V in SVD) are guaranteed perpendicular.</li>
+</ul>
+
+<h3>Change of basis — geometric intuition</h3>
+<p>The vector is <strong>real</strong>; the coordinates are just a description. A basis is a choice of ruler. Change of basis = re-describing the <em>same</em> point with a different ruler — nothing moves, only the numbers change.</p>
+
+<div class="stage">
+  <div class="stage-title">One point, two coordinate systems</div>
+  <div class="grid-canvas" style="width:240px;height:240px;">
+    <div class="arrow" style="transform: translate(-50%,-50%) rotate(0deg)"><div class="shaft" style="width:80px;background:var(--accent)"></div><div class="head" style="left:73px;border-left-color:var(--accent)"></div></div>
+    <div class="arrow" style="transform: translate(-50%,-50%) rotate(90deg)"><div class="shaft" style="width:80px;background:var(--good)"></div><div class="head" style="left:73px;border-left-color:var(--good)"></div></div>
+    <div class="arrow" style="transform: translate(-50%,-50%) rotate(45deg)"><div class="shaft" style="width:100px;background:var(--accent2)"></div><div class="head" style="left:93px;border-left-color:var(--accent2)"></div></div>
+    <div class="arrow" style="transform: translate(-50%,-50%) rotate(135deg)"><div class="shaft" style="width:100px;background:var(--accent2)"></div><div class="head" style="left:93px;border-left-color:var(--accent2)"></div></div>
+    <div style="position:absolute;left:calc(50% + 40px);top:calc(50% + 40px);width:12px;height:12px;border-radius:50%;background:var(--warn);transform:translate(-50%,-50%);"></div>
+  </div>
+  <div class="caption">Solid axes = standard basis (i, j). Purple = a 45°-rotated basis (v₁, v₂). The dot at grid-address (1,1) is at (√2, 0) in the rotated frame — purely along v₁. Same physical point, different numbers. This is exactly what Vᵀ does in SVD: re-describes a vector in V's frame.</div>
+</div>
+
+<h3>Change of basis — mathematical model</h3>
+<div class="formula">new coords → old coords: x = Bc &nbsp;·&nbsp; old coords → new coords: c = B⁻¹x</div>
+<ul>
+  <li><strong>B</strong> = the matrix whose columns are the new basis vectors (written in old coordinates). B·c rebuilds the point from new coordinates; B⁻¹x extracts new coordinates from old.</li>
+  <li>For <strong>orthonormal</strong> B: B⁻¹ = Bᵀ — the transpose-duality lesson again: rotating into a frame is done by the transpose.</li>
+  <li><strong>Same map, new glasses:</strong> a transformation M (old coords) becomes <span class="eq">B⁻¹MB</span> in the new coords. Diagonalization A = QΛQ⁻¹ is exactly this: find the basis (Q's columns) where the map becomes diagonal.</li>
+  <li>This is the machinery behind SVD: <strong>Vᵀ = change of coordinates into V's frame</strong>, then stretch, then U rebuilds in the output frame.</li>
+</ul>
+
+<!-- ============ 10. SVD ============ -->
+<h2><span class="num">10</span>SVD — The Grand Finale</h2>
 
 <h3>The one-line definition</h3>
 <div class="formula"><span class="c1">M = U</span> <span class="c2">Σ</span> <span class="c3">Vᵀ</span></div>
@@ -599,8 +664,8 @@ Demo (M = [[1,1],[0,2]]):  MᵀM = [[1,1],[1,5]] → eigenvalues (0.764, 5.236)
   <tr><td>Numerical stability</td><td>σ_max/σ_min = condition number — warns of near-singular, garbage-prone systems</td></tr>
 </table>
 
-<!-- ============ 10. CHEAT SHEET ============ -->
-<h2><span class="num">10</span>Key Intuitions Cheat Sheet</h2>
+<!-- ============ 11. CHEAT SHEET ============ -->
+<h2><span class="num">11</span>Key Intuitions Cheat Sheet</h2>
 <div class="cheat">
   <div class="cell"><h4>Columns are everything</h4>A matrix's columns are where the basis vectors land. Rank, column space, det, SVD all reduce to "what happens to the grid."</div>
   <div class="cell"><h4>Basis</h4>Minimal spanning set; many bases, unique count (dimension); every vector has a unique address.</div>
@@ -609,15 +674,15 @@ Demo (M = [[1,1],[0,2]]):  MᵀM = [[1,1],[1,5]] → eigenvalues (0.764, 5.236)
   <div class="cell"><h4>det = uniform area scaling</h4>Scales every shape by the same factor; composes multiplicatively; zero ⟺ squished.</div>
   <div class="cell"><h4>Dot product = shadow × scale</h4>|u| × (v's shadow on u). For unit vectors it IS cos θ — the alignment score.</div>
   <div class="cell"><h4>Duality</h4>Every 2D→1D map is "dot with some vector." Level lines are perpendicular to that hidden arrow. Transpose switches hats.</div>
+  <div class="cell"><h4>Eigenvectors: lines that don't tilt</h4>Directions the map only scales (λ). det = product of λ's; symmetric ⟹ perpendicular eigenvectors (why MᵀM gives V).</div>
+  <div class="cell"><h4>Change of basis = new glasses</h4>Same vector, new coordinates: x = Bc, c = B⁻¹x. A map becomes B⁻¹MB. Vᵀ in SVD is exactly a change of basis.</div>
   <div class="cell"><h4>SVD</h4>M = UΣVᵀ = rotate → stretch → rotate. MᵀM cancels U; symmetry forces perpendicularity. σ's are the stretch report; zero σ = dead dimension.</div>
 </div>
 
-<!-- ============ 11. WHERE TO GO NEXT ============ -->
-<h2><span class="num">11</span>What's Next</h2>
+<!-- ============ 12. WHERE TO GO NEXT ============ -->
+<h2><span class="num">12</span>What's Next</h2>
 <ul>
-  <li><strong>Eigenvalues &amp; eigenvectors</strong> — 3B1B chapter 14 (you've seen them via MᵀM; the direct picture is next).</li>
-  <li><strong>Change of basis</strong> — the formal version of "Vᵀ expresses in V's frame."</li>
-  <li><strong>3B1B's dedicated SVD video</strong> — his visual style applied to everything above.</li>
+  <li><strong>Review &amp; reinforcement</strong> — the full course is now summarized above (including eigenvalues &amp; change of basis). Re-run the interactive demos and work through the tracker's review checklist.</li>
   <li>Then on to <strong>calculus (gradients, chain rule)</strong> → micrograd → backprop.</li>
 </ul>
 
