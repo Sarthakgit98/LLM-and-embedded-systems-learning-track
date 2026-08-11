@@ -244,6 +244,36 @@
 
 **Why this order (retention-first):** probability builds directly on integration (expectation = ∫x·p(x)dx, CDF = antiderivative) — fresh calculus, immediate payoff; info theory builds on probability (entropy = −Σp·ln p); optimization is just Taylor/linearization + the chain rule; micrograd then *uses* every piece. Each day's booster re-activates the previous day, and the two tracks stay in separate sessions.
 
+## 🧪 TEMPORARY — Detailed Source Watchlist (compress into day rows or delete later)
+
+> Purpose: full breakdown of the probability & info-theory sources referenced in the sprint above. Once internalized (or when the sprint ends), compress this into the day rows above and delete this section.
+
+**Probability I & II (Wed–Thu) — exact sources:**
+
+1. **Deisenroth ch. 6 — "Probability and Distributions"** (*Mathematics for Machine Learning*, free PDF at mml-book.github.io) — the math backbone: probability spaces, sum & product rules, Bayes' theorem, expectation/variance, ML-relevant distributions (Bernoulli, Binomial, Categorical, Gaussian, Exponential, Laplace).
+2. **StatQuest** (YouTube, Josh Starmer) — ⚠️ *NOT* the "Statistics Fundamentals" playlist (that's frequentist hypothesis testing — p-values, t-tests, ANOVA — irrelevant to this block). Watch these specific videos instead (search by exact title):
+   - *Bayes Theorem*
+   - *Probability vs Likelihood*
+   - *Maximum Likelihood, clearly explained*
+   - *The Normal (Gaussian) Distribution* · *The Binomial Distribution* · *The Poisson Distribution* · *The Exponential Distribution* · *The Uniform Distribution*
+   - Order: watch first for intuition → then Deisenroth for the math (~90 min total)
+3. **Blitzstein — Harvard Stat 110** (free YouTube lectures; book: *Introduction to Probability*, Blitzstein & Hwang) — watch 3–5 lectures only (random variables, expectation, Bayes); gold standard for depth, the rest is reference.
+4. **MIT 6.041 (Tsitsiklis)** — *Introduction to Probability* (Bertsekas & Tsitsiklis), free PDF via MIT OCW — role: **exercises** (the highest-value part; turns "watched a video" into "can derive it").
+
+**Info theory (Fri) — exact sources:**
+
+1. **3Blue1Brown** — coding-theory / error-correcting-codes videos (search "3Blue1Brown coding theory"; Hamming/Shannon videos) — conceptual primer on *why* entropy & information are defined as they are; not the meat.
+2. **Jurafsky & Martin ch. 3** — *Speech and Language Processing* 3rd ed. draft, free at web.stanford.edu/~jurafsky/slp3/ — entropy + **perplexity** in the NLP context (the LLM-flavored payoff).
+3. **MacKay — *Information Theory, Inference, and Learning Algorithms*** — free PDF at inference.org.uk/mackay/itila/ — ch. 1–6 as reference; later chapters bridge to ML (neural nets, Bayesian inference).
+
+**Usage order per day:**
+
+| Day | Watch/read order |
+|---|---|
+| Wed — Probability I | StatQuest distributions → Deisenroth ch. 6 (distributions, expectation, variance) |
+| Thu — Probability II | StatQuest Bayes + MLE → Blitzstein Stat 110 lectures (Bayes, expectation) → MIT 6.041 exercises |
+| Fri — Info theory | 3B1B coding theory (primer) → Jurafsky ch. 3 (perplexity) → MacKay ch. 1–6 as reference |
+
 ## ⚠️ Sprint rules that keep retention high
 
 1. **5-minute daily flashback** — before each primary block, re-derive yesterday's key result from memory (no notes). Highest-leverage habit; 10 minutes/day of this beats 2 hours of re-reading later.
