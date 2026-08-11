@@ -128,14 +128,16 @@
 
 <header>
   <h1>Calculus — Phase 0</h1>
-  <p>3Blue1Brown <em>Essence of Calculus</em> — videos 1–4: the derivative, geometric formulas, and the product &amp; chain rules, with visual renders</p>
+  <p>3Blue1Brown <em>Essence of Calculus</em> — complete series (videos 1–11): derivatives, geometric formulas, product &amp; chain rules, Euler's e, implicit differentiation, limits, integration &amp; the FTC, higher derivatives, and Taylor series</p>
   <div>
-    <span class="badge">Videos 1–4</span>
+    <span class="badge">Complete</span>
     <span class="badge">Derivatives</span>
-    <span class="badge">Geometric Formulas</span>
-    <span class="badge">Product Rule</span>
-    <span class="badge">Chain Rule</span>
-    <span class="badge">Local Linearity</span>
+    <span class="badge">Euler's e</span>
+    <span class="badge">Implicit Diff</span>
+    <span class="badge">Limits &amp; ε-δ</span>
+    <span class="badge">Integration &amp; FTC</span>
+    <span class="badge">Higher Derivatives</span>
+    <span class="badge">Taylor Series</span>
   </div>
 </header>
 
@@ -441,18 +443,283 @@
   <strong>The chain rule is backpropagation.</strong> A neural network is one giant composition of functions (layers, activations, loss). The gradient of the loss w.r.t. any weight is a product of derivatives along the path from that weight to the loss — the chain rule, applied backward through the computation graph. Karpathy's <code>micrograd</code> is literally just these two rules (product + chain) plus a data structure to walk the graph. Everything you just visualized in this page <em>is</em> the engine of deep learning.
 </div>
 
-<p>Remaining in the course (next page update):</p>
+<p>All 11 main videos are now covered — sections 09–17 walk through the rest of the series and end by mapping every topic onto the LLM and embedded tracks.</p>
+
+<!-- ============ 9. EULER'S NUMBER ============ -->
+<h2><span class="num">09</span>Euler's Number e — The Function That Is Its Own Derivative</h2>
+
+<h3>The question that births e</h3>
+<p>Look at exponential functions f(x) = aˣ. Their derivative is proportional to the function itself: <span class="eq">d/dx(aˣ) = c(a)·aˣ</span> — the bigger the value, the faster it grows. That's what "exponential" means: growth rate ∝ current size (bacteria, money, a rumor). The constant c(a) depends on the base a, and it's exactly <strong>ln(a)</strong>.</p>
+
+<div class="formula">d/dx(aˣ) = ln(a)·aˣ &nbsp;&nbsp;·&nbsp;&nbsp; d/dx(eˣ) = eˣ &nbsp;&nbsp;·&nbsp;&nbsp; d/dx(ln x) = 1/x</div>
+
+<p><strong>e is the base where the proportionality constant becomes 1</strong> — the unique base whose function is its own derivative. Every other exponential is eˣ scaled: aˣ = e^(x·ln a). And ln(x) is the inverse function: "how long to reach x at continuous growth rate 1?"</p>
+
+<div class="stage">
+  <div class="stage-title">The aˣ family — all pass through (0,1); tangent slopes there are ln(a)</div>
+  <svg class="fig" viewBox="0 0 320 240" width="340" style="background:var(--code-bg);border:1px solid var(--line);border-radius:8px;">
+    <line x1="40" y1="205" x2="310" y2="205" stroke="var(--line)" stroke-width="1"/>
+    <line x1="40" y1="205" x2="40" y2="20" stroke="var(--line)" stroke-width="1"/>
+    <path d="M40,181 L71.5,177.3 L103,173.1 L134.5,168.2 L166,162.5" fill="none" stroke="var(--warn)" stroke-width="2"/>
+    <path d="M40,181 L71.5,174.4 L103,166 L134.5,155.3 L166,141.7" fill="none" stroke="var(--good)" stroke-width="2"/>
+    <path d="M40,181 L71.5,170.9 L103,156.7 L134.5,136.4 L166,107.7" fill="none" stroke="var(--accent)" stroke-width="2.5"/>
+    <line x1="40" y1="181" x2="100" y2="174.5" stroke="var(--warn)" stroke-width="1.5" stroke-dasharray="4 3"/>
+    <line x1="40" y1="181" x2="100" y2="169.9" stroke="var(--good)" stroke-width="1.5" stroke-dasharray="4 3"/>
+    <line x1="40" y1="181" x2="100" y2="165" stroke="var(--accent)" stroke-width="2" stroke-dasharray="4 3"/>
+    <polygon points="40,181 130,181 130,157" fill="rgba(56,189,248,0.15)" stroke="var(--accent)" stroke-width="1.2"/>
+    <circle cx="40" cy="181" r="3.5" fill="var(--ink)"/>
+    <text x="166" y="160" style="fill:var(--warn);font-size:11px" text-anchor="end">1.5ˣ</text>
+    <text x="166" y="139" style="fill:var(--good);font-size:11px" text-anchor="end">2ˣ</text>
+    <text x="166" y="105" style="fill:var(--accent);font-size:12px" text-anchor="end">eˣ</text>
+    <text x="132" y="172" style="fill:var(--accent);font-size:10px" text-anchor="middle">slope 1</text>
+    <text x="52" y="199" style="fill:var(--ink-dim);font-size:10px" text-anchor="middle">(0,1)</text>
+  </svg>
+  <div class="caption">eˣ is the one curve whose tangent at (0,1) has slope exactly 1 — "growing at the same rate as its own size." The little triangle marks ln(e) = 1: rise 1 over run 1.</div>
+</div>
+
+<h3>Two faces of e</h3>
 <ul>
-  <li><strong>Video 5 — Euler's number e:</strong> the function that is its own derivative; why e ≈ 2.718 appears in exponentials, logarithms, and (later) softmax.</li>
-  <li><strong>Videos 6–7 —</strong> implicit differentiation; limits &amp; L'Hôpital's rule, epsilon-delta.</li>
-  <li><strong>Videos 8–9 —</strong> integration and the Fundamental Theorem of Calculus: the derivative/integral inverse relationship (the "area ↔ slope" bridge).</li>
-  <li><strong>Videos 10–11 —</strong> higher-order derivatives; Taylor series (the generalization of "local linearity" to local <em>polynomials</em> — the gateway to understanding transformers' approximations).</li>
+  <li><strong>Derivative view:</strong> the base where d/dx(aˣ) = aˣ with no extra factor.</li>
+  <li><strong>Growth view:</strong> e = lim(1+1/n)ⁿ ≈ 2.71828 — the "natural" limit of compounding: one unit of growth, chopped into infinitely many compounding steps. (Rule of 72: doubling time ≈ 72/(rate%) — because ln 2 ≈ 0.693.)</li>
 </ul>
+<div class="card key"><strong>Why the derivative of ln x is 1/x:</strong> since eˣ and ln x are inverses, their slopes are reciprocals: if y = ln x then x = e^y, dx/dy = e^y = x, so dy/dx = 1/x. The chain-rule "machine reversal" from video 3, applied to the exponential machine.</div>
+
+<!-- ============ 10. IMPLICIT DIFFERENTIATION ============ -->
+<h2><span class="num">10</span>Implicit Differentiation — Slopes of Curves That Aren't Functions</h2>
+
+<p><strong>The problem:</strong> x² + y² = 25 is a circle — for most x there are TWO y values, so it can't be written as y = f(x). Yet the tangent slope is well-defined everywhere. Trick: differentiate <em>both sides</em>, treating y as an unknown function of x — the chain rule does the rest.</p>
+
+<div class="formula">x² + y² = 25 &nbsp;⟹&nbsp; 2x + 2y·(dy/dx) = 0 &nbsp;⟹&nbsp; dy/dx = −x/y</div>
+
+<p>The chain rule sneaks in via <span class="eq">d/dx(y²) = 2y·y'</span> — we never need to write y explicitly; we just acknowledge it's a function of x.</p>
+
+<div class="stage">
+  <div class="stage-title">Circle x² + y² = 25 — tangent ⟂ radius, captured by the formula</div>
+  <svg class="fig" viewBox="0 0 300 260" width="300" style="background:var(--code-bg);border:1px solid var(--line);border-radius:8px;">
+    <line x1="150" y1="20" x2="150" y2="245" stroke="var(--line)" stroke-width="1"/>
+    <line x1="30" y1="140" x2="270" y2="140" stroke="var(--line)" stroke-width="1"/>
+    <circle cx="150" cy="140" r="100" fill="none" stroke="var(--accent)" stroke-width="2"/>
+    <line x1="150" y1="140" x2="210" y2="60" stroke="var(--accent)" stroke-width="2"/>
+    <line x1="170" y1="30" x2="250" y2="90" stroke="var(--accent2)" stroke-width="2"/>
+    <circle cx="210" cy="60" r="4" fill="var(--accent2)"/>
+    <circle cx="210" cy="220" r="3" fill="var(--ink-dim)"/>
+    <text x="222" y="55" style="fill:var(--accent2);font-size:11px" text-anchor="start">(3,4)</text>
+    <text x="222" y="222" style="fill:var(--ink-dim);font-size:11px" text-anchor="start">(3,−4)</text>
+    <text x="240" y="92" style="fill:var(--accent2);font-size:10px" text-anchor="end">y' = −3/4</text>
+    <text x="120" y="118" style="fill:var(--accent);font-size:10px" text-anchor="end">radius</text>
+  </svg>
+  <div class="caption">At (3,4): dy/dx = −3/4. The tangent direction (−4,3) is perpendicular to the radius (3,4) — the formula encodes "tangent ⟂ radius" without any geometry. Same x = 3 gives y = ±4 (two points, two slopes ±3/4) — the ± is exactly why this curve can't be a function.</div>
+</div>
+
+<h3>When you'd use it</h3>
+<ul>
+  <li>Any curve defined by an equation (circles, ellipses x²/a² + y²/b² = 1, implicit surfaces).</li>
+  <li><strong>Related rates:</strong> if two quantities are linked by an equation, differentiating both sides links their rates of change.</li>
+  <li>General pattern: for F(x,y) = 0, <span class="eq">dy/dx = −(∂F/∂x)/(∂F/∂y)</span> (implicit function theorem — the "∂" version shows up later in gradient-land).</li>
+</ul>
+
+<!-- ============ 11. LIMITS & L'HOPITAL ============ -->
+<h2><span class="num">11</span>Limits, L'Hôpital's Rule &amp; ε-δ Definitions</h2>
+
+<h3>Why limits exist at all</h3>
+<p>The derivative is a limit of a 0/0 expression — (f(x+h)−f(x))/h is literally 0/0 at h = 0. Limits are the machinery that makes "what does it approach?" rigorous, and L'Hôpital's rule is the workhorse for computing such limits.</p>
+
+<div class="card key"><strong>L'Hôpital, intuitively:</strong> when both f and g → 0 at a point, zoom in — each function is its tangent line through the point. If f(x) ≈ f'(0)·x and g(x) ≈ g'(0)·x, then f/g ≈ f'(0)/g'(0). The ratio of the functions is, near the point, the ratio of their local slopes.</div>
+
+<div class="formula">lim f(x)/g(x) = lim f'(x)/g'(x) &nbsp;(when both → 0 or both → ±∞)</div>
+
+<div class="card tip"><strong>Classic: lim sin(x)/x = 1.</strong> sin(x) starts out with slope cos(0) = 1, so near 0 the sine curve is indistinguishable from y = x; their ratio → 1. Likewise (eˣ − 1)/x → e⁰ = 1.</div>
+
+<h3>The ε-δ definition — limits without hand-waving</h3>
+<div class="formula">lim<sub>x→a</sub> f(x) = L &nbsp;⟺&nbsp; ∀ε&gt;0 ∃δ&gt;0 : |x−a|&lt;δ ⟹ |f(x)−L|&lt;ε</div>
+<p>ε is the <strong>output tolerance</strong> you demand; δ is the <strong>input distance</strong> you must stay within to guarantee it. "You can get the output arbitrarily close to L — you just need to get close enough to a." No motion, no "infinitely small" — pure logical quantification.</p>
+
+<div class="stage">
+  <div class="stage-title">ε-δ for f(x) = x² at a = 1 (L = 1)</div>
+  <svg class="fig" viewBox="0 0 300 220" width="300" style="background:var(--code-bg);border:1px solid var(--line);border-radius:8px;">
+    <path d="M30,200 L55,197.1 L80,188.5 L105,174.1 L130,154 L155,128.1 L180,96.5 L205,59.1 L230,16" fill="none" stroke="var(--accent)" stroke-width="2.5"/>
+    <line x1="30" y1="135.6" x2="230" y2="135.6" stroke="var(--warn)" stroke-width="1.2" stroke-dasharray="5 4"/>
+    <line x1="30" y1="172.4" x2="230" y2="172.4" stroke="var(--warn)" stroke-width="1.2" stroke-dasharray="5 4"/>
+    <line x1="107.5" y1="200" x2="107.5" y2="18" stroke="var(--good)" stroke-width="1.2" stroke-dasharray="5 4"/>
+    <line x1="148.3" y1="200" x2="148.3" y2="18" stroke="var(--good)" stroke-width="1.2" stroke-dasharray="5 4"/>
+    <circle cx="130" cy="154" r="4" fill="var(--ink)"/>
+    <text x="236" y="139" style="fill:var(--warn);font-size:11px" text-anchor="start">L+ε</text>
+    <text x="236" y="176" style="fill:var(--warn);font-size:11px" text-anchor="start">L−ε</text>
+    <text x="86" y="195" style="fill:var(--good);font-size:11px" text-anchor="middle">a−δ</text>
+    <text x="170" y="195" style="fill:var(--good);font-size:11px" text-anchor="middle">a+δ</text>
+    <text x="126" y="148" style="fill:var(--ink);font-size:11px" text-anchor="end">(a, L)</text>
+  </svg>
+  <div class="caption">The curve stays inside the horizontal ε band (yellow) for the whole vertical δ band (green). Here δ ≈ 0.18 was chosen so x² exits the ε band exactly at the δ lines — for any smaller ε you can always find a smaller δ. The limit is a <em>guarantee structure</em>, not a process.</div>
+</div>
+
+<!-- ============ 12. INTEGRATION & FTC ============ -->
+<h2><span class="num">12</span>Integration &amp; the Fundamental Theorem</h2>
+
+<h3>Integration = accumulation</h3>
+<p>The integral adds up infinitely many tiny contributions: <span class="eq">∫ₐᵇ f(x)dx</span> = the area under f from a to b = total accumulated quantity. It is the "undo" of the derivative — and the FTC is the exact statement of that inverse relationship.</p>
+
+<div class="formula">A(x) = ∫<sub>a</sub><sup>x</sup> f(t)dt &nbsp;⟹&nbsp; A'(x) = f(x) &nbsp;&nbsp;·&nbsp;&nbsp; ∫<sub>a</sub><sup>b</sup> f(x)dx = F(b) − F(a) &nbsp;(F′ = f)</div>
+
+<ul>
+  <li><strong>Part 1:</strong> the derivative of the area function is the original function — adding a strip of height f(x)·dx changes the area by f(x)·dx, so the area accumulates at rate f(x).</li>
+  <li><strong>Part 2:</strong> to compute an integral, find <em>any</em> antiderivative F and evaluate at the endpoints. This is the leap: area computed by anti-differentiation, not by summing strips.</li>
+</ul>
+
+<div class="stage">
+  <div class="stage-title">∫₀ˣ sin(t)dt — the shaded area up to a moving point, plus the accumulating strip</div>
+  <svg class="fig" viewBox="0 0 320 200" width="320" style="background:var(--code-bg);border:1px solid var(--line);border-radius:8px;">
+    <polygon points="0,180 22.3,142.9 44.6,108.1 66.8,77.9 89.1,53.8 111.4,37.3 133.7,30.1 133.7,180" fill="rgba(56,189,248,0.18)"/>
+    <rect x="133.7" y="30.1" width="6" height="149.9" fill="rgba(167,139,250,0.55)"/>
+    <path d="M0,180 L22.3,142.9 L44.6,108.1 L66.8,77.9 L89.1,53.8 L111.4,37.3 L133.7,30.1 L155.9,30.1 L178.2,43.6 L200.5,60.6 L222.8,80.1 L245,101.2 L267.3,123.2 L279.9,179.4" fill="none" stroke="var(--accent)" stroke-width="2.5"/>
+    <line x1="0" y1="180" x2="280" y2="180" stroke="var(--line)" stroke-width="1"/>
+    <text x="145" y="20" style="fill:var(--accent2);font-size:11px" text-anchor="middle">strip: dA = sin(x)·dx</text>
+    <text x="45" y="140" style="fill:var(--ink-dim);font-size:11px" text-anchor="middle">A(x)</text>
+    <text x="133.7" y="195" style="fill:var(--ink-dim);font-size:10px" text-anchor="middle">x</text>
+    <text x="6" y="195" style="fill:var(--ink-dim);font-size:10px" text-anchor="middle">0</text>
+    <text x="290" y="195" style="fill:var(--ink-dim);font-size:10px" text-anchor="middle">π</text>
+  </svg>
+  <div class="caption">Here A(x) = 1 − cos(x): as x moves, A accumulates; a tiny step adds the thin strip of height sin(x). Strip area ÷ strip width → sin(x): A' = f. This is the FTC in one glance.</div>
+</div>
+
+<div class="card tip"><strong>Worked:</strong> ∫₀^π sin(x)dx = [−cos x]₀^π = −cos(π)+cos(0) = 2. And the <em>average value</em> of sin on [0,π] = 2/π — the constant height with the same area — the idea from our earlier discussion: average value of f = (F(b)−F(a))/(b−a) = average slope of the antiderivative.</div>
+
+<!-- ============ 13. AREA VS SLOPE ============ -->
+<h2><span class="num">13</span>What Does Area Have to Do with Slope?</h2>
+
+<p>Video 9's whole point: the connection isn't a coincidence — <strong>area under f and slope of F are the same information in two languages</strong>, because accumulation is the inverse of rate-of-change.</p>
+
+<div class="card key"><strong>The master picture:</strong> plot the area-under-f so far, A(x) = ∫₀ˣ f. That curve's <em>slope at x</em> is exactly <em>the height of f at x</em>. The function and its area-accumulation are derivative/antiderivative pairs. (Car: the speed curve's area = distance; the distance curve's slope = speed. Same trip, two graphs.)</div>
+
+<div class="stage">
+  <div class="stage-title">Same data, two graphs — f(x) = sin(x) and its area function A(x) = 1 − cos(x)</div>
+  <div style="display:flex; justify-content:center; gap:1.4rem; flex-wrap:wrap; align-items:flex-start;">
+    <div style="text-align:center">
+      <svg class="fig" viewBox="0 0 160 120" width="170" style="background:var(--code-bg);border:1px solid var(--line);border-radius:8px;">
+        <polygon points="0,110 22.8,64.5 45.5,30.1 68.3,15.2 68.3,110" fill="rgba(56,189,248,0.18)"/>
+        <path d="M0,110 L22.8,64.5 L45.5,30.1 L68.3,15.2 L91,23.6 L113.8,46.8 L136.5,74.1 L142.9,109.6" fill="none" stroke="var(--accent)" stroke-width="2"/>
+        <line x1="0" y1="110" x2="143" y2="110" stroke="var(--line)" stroke-width="1"/>
+        <text x="70" y="104" style="fill:var(--ink-dim);font-size:10px" text-anchor="middle">f = sin(x) — the rate</text>
+      </svg>
+      <div class="caption">rate curve</div>
+    </div>
+    <div style="text-align:center">
+      <svg class="fig" viewBox="0 0 160 120" width="170" style="background:var(--code-bg);border:1px solid var(--line);border-radius:8px;">
+        <path d="M0,110 L22.8,104.1 L45.5,87.7 L68.3,64.9 L91,41.3 L113.8,22.7 L136.5,13.5 L142.9,13" fill="none" stroke="var(--accent2)" stroke-width="2"/>
+        <line x1="58.3" y1="54.3" x2="78.3" y2="75.5" stroke="var(--warn)" stroke-width="2"/>
+        <circle cx="68.3" cy="64.9" r="3" fill="var(--warn)"/>
+        <line x1="0" y1="110" x2="143" y2="110" stroke="var(--line)" stroke-width="1"/>
+        <text x="70" y="104" style="fill:var(--ink-dim);font-size:10px" text-anchor="middle">A(x) = 1 − cos(x)</text>
+      </svg>
+      <div class="caption">accumulation curve — slope = f</div>
+    </div>
+  </div>
+  <div class="caption">At the marked x: the height of the left curve ≈ the slope of the right curve (both ≈ 0.997 = sin(1.5)). One function is the antiderivative of the other — the FTC says this pairing always holds.</div>
+</div>
+
+<!-- ============ 14. HIGHER ORDER DERIVATIVES ============ -->
+<h2><span class="num">14</span>Higher-Order Derivatives</h2>
+
+<h3>Derivatives of derivatives</h3>
+<p>The derivative tells you how fast something changes; the second derivative tells you how fast <em>that</em> changes — i.e., how the slope itself is tilting.</p>
+<ul>
+  <li>Position s(t) → velocity s′ → acceleration s″ → jerk s‴ (and beyond).</li>
+  <li><strong>Graph reading:</strong> f″ &gt; 0 ⟹ convex ("smiling" — slope increasing); f″ &lt; 0 ⟹ concave ("frowning"); f″ = 0 with a sign change = <strong>inflection point</strong> (the curve flattens out mid-turn).</li>
+  <li>For a circle of radius r, curvature = 1/r — the second-derivative-ish measure of "how sharply the direction is changing."</li>
+</ul>
+
+<div class="stage">
+  <div class="stage-title">f(x) = (x³ − 3x)/2 — convex right, concave left, inflection at 0</div>
+  <svg class="fig" viewBox="0 0 320 240" width="320" style="background:var(--code-bg);border:1px solid var(--line);border-radius:8px;">
+    <rect x="40" y="20" width="120" height="200" fill="rgba(248,113,113,0.05)"/>
+    <rect x="160" y="20" width="120" height="200" fill="rgba(52,211,153,0.05)"/>
+    <line x1="160" y1="20" x2="160" y2="220" stroke="var(--line)" stroke-width="1" stroke-dasharray="4 3"/>
+    <path d="M40,190 L64,95.4 L88,54.5 L112,53.9 L136,80.2 L160,120 L184,159.8 L208,186.1 L232,185.5 L256,144.6 L280,50" fill="none" stroke="var(--accent)" stroke-width="2.5"/>
+    <line x1="130" y1="67.5" x2="190" y2="172.5" stroke="var(--accent2)" stroke-width="1.5" stroke-dasharray="4 3"/>
+    <circle cx="160" cy="120" r="4" fill="var(--warn)"/>
+    <text x="100" y="40" style="fill:var(--bad);font-size:11px" text-anchor="middle">f″&lt;0 concave</text>
+    <text x="220" y="40" style="fill:var(--good);font-size:11px" text-anchor="middle">f″&gt;0 convex</text>
+    <text x="160" y="235" style="fill:var(--warn);font-size:11px" text-anchor="middle">inflection: f″ = 0; slope there = f′(0) = −1.5 (dashed)</text>
+  </svg>
+  <div class="caption">Left of 0 the slope is decreasing (concave); right of 0 the slope is increasing (convex); exactly at 0 the slope is momentarily −1.5 and stops decreasing — the inflection point.</div>
+</div>
+
+<div class="card tip"><strong>Notation:</strong> f″ = d²y/dx² — literally "the derivative of dy/dx"; the d² and dx² are bookkeeping for "applied twice." In ML you'll meet the generalization: the <strong>Hessian</strong> matrix of all second partial derivatives — the curvature of the loss landscape, used by second-order optimizers.</div>
+
+<!-- ============ 15. TAYLOR SERIES ============ -->
+<h2><span class="num">15</span>Taylor Series — Local Linearity, Upgraded</h2>
+
+<h3>The idea</h3>
+<p>A tangent line matches a function's <em>value and slope</em> at a point. A parabola can also match its <em>curvature</em> (f″). A cubic matches f‴ too. <strong>Taylor's series matches ALL derivatives at one point</strong> — the resulting polynomial is the best local approximation at every order, and for many functions it converges to the function itself.</p>
+
+<div class="formula">f(x) = f(a) + f′(a)(x−a) + f″(a)/2!·(x−a)² + f‴(a)/3!·(x−a)³ + …</div>
+
+<p><strong>Why the n! denominators:</strong> the n-th term's nth derivative is f⁽ⁿ⁾(a) — differentiating (x−a)ⁿ n times gives n!, so the coefficient must be f⁽ⁿ⁾(a)/n! to match. Every term is "the piece of f's behavior that shows up at order n."</p>
+
+<div class="stage">
+  <div class="stage-title">eˣ vs its Maclaurin polynomials — each degree hugs longer</div>
+  <svg class="fig" viewBox="0 0 320 230" width="320" style="background:var(--code-bg);border:1px solid var(--line);border-radius:8px;">
+    <path d="M40,216.25 L80,191.7 L120,186.4 L160,177.5 L200,162.9 L240,138.8 L280,99.2" fill="none" stroke="var(--accent)" stroke-width="2.5"/>
+    <path d="M40,216.25 L160,177.5 L280,148.75" fill="none" stroke="var(--warn)" stroke-width="1.8" stroke-dasharray="6 4"/>
+    <path d="M40,190.9 L160,177.5 L280,123.4" fill="none" stroke="var(--good)" stroke-width="1.8" stroke-dasharray="6 4"/>
+    <path d="M40,203.6 L160,177.5 L280,110.8" fill="none" stroke="var(--accent2)" stroke-width="1.8" stroke-dasharray="6 4"/>
+    <circle cx="160" cy="177.5" r="3.5" fill="var(--ink)"/>
+    <text x="288" y="100" style="fill:var(--accent);font-size:11px" text-anchor="start">eˣ</text>
+    <text x="288" y="152" style="fill:var(--warn);font-size:11px" text-anchor="start">P₁</text>
+    <text x="288" y="126" style="fill:var(--good);font-size:11px" text-anchor="start">P₂</text>
+    <text x="288" y="114" style="fill:var(--accent2);font-size:11px" text-anchor="start">P₃</text>
+    <text x="160" y="222" style="fill:var(--ink-dim);font-size:10px" text-anchor="middle">Pₙ matches the first n derivatives of eˣ at x = 0</text>
+  </svg>
+  <div class="caption">P₁ = 1+x, P₂ = 1+x+x²/2, P₃ = 1+x+x²/2+x³/6 — the approximations cling to eˣ near 0 and peel away further out. Since eˣ's derivatives never stop, the full series 1+x+x²/2!+x³/3!+… converges everywhere.</div>
+</div>
+
+<div class="card tip"><strong>The eˣ bonus:</strong> differentiate 1 + x + x²/2! + x³/3! + … and each term becomes the previous one — the series is literally self-reproducing, which is why its sum is the self-derivative function.</div>
+
+<h3>Radius of convergence &amp; divergence</h3>
+<p>Matching at a point doesn't guarantee matching everywhere. The series works within a <strong>radius of convergence</strong> R around the expansion point; outside it, terms grow and the sum diverges.</p>
+
+<table>
+  <tr><th>Series</th><th>Expansion (at 0)</th><th>Converges for</th></tr>
+  <tr><td>eˣ</td><td>1 + x + x²/2! + x³/3! + …</td><td>all x</td></tr>
+  <tr><td>sin x</td><td>x − x³/3! + x⁵/5! − …</td><td>all x</td></tr>
+  <tr><td>cos x</td><td>1 − x²/2! + x⁴/4! − …</td><td>all x</td></tr>
+  <tr><td>1/(1−x)</td><td>1 + x + x² + x³ + …</td><td>|x| &lt; 1</td></tr>
+  <tr><td>ln(1+x)</td><td>x − x²/2 + x³/3 − …</td><td>−1 &lt; x ≤ 1</td></tr>
+</table>
+
+<div class="card warn"><strong>The subtlety:</strong> 1/(1−x) is a perfectly nice function at x = 2 (it equals −1), yet its series 1+2+4+8+… diverges there. The series can't know about the function beyond the nearest singularity — the radius of convergence is the distance to the nearest point where the function blows up (in the complex plane, x = 1 for 1/(1−x)). Roughly: <span class="eq">R = lim |cₙ/cₙ₊₁|</span> (ratio test).</div>
+
+<!-- ============ 16. APPLICATIONS ACROSS TRACKS ============ -->
+<h2><span class="num">16</span>Where This Lands in the Tracks</h2>
+<p>None of this is ivory-tower — every topic maps straight onto the LLM and embedded plans:</p>
+<table>
+  <tr><th>Topic</th><th>🧠 LLM / ML track</th><th>🔧 Embedded track</th></tr>
+  <tr><td><strong>e, exp, ln</strong></td><td>Softmax (e^z), cross-entropy (−ln), attention scores, learning-rate schedules, all probability (log-likelihood)</td><td>RC circuits e^(−t/RC) — capacitor charge/discharge IS eˣ; exponential smoothing filters; diode equation; log/exp on MCUs via lookup/polynomial</td></tr>
+  <tr><td><strong>Implicit diff</strong></td><td>Implicit function theorem in ML theory; constrained optimization (Lagrange multipliers); manifolds</td><td>Constraint-driven geometry (linkage kinematics) — rates of linked variables</td></tr>
+  <tr><td><strong>Limits / L'Hôpital</strong></td><td>Asymptotic analysis (perplexity, complexity); the stability trick of softmax via max-shifting (log-sum-exp)</td><td>Quantization error analysis; filter asymptotics; timing-jitter limits</td></tr>
+  <tr><td><strong>Integration / FTC</strong></td><td>Expected value E[X] = ∫x·p(x)dx; variance; loss = average over data (the average-value idea!); entropy H = −Σp ln p</td><td><strong>PID control's I term = literal integration</strong> of error; battery state-of-charge (Coulomb counting = integrate current); IMU: integrate acceleration → velocity → position; PWM averaging</td></tr>
+  <tr><td><strong>Area ↔ slope</strong></td><td>PDF → CDF: P(a&lt;X&lt;b) = F(b)−F(a) — the FTC wearing a probability hat; average loss / average gradient</td><td>Sensor cumulative distributions; double-integration dead reckoning; energy = ∫power·dt</td></tr>
+  <tr><td><strong>Higher derivatives</strong></td><td>Hessian = curvature of loss; second-order optimizers (Newton, natural gradient intuition); saddle points</td><td><strong>PID's D term = derivative</strong> of error; control stability analysis; jerk limits in motion systems</td></tr>
+  <tr><td><strong>Taylor series</strong></td><td>Newton's method (quadratic approx of loss); stable softmax (log-sum-exp trick); quantization-friendly approximations of activations</td><td><strong>sin/cos/exp without an FPU</strong> (CORDIC / polynomial approx on MCUs); Kalman filter linearization (EKF = Taylor-truncated dynamics); sensor calibration curves</td></tr>
+  <tr><td><strong>Radius of convergence</strong></td><td>When series-based approximations of activations are safe; power-law / heavy-tailed distributions in NLP</td><td>Choosing polynomial degree vs operating range for fixed-point math; Newton's method convergence basins</td></tr>
+</table>
+
+<div class="card key"><strong>Note the pattern:</strong> the three operations of PID control (P, I, D) are literally f, ∫f, f′ — your whole calculus course compressed into one control loop, the workhorse of every embedded system. And the probability block next in your LLM plan is <em>integration in disguise</em>: expectation is an integral, the CDF is an antiderivative, entropy is an expectation of logs. You've now got all the machinery.</div>
+
+<!-- ============ 17. WRAP-UP ============ -->
+<h2><span class="num">17</span>Course Complete — What's Next</h2>
+<ul>
+  <li>✅ <strong>Essence of Calculus — all 11 main videos done.</strong> (There's a bonus video 12 — Wallis' formula for π — if you want a curiosity.)</li>
+  <li><strong>Next milestone:</strong> Karpathy's <code>micrograd</code> — ~100 lines of Python implementing exactly the product &amp; chain rules over a computation graph = backprop. You now know every derivative it uses.</li>
+  <li><strong>Then Phase 0 finishes with:</strong> probability &amp; information theory (expectation, entropy, KL — all integration/ln as above) and optimization (gradient descent — Taylor/linearization at its core).</li>
+  <li>After that: history of NLP → transformers. Attention's softmax is eˣ; position encodings are sin/cos — the very functions whose derivatives you've now derived from first principles.</li>
+</ul>
+
+<div class="card tip">Tie it together: position encodings use <em>sin and cos</em>; softmax uses <em>e</em>; training loss uses <em>ln</em>; backprop is the <em>chain rule</em>; optimization is <em>gradient descent</em> (linearization). Every "magic" ingredient in an LLM is calculus you've now done by hand.</div>
 
 <p class="dim">Next page: <a href="../LinearAlgebra/linear-algebra-phase0-summary.html" style="color:var(--accent)">Linear Algebra summary</a> (done) · <a href="../index.html" style="color:var(--accent)">Back to hub</a></p>
 
 <footer>
-  Calculus Phase 0 — Essence of Calculus videos 1–4 (derivatives, geometric formulas, product &amp; chain rules) · Generated 2026-08-11
+  Calculus Phase 0 — Essence of Calculus videos 1–11 complete (derivatives → Taylor series) · Generated 2026-08-11
 </footer>
 
 </div>

@@ -15,12 +15,12 @@
 - [ ] Strang MIT 18.06 lectures 1–20 (optional deep-dive)
 
 **Calculus**
-- [ ] 3Blue1Brown "Essence of Calculus" (all videos) — *in progress: videos 1–4 done (derivative paradox, geometric formulas x²/1/x/√x/sin, product & chain rules). Summary page: `Calculus/calculus-phase0-summary.html` (interactive secant demo + worked examples). Next: video 5 (e)*
-- [ ] Chain rule — can derive backprop by hand *(mechanics down: product rule = two strips, chain rule = nested zoom; examples incl. sin(x²) & √(x²+1) done)*
+- [x] 3Blue1Brown "Essence of Calculus" (all videos) — *complete 2026-08-11: videos 1–11 incl. e, implicit differentiation, limits/ε-δ, integration & FTC, area↔slope, higher derivatives, Taylor series + radius of convergence. Full summary: `Calculus/calculus-phase0-summary.html` (17 sections)*
+- [ ] Chain rule — can derive backprop by hand *(rule mechanics done — product = two strips, chain = nested zoom; but "derive backprop" deferred until after neural-network basics, since backprop needs a net to backprop through — revisit at Phase 2)*
 
 **Probability & Information Theory**
-- [ ] Distributions, Bayes, expectation, MLE
-- [ ] Entropy, cross-entropy, KL divergence, perplexity (Jurafsky & Martin ch. 3)
+- [ ] Distributions, Bayes, expectation, MLE *(sources: Deisenroth ch. 6 · StatQuest playlist · Blitzstein Harvard Stat 110)*
+- [ ] Entropy, cross-entropy, KL divergence, perplexity *(sources: Jurafsky & Martin ch. 3 · 3Blue1Brown "coding theory" series · MacKay "Information Theory, Inference, and Learning Algorithms" ch. 1–6)*
 
 **Optimization**
 - [ ] Gradient descent / SGD / Adam concepts
@@ -30,27 +30,32 @@
 
 ---
 
-## 📋 Linear Algebra Review Checklist (tomorrow)
+## 📋 Calculus Review Checklist
 
-> Summary doc: `LinearAlgebra/linear-algebra-phase0-summary.html` — skim sections 1–9, then hit these:
+> Summary doc: `Calculus/calculus-phase0-summary.html` — skim sections 01–17, then hit these. (The old Linear Algebra checklist is implicitly retired — you've moved well past it; revisit LA only when SVD/linear algebra resurfaces in later phases.)
 
 **Quick re-derivations (by hand, no notes):**
-- [ ] Matrix × vector: compute Av for [[1,2],[3,4]]·(5,6) both row-view and column-view — same answer?
-- [ ] det(AB) = det(A)·det(B) on a 2×2 pair
-- [ ] cos θ from a dot product (u=(1,2), v=(3,1) → 45°)
-- [ ] Write the SVD recipe from memory (MᵀM → V & σ²; U = Mv/σ)
+- [ ] d/dx(x²) = 2x from the square picture (two strips of x·dx)
+- [ ] d/dx(√x) = 1/(2√x) by running the square backwards (rim dx = 2·√x·d(√x))
+- [ ] d/dx(1/x) = −1/x² from the constant-area rectangle
+- [ ] d/dx(sin x) = cos x from the unit circle (vertical tip speed of the rotating stick)
+- [ ] Product rule from the rectangle picture — and why the df·dg corner vanishes
+- [ ] Chain rule: d/dx[sin(x²)] and d/dx[√(x²+1)] without looking
+- [ ] ∫₀^π sin(x)dx = 2 via FTC; average value of sin on [0,π] = 2/π
+- [ ] e: why d/dx(eˣ) = eˣ and d/dx(ln x) = 1/x (inverse-function slopes)
 
 **Conceptual recall (explain out loud):**
-- [ ] Why "basis" has many sets but one dimension; why unique representation matters
-- [ ] Column space = range; Ax = b solvable ⟺ b ∈ column space; uniqueness ⟺ kernel
-- [ ] Why det = 0 ⟺ squished (columns collinear ⟹ zero volume)
-- [ ] Duality: why the vector (2,3) is perpendicular to level lines 2x+3y=c
-- [ ] Why Vᵀ (not V) expresses a vector in V's frame (V moves it; Vᵀ re-describes it)
-- [ ] Why MᵀM cancels U and why symmetry guarantees perpendicular SVD axes
-- [ ] Why a shear's SVD axes are hidden (circle → tilted ellipse; perpendicularity preserved on V's/U's columns)
+- [ ] The derivative paradox: dx treated as zero AND nonzero — resolved as a limit of ratios, not a ratio of infinitesimals
+- [ ] Why L'Hôpital works (zoom in: each function ≈ its tangent line; the ratio ≈ ratio of slopes)
+- [ ] Why the area function's slope is the function itself (FTC in one sentence)
+- [ ] Why the average value of f = the average slope of its antiderivative: (F(b)−F(a))/(b−a)
+- [ ] What f″ > 0 vs f″ < 0 means on a graph; where the inflection point sits
+- [ ] Why Taylor series have a radius of convergence (1/(1−x) diverges at x=2 even though the function is fine there)
+- [ ] The ε-δ guarantee in plain words (output tolerance demanded ⟹ input distance that guarantees it)
 
 **Run (5 min, in Python):**
-- [ ] `U, S, Vt = np.linalg.svd([[1,2],[2,4]])` → observe σ = (5, 0); connect zero σ to rank 1 & column space line y=2x
+- [ ] `(np.sin(0.001)-np.sin(0))/0.001` ≈ 1 = cos(0) and `(np.exp(0.001)-1)/0.001` ≈ 1 — the derivative definition doing its thing
+- [ ] `np.trapz(np.sin(np.linspace(0, np.pi, 1000)), dx=np.pi/999)` ≈ 2.0 — numeric area agrees with [−cos]₀^π (the FTC)
 
 ---
 
@@ -203,16 +208,19 @@
 
 ---
 
-# 📅 First 90 Days Quick View
+# 📅 Progress Reality Check (2026-08-11)
 
-**Weeks 1–4**
-- [ ] 3Blue1Brown math + micrograd
-- [ ] C pointers/bit-manip + ARM book ch. 1–4
-- [ ] micrograd ✅ / I2C bit-bang ✅
+> The math phase compressed dramatically: **Linear Algebra + the full Essence of Calculus were completed in 3 days (Sun Aug 9 → Tue Aug 11)**, not 4 weeks. The 90-day plan is a ceiling, not a floor. What's left of Phase 0: probability, info theory, optimization, and the micrograd milestone — see the 5-day plan below.
+
+**Weeks 1–4 content (actual state)**
+- [x] 3Blue1Brown math — linear algebra ✅ + calculus ✅ (3 days)
+- [ ] micrograd (scheduled: 5-day plan, day 5)
+- [ ] C pointers / bit-manip + ARM book ch. 1–4 — not started (embedded begins in parallel from day 3 of the plan)
+- [ ] I2C bit-bang / 8-bit CPU — not started
 
 **Weeks 5–8**
-- [ ] Transformer concept layer (Alammar + Annotated Transformer)
-- [ ] STM32 Nucleo + bare-metal register GPIO/UART
+- [ ] Transformer concept layer (Alammar + Annotated Transformer) — after Phase 1 history
+- [ ] STM32 Nucleo + bare-metal register GPIO/UART — after C foundations
 
 **Weeks 9–12**
 - [ ] nanoGPT coding-along
@@ -220,46 +228,31 @@
 
 ---
 
-# ⏰ Daily Schedule Template (~1.5 hrs/day avg)
+# ⏰ Schedule — 3-Day Reality + 5-Day Sprint (max retention)
 
-> Rule of thumb: **weekdays = theory/reading, weekends = hands-on milestones.**
-> Hands-on work (nanoGPT, bare-metal, RTOS projects) needs 2+ hr uninterrupted blocks — schedule them on weekends.
+> The original weekday/weekend template assumed 10–12 hrs/wk. You've proven you can move far faster — the risk is now **forgetting**, not pace. The plan below closes Phase 0 and opens the other tracks, with a built-in daily review loop and one-track-per-session discipline.
 
-## Weekday Evening Routine (Mon–Fri, ~1–1.5 hrs)
+## 📅 Next 5 Days — Close Phase 0, Open the Other Tracks
 
-| Time | Activity | Notes |
-|---|---|---|
-| 20:00–20:15 | **Review yesterday** | 1-2 min skim of notes; re-run last code |
-| 20:15–20:45 | **Primary study block** | Rotate per phase (see weekly rotation below) |
-| 20:45–21:00 | **Practice / flashcards** | Write down 3 things learned; quiz yourself on yesterday's |
-| 21:00–21:15 | **Plan tomorrow** | Pick 1 concrete goal (e.g., "finish ch. 4", "get UART RX working") |
+| Day | Primary block (LLM math, ~1–1.5 h) | Retention booster (10 min) | Secondary session (30–45 min, separate slot) |
+|---|---|---|---|
+| Wed 12 | Probability I — distributions, expectation, variance (Deisenroth ch. 6; StatQuest) | 5-min calculus flashback: re-derive chain rule on sin(x²) | — |
+| Thu 13 | Probability II — Bayes, MLE, conditional (StatQuest; Blitzstein Stat 110) | Re-derive E[X] = ∫x·p(x)dx from memory | — |
+| Fri 14 | Info theory — entropy, cross-entropy, KL, perplexity (Jurafsky ch. 3; 3B1B coding theory) | Explain entropy in ≤ 3 sentences out loud | Embedded C I: pointers + memory layout (K&R ch. 5) |
+| Sat 15 | Optimization — gradient descent / SGD / Adam (Karpathy Zero-to-Hero 1–3) | Link GD to Taylor: "linearize the loss, step downhill" | — |
+| Sun 16 | 🏁 **micrograd from scratch** (2 h, hands-on) — Phase 0 complete | After coding it, re-derive backprop by hand, no notes | Phase 1 kickoff: history of NLP timeline (first 3 eras) |
 
-## Weekend Deep-Work Blocks (Sat + Sun, 2–3 hrs each)
+**Why this order (retention-first):** probability builds directly on integration (expectation = ∫x·p(x)dx, CDF = antiderivative) — fresh calculus, immediate payoff; info theory builds on probability (entropy = −Σp·ln p); optimization is just Taylor/linearization + the chain rule; micrograd then *uses* every piece. Each day's booster re-activates the previous day, and the two tracks stay in separate sessions.
 
-| Block | Activity | Notes |
-|---|---|---|
-| Sat 09:00–12:00 | **Hands-on milestone** | nanoGPT coding, bare-metal peripheral, RTOS task |
-| Sat 16:00–17:00 | **Review + fix** | Debug leftover issues; update tracker checkboxes |
-| Sun 09:00–11:00 | **Hands-on (continue)** | Finish Sat's milestone or start next |
-| Sun 11:00–12:00 | **Theory catch-up** | Readings/videos you missed during the week |
-| Sun 20:00–20:30 | **Weekly review** | Tick off tracker items; adjust next week's goals |
+## ⚠️ Sprint rules that keep retention high
 
-## Weekly Rotation (first 90 days)
-
-| Week | Mon–Fri (weekday block) | Sat–Sun (deep work) |
-|---|---|---|
-| 1–4 | 3Blue1Brown math videos / C pointers + ARM book ch. 1–4 | micrograd implementation / I2C bit-bang project |
-| 5–8 | Transformer concept layer (Alammar, Annotated Transformer) / ARM interrupts + peripheral theory | STM32 bare-metal GPIO → UART |
-| 9–12 | nanoGPT theory + training/alignment readings / RTOS concepts | nanoGPT coding-along / interrupts + I2C/SPI sensors |
-
-## ⚠️ Rules that keep this sustainable
-
-1. **No zero days under 20 minutes** — even 20 min of review counts; momentum beats intensity.
-2. **Hands-on tasks always on weekends** — never start a debugging session at 21:00 on a workday.
-3. **One track per session** — don't mix LLM and embedded in the same 45-min block; context-switching kills retention.
-4. **Bank overflow into Sunday review** — if a weekday block runs long, note it and move on.
-5. **1 rest half-day minimum** — burnout is the #1 plan-killer; the timeline already assumes this.
+1. **5-minute daily flashback** — before each primary block, re-derive yesterday's key result from memory (no notes). Highest-leverage habit; 10 minutes/day of this beats 2 hours of re-reading later.
+2. **Explain-out-loud checkpoint** — after each topic, explain it to an imaginary colleague in ≤ 3 sentences; the sentences you stumble on are what to re-read.
+3. **One track per session** — LLM math in the primary block; embedded/history only in the separate secondary slot. Never mix within a block.
+4. **Hands-on on the weekend** — micrograd lands on Sun. If it slips, protect it as the next available 2-h block; don't squeeze it into a weeknight.
+5. **Bank overflow, don't binge** — if a block runs long, note it and move on; the plan absorbs one slip per topic without collapse.
+6. **Rest** — you've done 3 consecutive days; take one half-day off somewhere in the 5 days.
 
 ---
 
-*Last updated: 2025-08-09*
+*Last updated: 2026-08-11*

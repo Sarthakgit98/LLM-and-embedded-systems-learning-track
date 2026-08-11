@@ -14,8 +14,8 @@ Don't do a full math degree — learn the *subset* that appears in ML papers.
 |---|---|---|
 | Linear Algebra | Vectors, dot products, matrices, matrix multiply, eigenvalues/SVD, norms | 3Blue1Brown "Essence of Linear Algebra"; Strang MIT 18.06 (Lectures 1–20) |
 | Calculus | Derivatives, partial derivatives, chain rule, gradients, Jacobians | 3Blue1Brown "Essence of Calculus"; Karpathy's micrograd (this IS the chain rule) |
-| Probability | Distributions, Bayes, expectation/variance, MLE, conditional probability | "Mathematics for Machine Learning" (Deisenroth) ch. 6; StatQuest |
-| Information Theory | Entropy, cross-entropy, KL divergence, perplexity | "Speech and Language Processing" (Jurafsky & Martin) ch. 3 |
+| Probability | Distributions, Bayes, expectation/variance, MLE, conditional probability | Deisenroth ch. 6 (math-first, ML-focused) · StatQuest playlist (intuition, distributions/Bayes/MLE) · Blitzstein Harvard **Stat 110** (free videos + "Introduction to Probability" — rigorous depth) · MIT 6.041 (Bertsekas & Tsitsiklis) notes for exercises |
+| Information Theory | Entropy, cross-entropy, KL divergence, perplexity | Jurafsky & Martin ch. 3 · 3Blue1Brown "Coding Theory" series (entropy visualized) · MacKay "Information Theory, Inference, and Learning Algorithms" ch. 1–6 (free PDF — the classic ML↔info-theory bridge) |
 | Optimization | Gradient descent, SGD, Adam, backprop | Karpathy "Neural Networks: Zero to Hero" videos 1–3 |
 
 **Milestone:** Watch 3Blue1Brown's *Neural Networks* series end-to-end. Then implement backprop from scratch by coding along with Karpathy's `micrograd` (100 lines of Python).
