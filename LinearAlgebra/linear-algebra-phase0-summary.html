@@ -145,6 +145,21 @@
   .step-desc { margin-top: 1rem; color: var(--ink); min-height: 3.4em; max-width: 520px; margin-left: auto; margin-right: auto; }
   .step-formula { font-family: "SF Mono", Menlo, Consolas, monospace; color: var(--accent); margin-top: 0.5rem; font-size: 0.9rem; }
 
+  /* span shading: families of lines parallel to each spanning vector */
+  .span-tint {
+    position: absolute; inset: 0; pointer-events: none;
+    background:
+      repeating-linear-gradient(120deg, rgba(56,189,248,0.14) 0 1.5px, transparent 1.5px 22px),
+      repeating-linear-gradient(210deg, rgba(167,139,250,0.14) 0 1.5px, transparent 1.5px 22px),
+      linear-gradient(rgba(56,189,248,0.08), rgba(56,189,248,0.08));
+  }
+  .span-line-tint {
+    position: absolute; inset: 0; pointer-events: none;
+    background:
+      repeating-linear-gradient(120deg, rgba(56,189,248,0.16) 0 1.5px, transparent 1.5px 20px),
+      linear-gradient(rgba(56,189,248,0.10), rgba(56,189,248,0.10));
+  }
+
   /* column space line */
   .line-stage { position: relative; width: 300px; height: 300px; margin: 0 auto; overflow: hidden;
     background:
@@ -244,18 +259,45 @@
 </ul>
 
 <div class="stage">
-  <div class="stage-title">Span of two vectors in a plane</div>
-  <div class="grid-canvas">
-    <div class="origin" style="transform: translate(-50%,-50%)">
-      <div class="arrow a-ix" style="transform: translate(-50%,-50%) rotate(30deg)"><div class="shaft"></div><div class="head"></div></div>
-      <div class="arrow a-iy" style="transform: translate(-50%,-50%) rotate(120deg)"><div class="shaft"></div><div class="head"></div></div>
+  <div class="stage-title">What the span looks like — three cases</div>
+  <div style="display:flex; justify-content:center; gap:1.4rem; flex-wrap:wrap; align-items:flex-start;">
+    <div style="text-align:center">
+      <div class="grid-canvas" style="width:170px;height:170px;">
+        <div class="span-line-tint"></div>
+        <div class="col-line" style="width:170px; transform: translate(-50%,-50%) rotate(30deg);"></div>
+        <div class="origin" style="transform: translate(-50%,-50%)">
+          <div class="arrow a-ix" style="transform: translate(-50%,-50%) rotate(30deg)"><div class="shaft" style="width:60px"></div><div class="head" style="left:53px"></div></div>
+        </div>
+      </div>
+      <div class="caption">1 vector → a <strong>line</strong></div>
     </div>
-    <div class="arrow" style="transform: translate(-50%,-50%)">
-      <div class="shaft" style="width:120px;background:rgba(248,113,113,0.5)"></div>
-      <div class="head" style="left:113px;border-left-color:rgba(248,113,113,0.5)"></div>
+    <div style="text-align:center">
+      <div class="grid-canvas" style="width:170px;height:170px;">
+        <div class="span-tint"></div>
+        <div class="origin" style="transform: translate(-50%,-50%)">
+          <div class="arrow a-ix" style="transform: translate(-50%,-50%) rotate(30deg)"><div class="shaft" style="width:55px"></div><div class="head" style="left:48px"></div></div>
+          <div class="arrow a-iy" style="transform: translate(-50%,-50%) rotate(120deg)"><div class="shaft" style="width:55px"></div><div class="head" style="left:48px"></div></div>
+        </div>
+        <div class="arrow" style="transform: translate(-50%,-50%) rotate(75deg)">
+          <div class="shaft" style="width:77px;background:rgba(248,113,113,0.85)"></div>
+          <div class="head" style="left:70px;border-left-color:rgba(248,113,113,0.85)"></div>
+        </div>
+      </div>
+      <div class="caption">2 independent vectors → the <strong>whole plane</strong></div>
+    </div>
+    <div style="text-align:center">
+      <div class="grid-canvas" style="width:170px;height:170px;">
+        <div class="span-line-tint"></div>
+        <div class="col-line" style="width:170px; transform: translate(-50%,-50%) rotate(30deg);"></div>
+        <div class="origin" style="transform: translate(-50%,-50%)">
+          <div class="arrow a-ix" style="transform: translate(-50%,-50%) rotate(30deg)"><div class="shaft" style="width:50px"></div><div class="head" style="left:43px"></div></div>
+          <div class="arrow a-iy" style="transform: translate(-50%,-50%) rotate(30deg)"><div class="shaft" style="width:80px"></div><div class="head" style="left:73px"></div></div>
+        </div>
+      </div>
+      <div class="caption">2 collinear vectors → still a <strong>line</strong></div>
     </div>
   </div>
-  <div class="caption">Two independent vectors (blue, green) + a reachable combination (red) — the shaded region they sweep out is the span.</div>
+  <div class="caption">The middle shading covers <strong>every</strong> pixel — and that's correct, not a rendering bug: two independent vectors in 2D span the <em>entire</em> plane, because any point (x,y) = a·v₁ + b·v₂ for some scalars a, b (red arrow = one such combination, v₁ + v₂). If you expected a finite parallelogram: that's the set of combinations with coefficients only in [0,1] — the span allows <em>all</em> real coefficients, which is exactly why it fills the whole plane. A single vector (left) or two collinear ones (right) add no second direction, so their span collapses to a line.</div>
 </div>
 
 <h3>Basis</h3>

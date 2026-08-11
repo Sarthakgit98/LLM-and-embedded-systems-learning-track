@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculus — Phase 0 Summary (Essence of Calculus, videos 1–4)</title>
+<style>
+  :root {
+    --bg: #0f172a;
+    --bg2: #1e293b;
+    --card: #1e293b;
+    --card2: #26334d;
+    --ink: #e2e8f0;
+    --ink-dim: #94a3b8;
+    --accent: #38bdf8;
+    --accent2: #a78bfa;
+    --good: #34d399;
+    --warn: #fbbf24;
+    --bad: #f87171;
+    --line: #334155;
+    --code-bg: #0b1220;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.6;
+    padding: 2rem 1rem;
+  }
+  .wrap { max-width: 900px; margin: 0 auto; }
+
+  header { text-align: center; padding: 2rem 1rem 2.5rem; border-bottom: 1px solid var(--line); margin-bottom: 2rem; }
+  header h1 { font-size: 2rem; color: var(--accent); letter-spacing: -0.02em; }
+  header p { color: var(--ink-dim); margin-top: 0.5rem; }
+  .badge {
+    display: inline-block; background: var(--card2); border: 1px solid var(--line);
+    border-radius: 999px; padding: 0.25rem 0.9rem; font-size: 0.8rem; color: var(--ink-dim); margin: 0.25rem;
+  }
+
+  h2 {
+    font-size: 1.4rem; color: var(--accent); margin: 3rem 0 1rem;
+    padding-bottom: 0.4rem; border-bottom: 2px solid var(--line);
+  }
+  h2 .num {
+    display: inline-block; background: var(--accent); color: #06283d;
+    border-radius: 8px; padding: 0.05rem 0.6rem; font-size: 1rem; margin-right: 0.6rem;
+  }
+  h3 { color: var(--accent2); margin: 1.4rem 0 0.5rem; font-size: 1.05rem; }
+
+  p { margin: 0.6rem 0; }
+  .dim { color: var(--ink-dim); }
+
+  .card {
+    background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+    padding: 1.2rem 1.4rem; margin: 1rem 0;
+  }
+  .card.tip { border-left: 4px solid var(--good); }
+  .card.warn { border-left: 4px solid var(--warn); }
+  .card.key { border-left: 4px solid var(--accent2); }
+
+  code {
+    background: var(--code-bg); border: 1px solid var(--line); border-radius: 5px;
+    padding: 0.1rem 0.4rem; font-family: "SF Mono", Menlo, Consolas, monospace; font-size: 0.88em; color: #7dd3fc;
+  }
+  pre {
+    background: var(--code-bg); border: 1px solid var(--line); border-radius: 8px;
+    padding: 1rem; overflow-x: auto; font-size: 0.85rem; line-height: 1.5;
+  }
+  pre code { border: none; background: none; color: #a5f3fc; }
+
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.92rem; }
+  th { background: var(--card2); color: var(--accent); text-align: left; padding: 0.5rem 0.8rem; border: 1px solid var(--line); }
+  td { padding: 0.5rem 0.8rem; border: 1px solid var(--line); vertical-align: top; }
+
+  /* ============ FIGURES ============ */
+  .stage {
+    background: var(--card2); border: 1px solid var(--line); border-radius: 12px;
+    padding: 1.5rem; margin: 1rem 0; text-align: center;
+  }
+  .stage .caption { color: var(--ink-dim); font-size: 0.85rem; margin-top: 0.8rem; }
+  .stage-title { color: var(--accent2); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; }
+
+  .fig { max-width: 100%; }
+  .fig text { font-family: "SF Mono", Menlo, Consolas, monospace; }
+
+  input[type="range"] { width: 100%; accent-color: var(--accent); cursor: pointer; }
+  .readout { font-family: "SF Mono", Menlo, Consolas, monospace; font-size: 0.85rem; color: var(--ink); }
+  .readout b { color: var(--warn); }
+
+  /* chain rule machine pipeline */
+  .chain { display: flex; align-items: stretch; justify-content: center; gap: 0.8rem; flex-wrap: wrap; margin: 1.2rem 0 0.4rem; }
+  .chain .node {
+    background: var(--card); border: 2px solid var(--accent); border-radius: 10px;
+    padding: 0.7rem 1.1rem; text-align: center; min-width: 110px;
+  }
+  .chain .node .lbl { font-size: 0.7rem; color: var(--ink-dim); text-transform: uppercase; letter-spacing: 0.06em; }
+  .chain .node .val { font-size: 1.15rem; font-weight: 700; color: var(--accent); font-family: "SF Mono", Menlo, Consolas, monospace; margin-top: 0.15rem; }
+  .chain .node.inner { border-color: var(--accent2); }
+  .chain .node.inner .val { color: var(--accent2); }
+  .chain .edge { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.15rem; }
+  .chain .edge .arr { color: var(--ink-dim); font-size: 1.4rem; line-height: 1; }
+  .chain .edge .sens { font-size: 0.72rem; color: var(--good); font-family: "SF Mono", Menlo, Consolas, monospace; }
+
+  .formula {
+    background: var(--code-bg); border: 1px solid var(--line); border-radius: 10px;
+    padding: 1.2rem; text-align: center; font-size: 1.25rem; margin: 1rem 0; color: #a5f3fc;
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+  }
+  .formula .c1 { color: var(--accent); }
+  .formula .c2 { color: var(--warn); }
+  .formula .c3 { color: var(--good); }
+  .formula.small { font-size: 1.05rem; }
+
+  .cheat { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; margin: 1rem 0; }
+  .cheat .cell { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 1rem; }
+  .cheat .cell h4 { color: var(--accent); margin-bottom: 0.4rem; font-size: 0.95rem; font-family: "SF Mono", Menlo, Consolas, monospace; }
+
+  ul, ol { margin: 0.6rem 0 0.6rem 1.4rem; }
+  li { margin: 0.3rem 0; }
+  .eq { font-family: "SF Mono", Menlo, Consolas, monospace; }
+
+  footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--line); color: var(--ink-dim); font-size: 0.85rem; text-align: center; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>Calculus — Phase 0</h1>
+  <p>3Blue1Brown <em>Essence of Calculus</em> — videos 1–4: the derivative, geometric formulas, and the product &amp; chain rules, with visual renders</p>
+  <div>
+    <span class="badge">Videos 1–4</span>
+    <span class="badge">Derivatives</span>
+    <span class="badge">Geometric Formulas</span>
+    <span class="badge">Product Rule</span>
+    <span class="badge">Chain Rule</span>
+    <span class="badge">Local Linearity</span>
+  </div>
+</header>
+
+<!-- ============ 1. THE BIG PICTURE ============ -->
+<h2><span class="num">01</span>The Big Picture</h2>
+<p>Calculus answers two questions about a function — one local, one global:</p>
+<ul>
+  <li><strong>The derivative:</strong> "how fast is this changing <em>right now</em>?" → the slope of the tangent line at a point.</li>
+  <li><strong>The integral:</strong> "how much has accumulated overall?" → the area under the curve.</li>
+</ul>
+<p>Surprisingly, these two questions are <strong>inverses of each other</strong> — that's the Fundamental Theorem of Calculus, and it's the arc of the whole series. For now, the derivative side:</p>
+
+<div class="card key">
+  <strong>The master idea — local linearity:</strong> zoom in close enough on any smooth function and it looks like a straight line. The derivative is the slope of that line. Everything else — all the formulas, the product and chain rules, backprop — is just bookkeeping built on this one fact.
+</div>
+
+<p>The habit to build: when you see <span class="eq">df/dx</span>, read it as <em>"for a tiny step dx, the function rises by df ≈ (slope)·dx"</em>. The whole course is learning to compute that slope for every kind of function.</p>
+
+<!-- ============ 2. THE PARADOX ============ -->
+<h2><span class="num">02</span>The Paradox of the Derivative</h2>
+
+<h3>Secant → tangent</h3>
+<p>Pick two points on a curve and connect them: that's a <strong>secant line</strong>, slope = rise/run. Now slide the second point toward the first. The secant slopes <em>approach</em> a limiting value — the slope of the <strong>tangent line</strong>. That limit <em>is</em> the derivative.</p>
+
+<div class="formula">f'(x) = lim<sub>h→0</sub> (f(x+h) − f(x)) / h</div>
+
+<div class="stage">
+  <div class="stage-title">From secant to tangent — drag the slider (curve: y = (x−160)²/200 + 30, at x = 100)</div>
+  <div style="display:flex; justify-content:center; gap:1.4rem; flex-wrap:wrap; align-items:flex-start;">
+    <svg id="secantSvg" class="fig" viewBox="0 0 340 230" width="340" style="background:var(--code-bg);border:1px solid var(--line);border-radius:8px;">
+      <path d="M20,128 L40,102 L60,80 L80,62 L100,48 L120,38 L140,32 L160,30 L180,32 L200,38 L220,48 L240,62 L260,80 L280,102 L300,128" fill="none" stroke="var(--accent)" stroke-width="2.5"/>
+      <line id="secLine" x1="100" y1="48" x2="130" y2="34.5" stroke="var(--good)" stroke-width="2" stroke-dasharray="5 4"/>
+      <line x1="40" y1="84" x2="175" y2="3" stroke="var(--accent2)" stroke-width="2"/>
+      <circle id="secP" cx="100" cy="48" r="4.5" fill="var(--accent)"/>
+      <circle id="secQ" cx="130" cy="34.5" r="4" fill="var(--good)"/>
+      <text x="96" y="40" style="fill:var(--accent);font-size:12px" text-anchor="end">P</text>
+      <text x="138" y="30" style="fill:var(--good);font-size:12px" text-anchor="start">Q</text>
+      <text x="60" y="98" style="fill:var(--accent2);font-size:12px" text-anchor="middle">tangent</text>
+    </svg>
+    <div style="text-align:left; max-width:230px; min-width:200px;">
+      <div class="dim" style="font-size:0.85rem; margin-bottom:0.3rem;">Q distance Δx from P</div>
+      <input type="range" id="qSlide" min="4" max="60" value="30">
+      <div class="readout" id="secReadout" style="margin-top:0.7rem;"></div>
+      <div class="dim" style="font-size:0.8rem; margin-top:0.7rem;">As Δx → 0 the secant slope converges to the tangent slope. The derivative is the <em>limit</em>, not any single secant.</div>
+    </div>
+  </div>
+  <div class="caption">Secant (green, dashed) from P to Q vs tangent (purple, solid). The closer Q gets, the closer the green slope gets to −0.600.</div>
+</div>
+
+<div class="stage">
+  <div class="stage-title">The paradox, resolved — zoom in</div>
+  <div style="display:flex; justify-content:center; gap:1.4rem; flex-wrap:wrap; align-items:flex-start;">
+    <div style="text-align:center">
+      <svg class="fig" viewBox="0 0 150 150" width="150" style="background:var(--code-bg);border:1px solid var(--line);border-radius:8px;">
+        <path d="M15,111 L45,93 L75,75 L105,57 L135,39" fill="none" stroke="var(--accent2)" stroke-width="2" stroke-dasharray="5 4"/>
+        <path d="M15,114 L30,103.7 L45,93.75 L60,84.2 L75,75 L90,66.2 L105,57.75 L120,49.7 L135,42" fill="none" stroke="var(--accent)" stroke-width="2.5"/>
+        <text x="75" y="132" style="fill:var(--ink-dim);font-size:10px" text-anchor="middle">6× zoom at P</text>
+      </svg>
+      <div class="caption">Curve (blue) vs tangent (purple) — nearly identical</div>
+    </div>
+    <div style="text-align:left; max-width:300px;">
+      <p class="dim" style="font-size:0.88rem;">At 6× zoom the curve and its tangent are almost indistinguishable. The tiny residual bow is the part the tangent <em>ignores</em> — it's what makes the derivative an approximation that becomes exact in the limit.</p>
+      <div class="card warn" style="margin-top:0.8rem;">
+        <strong>The paradox:</strong> dx is treated as <em>zero</em> (we want the instantaneous rate) and simultaneously as <em>nonzero</em> (a slope needs a run). Resolution: df and dx are not actual quantities — the derivative is a <strong>limit of ratios</strong>, not a literal quotient. "Ghosts of departed quantities."
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 3. GEOMETRIC FORMULAS ============ -->
+<h2><span class="num">03</span>Derivative Formulas Through Geometry</h2>
+<p>Three formulas, zero algebra — each is "increase the input by a tiny amount and watch <em>where</em> the new area/volume appears."</p>
+
+<h3>d/dx(x²) = 2x — the square</h3>
+<div class="stage">
+  <div class="stage-title">The square: area x² grows by two strips</div>
+  <svg class="fig" viewBox="0 0 300 300" width="300" style="background:var(--code-bg);border:1px solid var(--line);border-radius:8px;">
+    <rect x="50" y="50" width="200" height="200" fill="rgba(56,189,248,0.08)" stroke="var(--accent)" stroke-width="2"/>
+    <rect x="250" y="50" width="20" height="200" fill="rgba(167,139,250,0.4)" stroke="var(--accent2)"/>
+    <rect x="50" y="30" width="200" height="20" fill="rgba(167,139,250,0.4)" stroke="var(--accent2)"/>
+    <rect x="250" y="30" width="20" height="20" fill="rgba(248,113,113,0.5)" stroke="var(--bad)"/>
+    <text x="150" y="283" style="fill:var(--ink);font-size:14px" text-anchor="middle">x</text>
+    <text x="30" y="155" style="fill:var(--ink);font-size:14px" text-anchor="middle">x</text>
+    <text x="260" y="152" style="fill:var(--accent2);font-size:12px" text-anchor="middle">x·dx</text>
+    <text x="150" y="45" style="fill:var(--accent2);font-size:12px" text-anchor="middle">x·dx</text>
+    <text x="260" y="44" style="fill:var(--bad);font-size:10px" text-anchor="middle">dx²≈0</text>
+    <text x="150" y="20" style="fill:var(--ink-dim);font-size:11px" text-anchor="middle">total added: 2·x·dx</text>
+  </svg>
+  <div class="caption">Grow the side by dx: the area gains two strips, each x·dx. So d(x²) = 2x·dx, and d/dx(x²) = 2x. The corner dx² is two infinitesimals multiplied — it vanishes next to the strips.</div>
+</div>
+
+<h3>d/dx(x³) = 3x² — the cube</h3>
+<p>Same story in 3D: grow the cube's edge by dx and you add <strong>three faces</strong>, each of area x² (the three edge-corners vanish). Hence d/dx(x³) = 3x². The pattern <span class="eq">d/dx(xⁿ) = n·xⁿ⁻¹</span> is "n faces of size xⁿ⁻¹" — the <strong>power rule</strong> is just geometry in n dimensions.</p>
+
+<h3>d/dx(1/x) = −1/x² — the constant-area rectangle</h3>
+<div class="stage">
+  <div class="stage-title">The rectangle with area 1: width x × height 1/x</div>
+  <svg class="fig" viewBox="0 0 340 240" width="340" style="background:var(--code-bg);border:1px solid var(--line);border-radius:8px;">
+    <rect x="40" y="50" width="200" height="100" fill="rgba(56,189,248,0.08)" stroke="var(--accent)" stroke-width="2"/>
+    <rect x="40" y="60" width="220" height="90" fill="none" stroke="var(--ink-dim)" stroke-width="1.5" stroke-dasharray="6 4"/>
+    <rect x="240" y="50" width="20" height="100" fill="rgba(52,211,153,0.35)" stroke="var(--good)"/>
+    <rect x="40" y="50" width="200" height="10" fill="rgba(248,113,113,0.4)" stroke="var(--bad)"/>
+    <text x="140" y="172" style="fill:var(--ink);font-size:14px" text-anchor="middle">x</text>
+    <text x="34" y="103" style="fill:var(--ink);font-size:14px" text-anchor="end">1/x</text>
+    <text x="250" y="172" style="fill:var(--good);font-size:11px" text-anchor="middle">dx·(1/x)</text>
+    <text x="140" y="44" style="fill:var(--bad);font-size:11px" text-anchor="middle">x·|d(1/x)|</text>
+    <text x="280" y="103" style="fill:var(--ink-dim);font-size:11px" text-anchor="start">dx</text>
+  </svg>
+  <div class="caption">Area must stay 1 (the product is constant). Widening by dx adds the green strip dx·(1/x); the height must drop, removing the red strip x·|d(1/x)|. Equal areas ⟹ dx·(1/x) = x·|d(1/x)| ⟹ d(1/x)/dx = −1/x². The minus sign: height <em>shrinks</em> as x grows.</div>
+</div>
+
+<h3>d/dx(√x) = 1/(2√x) — the square, inverted</h3>
+<div class="stage">
+  <div class="stage-title">Same picture as x², run in reverse: area x, side √x</div>
+  <svg class="fig" viewBox="0 0 300 300" width="300" style="background:var(--code-bg);border:1px solid var(--line);border-radius:8px;">
+    <rect x="50" y="50" width="200" height="200" fill="rgba(56,189,248,0.08)" stroke="var(--accent)" stroke-width="2"/>
+    <rect x="250" y="50" width="20" height="200" fill="rgba(167,139,250,0.4)" stroke="var(--accent2)"/>
+    <rect x="50" y="30" width="200" height="20" fill="rgba(167,139,250,0.4)" stroke="var(--accent2)"/>
+    <rect x="250" y="30" width="20" height="20" fill="rgba(248,113,113,0.5)" stroke="var(--bad)"/>
+    <text x="150" y="283" style="fill:var(--ink);font-size:14px" text-anchor="middle">√x</text>
+    <text x="30" y="155" style="fill:var(--ink);font-size:14px" text-anchor="middle">√x</text>
+    <text x="260" y="152" style="fill:var(--accent2);font-size:12px" text-anchor="middle">√x·d(√x)</text>
+    <text x="150" y="45" style="fill:var(--accent2);font-size:12px" text-anchor="middle">√x·d(√x)</text>
+    <text x="260" y="44" style="fill:var(--bad);font-size:10px" text-anchor="middle">≈0</text>
+    <text x="150" y="20" style="fill:var(--ink-dim);font-size:11px" text-anchor="middle">rim = dx = 2·√x·d(√x)</text>
+  </svg>
+  <div class="caption">Now x is the <em>area</em> and √x is the <em>side</em>. Adding a rim of area dx = two strips of √x·d(√x) gives dx = 2√x·d(√x) ⟹ d(√x)/dx = 1/(2√x). This is the x² proof run backwards — the geometric seed of the inverse-function idea: the derivative of an inverse is the reciprocal of the original's slope.</div>
+</div>
+
+<h3>The teaser: d/dx(sin x) = cos x — the unit circle</h3>
+<div class="stage">
+  <div class="stage-title">The rotating stick: θ is the angle, the tip traces the circle</div>
+  <svg class="fig" viewBox="0 0 260 260" width="260" style="background:var(--code-bg);border:1px solid var(--line);border-radius:8px;">
+    <defs>
+      <marker id="arrR" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--bad)"/></marker>
+      <marker id="arrG" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--good)"/></marker>
+    </defs>
+    <line x1="30" y1="130" x2="230" y2="130" stroke="var(--line)" stroke-width="1"/>
+    <line x1="130" y1="30" x2="130" y2="230" stroke="var(--line)" stroke-width="1"/>
+    <circle cx="130" cy="130" r="100" fill="rgba(56,189,248,0.05)" stroke="var(--ink-dim)" stroke-width="1.5"/>
+    <line x1="130" y1="130" x2="200.7" y2="59.3" stroke="var(--accent)" stroke-width="2.5"/>
+    <path d="M 165,130 A 35 35 0 0 1 154.7,105.3" fill="none" stroke="var(--warn)" stroke-width="1.5"/>
+    <text x="163" y="117" style="fill:var(--warn);font-size:12px" text-anchor="middle">θ</text>
+    <line x1="200.7" y1="59.3" x2="168.9" y2="59.3" stroke="var(--bad)" stroke-width="2" marker-end="url(#arrR)"/>
+    <line x1="168.9" y1="59.3" x2="168.9" y2="27.5" stroke="var(--good)" stroke-width="2" marker-end="url(#arrG)"/>
+    <line x1="200.7" y1="59.3" x2="168.9" y2="27.5" stroke="var(--good)" stroke-width="1.3" stroke-dasharray="4 3"/>
+    <circle cx="200.7" cy="59.3" r="3.5" fill="var(--accent)"/>
+    <text x="150" y="74" style="fill:var(--bad);font-size:10px" text-anchor="end">−sin θ·dθ</text>
+    <text x="176" y="43" style="fill:var(--good);font-size:10px" text-anchor="middle">cos θ·dθ</text>
+    <text x="110" y="66" style="fill:var(--ink-dim);font-size:11px" text-anchor="end">sin θ</text>
+    <text x="213" y="146" style="fill:var(--ink-dim);font-size:11px" text-anchor="middle">cos θ</text>
+  </svg>
+  <div class="caption">Rotate the stick by a tiny dθ: the tip moves dθ units along the arc (radius 1, radians), tangent to the circle. That motion decomposes into a vertical piece cos θ·dθ (sin grows) and a horizontal piece −sin θ·dθ (cos shrinks). Hence d/dθ(sin θ) = cos θ and d/dθ(cos θ) = −sin θ — each function's rate of change is the <em>other</em> coordinate, with a minus on cos because the circle turns counterclockwise.</div>
+</div>
+
+<table>
+  <tr><th>Function</th><th>Picture</th><th>Derivative</th></tr>
+  <tr><td>x²</td><td>square, 2 strips of x·dx</td><td>2x</td></tr>
+  <tr><td>x³</td><td>cube, 3 faces of x²</td><td>3x²</td></tr>
+  <tr><td>1/x</td><td>constant-area rectangle, equal strips</td><td>−1/x²</td></tr>
+  <tr><td>√x</td><td>square run backwards, 2 strips of √x·d(√x)</td><td>1/(2√x)</td></tr>
+  <tr><td>sin x</td><td>rotating stick, vertical tip speed</td><td>cos x</td></tr>
+  <tr><td>cos x</td><td>rotating stick, horizontal tip speed</td><td>−sin x</td></tr>
+</table>
+
+<!-- ============ 4. PRODUCT RULE ============ -->
+<h2><span class="num">04</span>The Product Rule</h2>
+
+<div class="formula"><span class="c1">(f·g)'</span> = <span class="c2">f'·g</span> + <span class="c3">f·g'</span></div>
+
+<p>The picture is a rectangle with side lengths f and g — the product <em>is</em> an area. Grow both sides a little and the area grows in <strong>two strips</strong>:</p>
+
+<div class="stage">
+  <div class="stage-title">(f+df)(g+dg) = fg + df·g + f·dg + df·dg</div>
+  <svg class="fig" viewBox="0 0 340 240" width="340" style="background:var(--code-bg);border:1px solid var(--line);border-radius:8px;">
+    <rect x="40" y="40" width="200" height="160" fill="rgba(56,189,248,0.08)" stroke="var(--accent)" stroke-width="2"/>
+    <rect x="240" y="40" width="30" height="160" fill="rgba(167,139,250,0.4)" stroke="var(--accent2)"/>
+    <rect x="40" y="10" width="200" height="30" fill="rgba(167,139,250,0.4)" stroke="var(--accent2)"/>
+    <rect x="240" y="10" width="30" height="30" fill="rgba(248,113,113,0.5)" stroke="var(--bad)" stroke-width="1.5"/>
+    <text x="140" y="125" style="fill:var(--ink-dim);font-size:13px" text-anchor="middle">f·g</text>
+    <text x="255" y="125" style="fill:var(--accent2);font-size:11px" text-anchor="middle">df·g</text>
+    <text x="140" y="33" style="fill:var(--accent2);font-size:11px" text-anchor="middle">f·dg</text>
+    <text x="255" y="60" style="fill:var(--bad);font-size:10px" text-anchor="middle">df·dg ≈ 0</text>
+    <line x1="255" y1="41" x2="255" y2="50" stroke="var(--bad)" stroke-width="1" stroke-dasharray="3 2"/>
+    <text x="140" y="222" style="fill:var(--ink);font-size:13px" text-anchor="middle">f</text>
+    <text x="24" y="125" style="fill:var(--ink);font-size:13px" text-anchor="end">g</text>
+    <text x="255" y="222" style="fill:var(--ink-dim);font-size:12px" text-anchor="middle">df</text>
+    <text x="140" y="4" style="fill:var(--ink-dim);font-size:12px" text-anchor="middle">dg</text>
+  </svg>
+  <div class="caption">Two strips survive: df·g (right) and f·dg (top). The corner df·dg is two infinitesimals multiplied — infinitely smaller than the strips (O(dx²) vs O(dx)) — so it vanishes. Result: d(f·g) = df·g + f·dg ⟹ (fg)' = f'g + fg'.</div>
+</div>
+
+<div class="card tip">
+  <strong>Why the corner really vanishes (the paradox, again):</strong> it's not that df·dg is literally zero — it's that the strips are ~dx big while the corner is ~dx² big. As dx → 0, the corner's <em>relative</em> contribution → 0. The product rule keeps exactly the linear part of the change; everything quadratic or higher is discarded.
+</div>
+
+<!-- ============ 5. CHAIN RULE ============ -->
+<h2><span class="num">05</span>The Chain Rule</h2>
+
+<div class="formula"><span class="c1">d/dx f(g(x))</span> = <span class="c2">f'(g(x))</span> · <span class="c3">g'(x)</span></div>
+
+<p>Composition = two machines in a row. The first machine's output is the second machine's input:</p>
+
+<div class="stage">
+  <div class="stage-title">Two machines in series — sensitivities multiply</div>
+  <div class="chain">
+    <div class="node"><div class="lbl">input</div><div class="val">x</div></div>
+    <div class="edge"><div class="sens">dg/dx = g'(x)</div><div class="arr">→</div></div>
+    <div class="node inner"><div class="lbl">inner machine</div><div class="val">g(x)</div></div>
+    <div class="edge"><div class="sens">df/dg = f'(g(x))</div><div class="arr">→</div></div>
+    <div class="node"><div class="lbl">outer machine</div><div class="val">f(g(x))</div></div>
+  </div>
+  <div class="formula small">df = f'(g(x)) · dg = f'(g(x)) · g'(x) · dx</div>
+  <div class="caption">A step dx enters machine g and comes out scaled by g'(x): dg = g'(x)·dx. That dg enters machine f and comes out scaled by f' evaluated <em>at the inner value</em>: df = f'(g(x))·dg. Total sensitivity = product of the two slopes. In Leibniz notation df/dx = df/dg · dg/dx it even <em>looks</em> like fraction cancellation — and because derivatives are local linear slopes, it literally is, locally.</div>
+</div>
+
+<div class="stage">
+  <div class="stage-title">The slope triangles — machine 1's rise becomes machine 2's run</div>
+  <svg class="fig" viewBox="0 0 340 210" width="340" style="background:var(--code-bg);border:1px solid var(--line);border-radius:8px;">
+    <defs>
+      <marker id="arrG2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--good)"/></marker>
+    </defs>
+    <path d="M 120,112 Q 140,135 168,158" fill="none" stroke="var(--ink-dim)" stroke-width="1.2" stroke-dasharray="4 3" marker-end="url(#arrG2)"/>
+    <polygon points="20,160 120,160 120,110" fill="rgba(56,189,248,0.12)" stroke="var(--accent)" stroke-width="2"/>
+    <polygon points="120,160 170,160 170,90" fill="rgba(167,139,250,0.12)" stroke="var(--accent2)" stroke-width="2"/>
+    <text x="70" y="179" style="fill:var(--ink-dim);font-size:12px" text-anchor="middle">dx</text>
+    <text x="129" y="140" style="fill:var(--ink-dim);font-size:12px" text-anchor="start">dg</text>
+    <text x="70" y="102" style="fill:var(--accent);font-size:11px" text-anchor="middle">g'(x) = dg/dx</text>
+    <text x="145" y="179" style="fill:var(--ink-dim);font-size:12px" text-anchor="middle">dg</text>
+    <text x="179" y="132" style="fill:var(--ink-dim);font-size:12px" text-anchor="start">df</text>
+    <text x="145" y="82" style="fill:var(--accent2);font-size:11px" text-anchor="middle">f'(u) = df/dg</text>
+    <text x="170" y="203" style="fill:var(--ink);font-size:13px" text-anchor="middle">df = f'(g(x)) · g'(x) · dx</text>
+  </svg>
+  <div class="caption">The first triangle has run dx and rise dg (slope g'). That same dg is the run of the second triangle, whose rise is df (slope f'). Two slopes end-to-end multiply: df = f'(u)·g'(x)·dx.</div>
+</div>
+
+<div class="card key">
+  <strong>Two common slips:</strong>
+  <ol>
+    <li><strong>Evaluate f' at g(x), not at x.</strong> The outer machine doesn't know x; it only sees g(x). This is the #1 sign error in practice.</li>
+    <li><strong>The chain rule is the "nested zoom."</strong> You zoom into the outer function (a sine wave, say) until it looks linear — but the <em>input</em> axis of that zoom is measured in units of g, and changes in g are themselves caused by changes in x through g'. Both slopes multiply.</li>
+  </ol>
+</div>
+
+<!-- ============ 6. WORKED EXAMPLES ============ -->
+<h2><span class="num">06</span>Worked Examples</h2>
+
+<table>
+  <tr><th>h(x)</th><th>Rules used</th><th>Step by step</th><th>Result</th></tr>
+  <tr>
+    <td><span class="eq">x·sin(x)</span></td>
+    <td>Product</td>
+    <td>h' = (1)·sin(x) + x·(cos(x))</td>
+    <td><span class="eq">sin(x) + x·cos(x)</span></td>
+  </tr>
+  <tr>
+    <td><span class="eq">x²·(1/x)</span> &nbsp;<em>(sanity check!)</em></td>
+    <td>Product</td>
+    <td>h' = 2x·(1/x) + x²·(−1/x²) = 2 − 1</td>
+    <td><span class="eq">1</span> ✓ <span class="dim">(h(x) = x, and x' = 1)</span></td>
+  </tr>
+  <tr>
+    <td><span class="eq">sin(x²)</span></td>
+    <td>Chain</td>
+    <td>outer sin, inner x²: h' = cos(x²)·(2x)</td>
+    <td><span class="eq">2x·cos(x²)</span></td>
+  </tr>
+  <tr>
+    <td><span class="eq">√(x² + 1)</span></td>
+    <td>Chain + √x</td>
+    <td>outer √·, inner x²+1: h' = 1/(2√(x²+1)) · 2x</td>
+    <td><span class="eq">x / √(x²+1)</span></td>
+  </tr>
+  <tr>
+    <td><span class="eq">x²·sin(x²)</span></td>
+    <td>Product + Chain</td>
+    <td>h' = 2x·sin(x²) + x²·[cos(x²)·2x]</td>
+    <td><span class="eq">2x·sin(x²) + 2x²·cos(x²)</span></td>
+  </tr>
+</table>
+
+<div class="card tip">
+  <strong>How to verify any derivative you compute:</strong> pick a number (say x = 2), evaluate (f(x+h) − f(x))/h for a small h (e.g. h = 0.001) numerically, and compare with your formula. If they match to ~3 decimals, you're right. This habit catches the "evaluate f' at g(x)" slip instantly — and it's the exact mindset of backprop testing later.
+</div>
+
+<!-- ============ 7. CHEAT SHEET ============ -->
+<h2><span class="num">07</span>Rules Cheat Sheet</h2>
+<div class="cheat">
+  <div class="cell"><h4>d/dx[c] = 0</h4>Constants don't change — a horizontal line has slope 0.</div>
+  <div class="cell"><h4>d/dx[xⁿ] = n·xⁿ⁻¹</h4>Power rule = "n faces of size xⁿ⁻¹". Includes √x = x^½ → ½x^(−½).</div>
+  <div class="cell"><h4>d/dx[1/x] = −1/x²</h4>The constant-area rectangle; negative because height shrinks.</div>
+  <div class="cell"><h4>d/dx[sin x] = cos x</h4>Vertical tip speed of the rotating stick.</div>
+  <div class="cell"><h4>d/dx[cos x] = −sin x</h4>Horizontal tip speed, sign flipped by the counterclockwise turn.</div>
+  <div class="cell"><h4>(fg)' = f'g + fg'</h4>Product rule = two strips of the rectangle; corner df·dg vanishes.</div>
+  <div class="cell"><h4>(f∘g)' = f'(g)·g'</h4>Chain rule = machines in series; slopes multiply; evaluate f' at g(x).</div>
+  <div class="cell"><h4>Local linearity</h4>The reason all of this works: zoomed in, every smooth function is its tangent line, so rates multiply and add like slopes do.</div>
+</div>
+
+<!-- ============ 8. WHY IT MATTERS ============ -->
+<h2><span class="num">08</span>Why This Matters — and What's Next</h2>
+
+<div class="card key">
+  <strong>The chain rule is backpropagation.</strong> A neural network is one giant composition of functions (layers, activations, loss). The gradient of the loss w.r.t. any weight is a product of derivatives along the path from that weight to the loss — the chain rule, applied backward through the computation graph. Karpathy's <code>micrograd</code> is literally just these two rules (product + chain) plus a data structure to walk the graph. Everything you just visualized in this page <em>is</em> the engine of deep learning.
+</div>
+
+<p>Remaining in the course (next page update):</p>
+<ul>
+  <li><strong>Video 5 — Euler's number e:</strong> the function that is its own derivative; why e ≈ 2.718 appears in exponentials, logarithms, and (later) softmax.</li>
+  <li><strong>Videos 6–7 —</strong> implicit differentiation; limits &amp; L'Hôpital's rule, epsilon-delta.</li>
+  <li><strong>Videos 8–9 —</strong> integration and the Fundamental Theorem of Calculus: the derivative/integral inverse relationship (the "area ↔ slope" bridge).</li>
+  <li><strong>Videos 10–11 —</strong> higher-order derivatives; Taylor series (the generalization of "local linearity" to local <em>polynomials</em> — the gateway to understanding transformers' approximations).</li>
+</ul>
+
+<p class="dim">Next page: <a href="../LinearAlgebra/linear-algebra-phase0-summary.html" style="color:var(--accent)">Linear Algebra summary</a> (done) · <a href="../index.html" style="color:var(--accent)">Back to hub</a></p>
+
+<footer>
+  Calculus Phase 0 — Essence of Calculus videos 1–4 (derivatives, geometric formulas, product &amp; chain rules) · Generated 2026-08-11
+</footer>
+
+</div>
+
+<script>
+(function () {
+  var line = document.getElementById('secLine');
+  var q = document.getElementById('secQ');
+  var slide = document.getElementById('qSlide');
+  var out = document.getElementById('secReadout');
+  function yAt(x) { return (x - 160) * (x - 160) / 200 + 30; }
+  function update() {
+    var d = parseFloat(slide.value);
+    var qx = 100 + d;
+    var qy = yAt(qx);
+    line.setAttribute('x2', qx);
+    line.setAttribute('y2', qy);
+    q.setAttribute('cx', qx);
+    q.setAttribute('cy', qy);
+    var slope = (qy - 48) / d;
+    out.innerHTML = "Δx = " + d + "&nbsp;&nbsp;·&nbsp;&nbsp;secant slope = <b>" + slope.toFixed(3) + "</b><br>tangent slope = <b>-0.600</b> &nbsp;(as Δx → 0)";
+  }
+  slide.addEventListener('input', update);
+  update();
+})();
+</script>
+
+</body>
+</html>

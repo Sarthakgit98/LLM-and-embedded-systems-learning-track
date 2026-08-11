@@ -15,8 +15,8 @@
 - [ ] Strang MIT 18.06 lectures 1–20 (optional deep-dive)
 
 **Calculus**
-- [ ] 3Blue1Brown "Essence of Calculus" (all videos)
-- [ ] Chain rule — can derive backprop by hand
+- [ ] 3Blue1Brown "Essence of Calculus" (all videos) — *in progress: videos 1–4 done (derivative paradox, geometric formulas x²/1/x/√x/sin, product & chain rules). Summary page: `Calculus/calculus-phase0-summary.html` (interactive secant demo + worked examples). Next: video 5 (e)*
+- [ ] Chain rule — can derive backprop by hand *(mechanics down: product rule = two strips, chain rule = nested zoom; examples incl. sin(x²) & √(x²+1) done)*
 
 **Probability & Information Theory**
 - [ ] Distributions, Bayes, expectation, MLE
