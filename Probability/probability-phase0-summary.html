@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Probability — Phase 0 Summary (StatQuest intuition layer)</title>
+<style>
+  :root {
+    --bg: #0f172a;
+    --bg2: #1e293b;
+    --card: #1e293b;
+    --card2: #26334d;
+    --ink: #e2e8f0;
+    --ink-dim: #94a3b8;
+    --accent: #38bdf8;
+    --accent2: #a78bfa;
+    --good: #34d399;
+    --warn: #fbbf24;
+    --bad: #f87171;
+    --line: #334155;
+    --code-bg: #0b1220;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.6;
+    padding: 2rem 1rem;
+  }
+  .wrap { max-width: 900px; margin: 0 auto; }
+
+  header { text-align: center; padding: 2rem 1rem 2.5rem; border-bottom: 1px solid var(--line); margin-bottom: 2rem; }
+  header h1 { font-size: 2rem; color: var(--accent); letter-spacing: -0.02em; }
+  header p { color: var(--ink-dim); margin-top: 0.5rem; max-width: 640px; margin-left: auto; margin-right: auto; }
+  .badge {
+    display: inline-block; background: var(--card2); border: 1px solid var(--line);
+    border-radius: 999px; padding: 0.25rem 0.9rem; font-size: 0.8rem; color: var(--ink-dim); margin: 0.25rem;
+  }
+
+  h2 {
+    font-size: 1.4rem; color: var(--accent); margin: 3rem 0 1rem;
+    padding-bottom: 0.4rem; border-bottom: 2px solid var(--line);
+  }
+  h2 .num {
+    display: inline-block; background: var(--accent); color: #06283d;
+    border-radius: 8px; padding: 0.05rem 0.6rem; font-size: 1rem; margin-right: 0.6rem;
+  }
+  h3 { color: var(--accent2); margin: 1.4rem 0 0.5rem; font-size: 1.05rem; }
+
+  p { margin: 0.6rem 0; }
+  .dim { color: var(--ink-dim); }
+
+  .card {
+    background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+    padding: 1.2rem 1.4rem; margin: 1rem 0;
+  }
+  .card.tip { border-left: 4px solid var(--good); }
+  .card.warn { border-left: 4px solid var(--warn); }
+  .card.key { border-left: 4px solid var(--accent2); }
+  .card.chat { border-left: 4px solid var(--accent); }
+  .card h4 { color: var(--accent); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.5rem; }
+
+  code {
+    background: var(--code-bg); border: 1px solid var(--line); border-radius: 5px;
+    padding: 0.1rem 0.4rem; font-family: "SF Mono", Menlo, Consolas, monospace; font-size: 0.88em; color: #7dd3fc;
+  }
+  pre {
+    background: var(--code-bg); border: 1px solid var(--line); border-radius: 8px;
+    padding: 1rem; overflow-x: auto; font-size: 0.85rem; line-height: 1.5;
+  }
+  pre code { border: none; background: none; color: #a5f3fc; }
+
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.92rem; }
+  th { background: var(--card2); color: var(--accent); text-align: left; padding: 0.5rem 0.8rem; border: 1px solid var(--line); }
+  td { padding: 0.5rem 0.8rem; border: 1px solid var(--line); vertical-align: top; }
+
+  /* ============ FIGURES ============ */
+  .stage {
+    background: var(--card2); border: 1px solid var(--line); border-radius: 12px;
+    padding: 1.5rem; margin: 1rem 0; text-align: center;
+  }
+  .stage .caption { color: var(--ink-dim); font-size: 0.85rem; margin-top: 0.8rem; }
+  .stage-title { color: var(--accent2); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; }
+
+  .fig { max-width: 100%; }
+  .fig text { font-family: "SF Mono", Menlo, Consolas, monospace; }
+
+  .pair { display: flex; justify-content: center; gap: 1.2rem; flex-wrap: wrap; align-items: flex-start; }
+  .ctrl { text-align: left; max-width: 300px; min-width: 230px; }
+  .ctrl label { display: block; font-size: 0.85rem; color: var(--ink-dim); margin: 0.5rem 0 0.2rem; }
+  .radio-row { display: flex; gap: 1.2rem; justify-content: center; margin: 0.4rem 0 0.8rem; font-size: 0.88rem; color: var(--ink); flex-wrap: wrap; }
+
+  input[type="range"] { width: 100%; accent-color: var(--accent); cursor: pointer; }
+  .readout { font-family: "SF Mono", Menlo, Consolas, monospace; font-size: 0.85rem; color: var(--ink); margin-top: 0.6rem; }
+  .readout b { color: var(--warn); }
+
+  .formula {
+    background: var(--code-bg); border: 1px solid var(--line); border-radius: 10px;
+    padding: 1.2rem; text-align: center; font-size: 1.2rem; margin: 1rem 0; color: #a5f3fc;
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+  }
+  .formula .c1 { color: var(--accent); }
+  .formula .c2 { color: var(--warn); }
+  .formula .c3 { color: var(--good); }
+  .formula.small { font-size: 1.0rem; }
+
+  ul, ol { margin: 0.6rem 0 0.6rem 1.4rem; }
+  li { margin: 0.3rem 0; }
+  .eq { font-family: "SF Mono", Menlo, Consolas, monospace; }
+
+  footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--line); color: var(--ink-dim); font-size: 0.85rem; text-align: center; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>Probability — Phase 0</h1>
+  <p>StatQuest probability videos — Bayes' theorem, probability vs likelihood, the Normal / Binomial / Poisson / Exponential / Uniform distributions, and Maximum Likelihood Estimation. Intuition-first notes with interactive figures. <em>This is the intuition layer of the 5-day sprint (Day 1–2); the math backbone (Deisenroth ch. 6) lands next, and more sections get added as you progress.</em></p>
+  <div>
+    <span class="badge">StatQuest</span>
+    <span class="badge">Bayes</span>
+    <span class="badge">Likelihood</span>
+    <span class="badge">MLE</span>
+    <span class="badge">Distributions</span>
+    <span class="badge">interactive</span>
+  </div>
+</header>
+
+<!-- ============ 1. BAYES ============ -->
+<h2><span class="num">01</span>Bayes' Theorem</h2>
+
+<h3>Intuition — evidence should update belief</h3>
+<p>You hold a belief <em>before</em> seeing evidence (the <strong>prior</strong>). Evidence arrives. Bayes' theorem is the <em>update rule</em>: it tells you exactly how much to move your belief (to the <strong>posterior</strong>). It's the only consistent way to fold new information into an old opinion — which is why it's the foundation of spam filters, medical diagnostics, and (later) the Bayesian view of machine learning.</p>
+
+<div class="card key">
+  <h4>The master move — flip the conditioning</h4>
+  <p>Real life hands you conditional probabilities in the <em>easy direction</em>: "if a person is sick, how often does the test light up?" — that's <span class="eq">P(+ | sick)</span>, directly measurable. But you want the <em>hard direction</em>: "given a positive test, how likely are you sick?" — <span class="eq">P(sick | +)</span>. Bayes is the bridge between the two. Same ingredients, different order.</p>
+</div>
+
+<p><strong>The base-rate trap (why Bayes is shocking):</strong> a test that's 99% accurate can still leave you with only a 50/50 chance of being sick. In 10,000 people, 100 are sick (1%) — 99 of them test positive. But of the 9,900 healthy people, 1% — 99 people — also test positive (false alarms). So among all positive tests, only 99 of 198 are real: <strong>50%</strong>. The rare disease means false positives from the huge healthy crowd drown out the true positives.</p>
+
+<div class="formula">P(A | B) = <span class="c1">P(B | A)</span> · <span class="c2">P(A)</span> / P(B) &nbsp;&nbsp;·&nbsp;&nbsp; P(B) = P(B|A)P(A) + P(B|¬A)P(¬A)</div>
+
+<div class="stage">
+  <div class="stage-title">The mammogram tree — 10,000 people, 1% sick, test is 99% sensitive with 1% false positives</div>
+  <svg class="fig" viewBox="0 0 600 300" width="600" style="background:var(--code-bg);border:1px solid var(--line);border-radius:8px;">
+    <!-- root -->
+    <rect x="240" y="12" width="120" height="34" rx="8" fill="var(--card)" stroke="var(--accent)"/>
+    <text x="300" y="34" style="fill:var(--ink);font-size:12px" text-anchor="middle">10,000 people</text>
+    <!-- level-1 branches -->
+    <line x1="300" y1="46" x2="150" y2="96" stroke="var(--bad)"/>
+    <line x1="300" y1="46" x2="450" y2="96" stroke="var(--good)"/>
+    <text x="216" y="72" style="fill:var(--bad);font-size:10px" text-anchor="middle">P(sick)=0.01</text>
+    <text x="392" y="72" style="fill:var(--good);font-size:10px" text-anchor="middle">P(healthy)=0.99</text>
+    <rect x="95" y="96" width="110" height="34" rx="8" fill="var(--card)" stroke="var(--bad)"/>
+    <text x="150" y="117" style="fill:var(--ink);font-size:12px" text-anchor="middle">100 sick</text>
+    <rect x="395" y="96" width="110" height="34" rx="8" fill="var(--card)" stroke="var(--good)"/>
+    <text x="450" y="117" style="fill:var(--ink);font-size:12px" text-anchor="middle">9,900 healthy</text>
+    <!-- level-2 branches -->
+    <line x1="150" y1="130" x2="75" y2="196" stroke="var(--bad)"/>
+    <line x1="150" y1="130" x2="225" y2="196" stroke="var(--ink-dim)"/>
+    <line x1="450" y1="130" x2="375" y2="196" stroke="var(--bad)"/>
+    <line x1="450" y1="130" x2="525" y2="196" stroke="var(--good)"/>
+    <text x="98" y="168" style="fill:var(--ink-dim);font-size:9px" text-anchor="middle">P(+|sick)=0.99</text>
+    <text x="188" y="168" style="fill:var(--ink-dim);font-size:9px" text-anchor="middle">0.01</text>
+    <text x="416" y="168" style="fill:var(--ink-dim);font-size:9px" text-anchor="middle">P(+|healthy)=0.01</text>
+    <text x="494" y="168" style="fill:var(--ink-dim);font-size:9px" text-anchor="middle">0.99</text>
+    <rect x="20" y="196" width="110" height="34" rx="8" fill="var(--card2)" stroke="var(--warn)" stroke-width="2"/>
+    <text x="75" y="217" style="fill:var(--warn);font-size:12px" text-anchor="middle">99 test +</text>
+    <rect x="170" y="196" width="110" height="34" rx="8" fill="var(--card)" stroke="var(--line)"/>
+    <text x="225" y="217" style="fill:var(--ink-dim);font-size:12px" text-anchor="middle">1 test −</text>
+    <rect x="320" y="196" width="110" height="34" rx="8" fill="var(--card2)" stroke="var(--warn)" stroke-width="2"/>
+    <text x="375" y="217" style="fill:var(--warn);font-size:12px" text-anchor="middle">99 false +</text>
+    <rect x="470" y="196" width="110" height="34" rx="8" fill="var(--card)" stroke="var(--line)"/>
+    <text x="525" y="217" style="fill:var(--ink-dim);font-size:12px" text-anchor="middle">9,801 test −</text>
+    <text x="300" y="268" style="fill:var(--ink);font-size:12px" text-anchor="middle">P(sick | +) = 99 / (99+99) = <tspan fill="#fbbf24">50%</tspan></text>
+    <text x="300" y="286" style="fill:var(--ink-dim);font-size:10px" text-anchor="middle">the 99 true positives and 99 false positives are equal — a 99%-accurate test, a 50% chance</text>
+  </svg>
+  <div class="caption">The highlighted boxes are everyone who tested positive. Bayes asks: what fraction of <em>them</em> are actually sick? The base rate (1% sick) is doing the heavy lifting.</div>
+</div>
+
+<h3>When to use it — and why over alternatives</h3>
+<ul>
+  <li><strong>You have the conditionals in the "wrong direction."</strong> Medical tests (accuracy of test known, diagnosis unknown), spam filters (P(word|spam) measurable, P(spam|word) wanted), diagnostic reasoning in general.</li>
+  <li><strong>Chosen over plain conditional probability</strong> whenever you can't measure the direction you need directly — which is almost always the real-world situation. Plain <span class="eq">P(A|B)</span> is a definition; Bayes is the tool for actually computing it.</li>
+  <li><strong>Later payoff:</strong> the Bayesian view of machine learning (posterior = likelihood × prior / evidence) is the "other half" of MLE — see sections 02 and 08.</li>
+</ul>
+
+<div class="card chat">
+  <h4>From our discussion</h4>
+  <p>Bayes is the answer to MLE's most common confusion. MLE fixes the <em>data</em> and asks "which θ makes it most likely?" — the frequentist question. Bayes fixes nothing and asks "how plausible is θ <em>now</em>, after seeing the data?" — adding a prior. Same ingredient (the likelihood!), different question. That one sentence dissolves most of the Bayes-vs-MLE confusion you'll meet in ML tutorials.</p>
+</div>
+
+<!-- ============ 2. PROBABILITY VS LIKELIHOOD ============ -->
+<h2><span class="num">02</span>Probability vs Likelihood</h2>
+
+<h3>Intuition — the same formula, read in two directions</h3>
+<p>Take a coin with bias <span class="eq">p</span>. Flip it 10 times.</p>
+<ul>
+  <li><strong>Probability:</strong> fix the parameter (<span class="eq">p = 0.5</span>), ask "how likely is 7 heads?" The answer is a number, and the numbers over all possible outcomes sum to 1.</li>
+  <li><strong>Likelihood:</strong> fix the data (<span class="eq">7 heads</span>), ask "how likely is <em>this data</em> for each candidate <span class="eq">p</span>?" The answer is a <em>curve</em> over p. Its heights are relative — the curve doesn't sum to 1 — only the <em>shape</em> and the location of the peak matter.</li>
+</ul>
+
+<div class="card key">
+  <h4>The master mental model — a table</h4>
+  <p>Imagine a table: rows are candidate parameters θ, columns are possible data outcomes. <strong>Probability reads down a column</strong> (θ fixed, data varies — the column sums to 1). <strong>Likelihood reads across a row</strong> (data fixed, θ varies — the row's heights are arbitrary; only relative height matters). StatQuest's phrasing: probability is about the data given the parameter; likelihood is about the parameter given the data.</p>
+</div>
+
+<div class="formula">P(X = k | θ) — probability, as a function of the <span class="c1">data</span><br>
+L(θ | X = k) = P(X = k | θ) — likelihood, the same expression as a function of the <span class="c2">parameter</span></div>
+
+<div class="stage">
+  <div class="stage-title">Two views of the same math — drag k₀ (n = 10 flips, p = 0.5 for the probability view)</div>
+  <div class="pair">
+    <div>
+      <svg id="pvBar" class="fig" viewBox="0 0 340 230" width="340" style="background:var(--code-bg);border:1px solid var(--line);border-radius:8px;"></svg>
+      <div class="caption"><strong>Probability</strong> — θ fixed (p=0.5), data varies. Bars over k, they sum to 1.</div>
+    </div>
+    <div>
+      <svg id="pvCurve" class="fig" viewBox="0 0 340 230" width="340" style="background:var(--code-bg);border:1px solid var(--line);border-radius:8px;"></svg>
+      <div class="caption"><strong>Likelihood</strong> — data fixed (k₀ heads), θ varies. Curve L(p)=p^k₀(1−p)^(10−k₀); only the peak matters.</div>
+    </div>
+  </div>
+  <div class="ctrl" style="margin:0.8rem auto;">
+    <label>k₀ = heads observed: <b id="pvK">7</b> / 10</label>
+    <input type="range" id="pvSlide" min="0" max="10" value="7">
+    <div class="readout" id="pvReadout"></div>
+  </div>
+  <div class="caption">Same formula, two directions. Probability predicts before you see data; likelihood infers after you've seen it. The likelihood curve here is a cross-section of the "mountain" that section 08 climbs.</div>
+</div>
+
+<h3>When to use which</h3>
+<ul>
+  <li><strong>Probability</strong> — when you want to <em>predict</em>: "what will I see?" (betting, risk, queuing).</li>
+  <li><strong>Likelihood</strong> — when you want to <em>infer</em>: "given what I saw, what's the world like?" (parameter estimation). This is the engine of MLE and, much later, of LLM training — maximizing the probability of the next token is likelihood maximization in disguise.</li>
+</ul>
+
+<!-- ============ 3. NORMAL ============ -->
+<h2><span class="num">03</span>The Normal (Gaussian) Distribution</h2>
+
+<h3>Intuition — the bell</h3>
+<p>One symmetric peak at the mean <span class="eq">μ</span>, spread controlled by <span class="eq">σ</span>. Where does it come from? Add up <em>many small independent effects</em> and their sum (or average) becomes bell-shaped — that's the Central Limit Theorem, and it's why measurement error, sensor noise, heights, and test scores all look like this. The normal is the "many small causes" distribution.</p>
+
+<div class="card key">
+  <h4>The master mental model — center and shoulders</h4>
+  <p>μ decides <em>where</em> the bell sits; σ decides <em>how wide</em>. The <strong>inflection points</strong> (where the curve stops bending down and starts bending out) sit exactly at <span class="eq">μ ± σ</span> — the "shoulders." And the 68-95-99.7 rule: 68% of the mass sits within one σ of the center, 95% within two, 99.7% within three.</p>
+</div>
+
+<div class="formula">f(x) = <span class="c1">1 / (σ√(2π))</span> · exp( <span class="c2">−(x−μ)² / (2σ²)</span> )</div>
+
+<div class="stage">
+  <div class="stage-title">The bell — μ slides it, σ spreads it. Shaded bands = μ±1σ / 2σ / 3σ</div>
+  <svg id="normSvg" class="fig" viewBox="0 0 600 300" width="600" style="background:var(--code-bg);border:1px solid var(--line);border-radius:8px;"></svg>
+  <div class="ctrl" style="margin:0.8rem auto;">
+    <label>μ (center): <b id="normMu">300</b></label>
+    <input type="range" id="normMuS" min="150" max="450" step="5" value="300">
+    <label>σ (spread): <b id="normSig">60</b></label>
+    <input type="range" id="normSigS" min="40" max="120" step="2" value="60">
+    <div class="readout" id="normReadout"></div>
+  </div>
+  <div class="caption">Watch the inflection points (dots) at μ±σ — the shoulders mark one standard deviation. Narrow σ → tall, tight bell; wide σ → short, flat bell.</div>
+</div>
+
+<h3>When to use it — and why over alternatives</h3>
+<ul>
+  <li><strong>Symmetric continuous measurements</strong> with no reason to expect skew: sensor noise, model residuals, averages of many things.</li>
+  <li><strong>The default first guess</strong> for continuous data — when in doubt and the data looks symmetric, this is the honest starting point.</li>
+  <li><strong>Chosen over Poisson/Exponential</strong> when values can be negative and spread both ways; <strong>over uniform</strong> when you expect a center and a spread rather than flatness.</li>
+  <li><strong>Why ML loves it:</strong> the exponent makes logarithms trivial — the log-likelihood becomes a simple quadratic (squared error!). That's the hidden reason least squares = MLE under normal noise, and why Gaussians appear in weight initialization, error models, and Gaussian processes.</li>
+</ul>
+
+<div class="card chat">
+  <h4>From our discussion</h4>
+  <p>StatQuest's MLE example used the normal — not because MLE belongs to it, but because the normal is the most common family. Bonus: it has <em>two</em> parameters (μ and σ²), so its likelihood "mountain" lives in 2D instead of 1D (see the contour figure in section 08).</p>
+</div>
+
+<!-- ============ 4. BINOMIAL ============ -->
+<h2><span class="num">04</span>The Binomial Distribution</h2>
+
+<h3>Intuition — counting successes</h3>
+<p>Flip a coin <span class="eq">n</span> times. How many heads? That count is binomial: <span class="eq">n</span> fixed trials, each independent, each with the same success probability <span class="eq">p</span>. The shape depends on <span class="eq">p</span>: symmetric at p=0.5, skewed toward the <em>rarer</em> outcome when p is far from 0.5. The peak sits near the mean <span class="eq">np</span>.</p>
+
+<div class="card key">
+  <h4>The master mental model — n identical coins</h4>
+  <p>You're rolling the same loaded die n times and counting how often a particular face lands. Two knobs: how many trials (n) and how loaded the coin is (p). Mean = np, variance = np(1−p). When n is small, the bars look jagged and asymmetric; when n is large, the binomial <em>becomes</em> the normal bell — one family, two faces.</p>
+</div>
+
+<div class="formula">P(X = k) = <span class="c1">C(n, k)</span> · <span class="c2">p^k</span> · <span class="c3">(1−p)^(n−k)</span> &nbsp;&nbsp;·&nbsp;&nbsp; mean = np, var = np(1−p)</div>
+
+<div class="stage">
+  <div class="stage-title">Counting successes — n trials, success probability p. Highlight = bar nearest the mean np</div>
+  <svg id="binSvg" class="fig" viewBox="0 0 600 300" width="600" style="background:var(--code-bg);border:1px solid var(--line);border-radius:8px;"></svg>
+  <div class="ctrl" style="margin:0.8rem auto;">
+    <label>n (trials): <b id="binN">10</b></label>
+    <input type="range" id="binNS" min="1" max="30" value="10">
+    <label>p (success probability): <b id="binP">0.5</b></label>
+    <input type="range" id="binPS" min="0.05" max="0.95" step="0.05" value="0.5">
+    <div class="readout" id="binReadout"></div>
+  </div>
+  <div class="caption">Crank n up to 30 with p=0.5: the bars smooth into a bell (binomial → normal). Set p low and watch the skew — rare successes bunch at small k.</div>
+</div>
+
+<h3>When to use it — and why over alternatives</h3>
+<ul>
+  <li><strong>Fixed number of trials, independence, constant p, and you count successes:</strong> free-throw streaks, "will each of 10 users click?", defective parts in a batch of n.</li>
+  <li><strong>Chosen over Poisson</strong> when you have a fixed, known n; <strong>over normal</strong> when n is small (the distribution is discrete and possibly skewed).</li>
+  <li><strong>Bridge:</strong> for large n it approaches the normal; for tiny p it approaches the Poisson. The binomial is the "parent" of both.</li>
+</ul>
+
+<div class="card chat">
+  <h4>From our discussion</h4>
+  <p>Flip the formula around — fix the observed k, let p vary — and the binomial PMF <em>is</em> the likelihood curve L(p) = p^k(1−p)^(n−k) from sections 02 and 08. That's the two-viewpoint trick again: one formula, probability when you fix p, likelihood when you fix the data.</p>
+</div>
+
+<!-- ============ 5. POISSON ============ -->
+<h2><span class="num">05</span>The Poisson Distribution</h2>
+
+<h3>Intuition — counting rare events</h3>
+<p>Emails arriving per hour, calls to a support line per minute, radioactive decays per second. You know the <em>average rate</em> <span class="eq">λ</span>, but each individual event is rare and independent. The Poisson counts them: one knob (λ), and the surprising fingerprint is <strong>mean = variance = λ</strong> — a distribution whose spread is exactly its average.</p>
+
+<div class="card key">
+  <h4>The master mental model — many chances, each nearly impossible</h4>
+  <p>The Poisson is the limit of a binomial with huge n and tiny p: a million opportunities, each with probability λ/1,000,000 of happening. The binomial formula would explode to compute; the Poisson collapses to a single elegant expression. Small λ → skewed, bunched near 0. Large λ → smooth and bell-like (it, too, becomes the normal).</p>
+</div>
+
+<div class="formula">P(X = k) = <span class="c1">λ^k e^(−λ) / k!</span> &nbsp;&nbsp;·&nbsp;&nbsp; mean = variance = λ</div>
+
+<div class="stage">
+  <div class="stage-title">Counting rare events — rate λ. Highlight = mode ≈ floor(λ)</div>
+  <svg id="poisSvg" class="fig" viewBox="0 0 600 300" width="600" style="background:var(--code-bg);border:1px solid var(--line);border-radius:8px;"></svg>
+  <div class="ctrl" style="margin:0.8rem auto;">
+    <label>λ (average rate): <b id="poisL">4</b></label>
+    <input type="range" id="poisLS" min="0.5" max="15" step="0.5" value="4">
+    <div class="readout" id="poisReadout"></div>
+  </div>
+  <div class="caption">λ=0.5: most hours have zero emails. λ=15: the bars smooth toward a bell. Watch how the spread (variance) grows with λ — mean = variance, always.</div>
+</div>
+
+<h3>When to use it — and why over alternatives</h3>
+<ul>
+  <li><strong>Counts in time or space with no natural cap:</strong> arrival counts, defect counts, particles, page hits per minute.</li>
+  <li><strong>Chosen over binomial</strong> when n is unknown or huge and p is tiny — the binomial genuinely collapses to the Poisson in that limit, so why carry the extra baggage?</li>
+  <li><strong>Chosen over normal</strong> when counts are small (discrete, can't be negative).</li>
+</ul>
+
+<div class="card chat">
+  <h4>From our discussion</h4>
+  <p>MLE of λ is the sample mean — the same answer as the coin (Bernoulli), reached by different calculus. The pattern that emerged in our chat: many families' MLEs end up being "some simple statistic of the data" — often the mean. The Exponential in the next section is the exception that proves the rule.</p>
+</div>
+
+<!-- ============ 6. EXPONENTIAL ============ -->
+<h2><span class="num">06</span>The Exponential Distribution</h2>
+
+<h3>Intuition — the waiting time between events</h3>
+<p>If emails arrive at rate <span class="eq">λ</span> per hour (Poisson), the <em>time until the next email</em> is exponential. The curve starts tall at t=0 — short gaps are common — and decays: long waits are rare. One knob (the rate λ), and the expected gap is <span class="eq">1/λ</span>.</p>
+
+<div class="card key">
+  <h4>The master mental model — memorylessness</h4>
+  <p>The Exponential is the only continuous distribution with <strong>no memory</strong>: if you've already waited s minutes with no email, the remaining wait behaves <em>as if you had just started</em>. The process doesn't know you've been waiting. (This is why "time to next event" is memoryless but "time since last event" isn't.)</p>
+</div>
+
+<div class="formula">f(t) = <span class="c1">λ e^(−λt)</span>, t ≥ 0 &nbsp;&nbsp;·&nbsp;&nbsp; E[T] = 1/λ &nbsp;&nbsp;·&nbsp;&nbsp; P(T &gt; t) = e^(−λt)</div>
+
+<div class="stage">
+  <div class="stage-title">Waiting time — rate λ. Shaded = the tail beyond the mean gap</div>
+  <svg id="expSvg" class="fig" viewBox="0 0 600 300" width="600" style="background:var(--code-bg);border:1px solid var(--line);border-radius:8px;"></svg>
+  <div class="ctrl" style="margin:0.8rem auto;">
+    <label>λ (rate per unit time): <b id="expL">1</b></label>
+    <input type="range" id="expLS" min="0.2" max="3" step="0.1" value="1">
+    <div class="readout" id="expReadout"></div>
+  </div>
+  <div class="caption">The shaded tail: P(T &gt; 1/λ) = e⁻¹ ≈ 0.368 — about 37% of gaps outlast the average gap. A bigger λ means events arrive faster, gaps shrink, the curve falls sooner.</div>
+</div>
+
+<h3>When to use it — and why over alternatives</h3>
+<ul>
+  <li><strong>Continuous time-to-event data:</strong> battery life, service times, time-to-failure, inter-arrival times in queues.</li>
+  <li><strong>Chosen over Poisson</strong> when the variable is a <em>duration</em>, not a count — the Poisson counts events, the Exponential times the gaps between them.</li>
+  <li><strong>Chosen over normal</strong> when durations are skewed (must be ≥ 0; many short, few long).</li>
+</ul>
+
+<div class="card chat">
+  <h4>From our discussion</h4>
+  <p>The surprise from our chat: MLE of the rate is λ̂ = 1/x̄ — the <em>reciprocal</em> of the mean gap, not the mean itself. Same recipe as the coin (likelihood → log → differentiate → solve), different answer, because here the parameter sits in the exponent of a decay, not the base of a power. The "same procedure, different mechanics" lesson in its purest form.</p>
+</div>
+
+<!-- ============ 7. UNIFORM ============ -->
+<h2><span class="num">07</span>The Uniform Distribution</h2>
+
+<h3>Intuition — total ignorance, honestly declared</h3>
+<p>Every value in a range equally likely: a fair die, a well-seeded random number generator, "pick a random point in this box." No center, no shoulders, no decay — just a flat line. In the continuous case, <em>probability = area</em>: intervals of equal width have equal probability, and the whole area under the line is 1.</p>
+
+<div class="card key">
+  <h4>The master mental model — the "no information" prior</h4>
+  <p>When you know only the range and genuinely have no reason to prefer any value, the uniform is the honest statement of ignorance. It's also the cleanest possible place to see that probability = area under a curve — the exact connection to integration from calculus.</p>
+</div>
+
+<div class="formula">f(x) = <span class="c1">1 / (b−a)</span>, a ≤ x ≤ b &nbsp;&nbsp;·&nbsp;&nbsp; mean = (a+b)/2, var = (b−a)²/12</div>
+
+<div class="stage">
+  <div class="stage-title">Continuous uniform on [0, 10] — drag c and d. Probability = shaded area</div>
+  <div class="pair">
+    <svg id="uniSvg" class="fig" viewBox="0 0 600 300" width="580" style="background:var(--code-bg);border:1px solid var(--line);border-radius:8px;"></svg>
+    <div style="text-align:left; min-width:210px;">
+      <label style="font-size:0.85rem;color:var(--ink-dim);display:block;margin-top:0.4rem;">interval start c: <b id="uniC">2</b></label>
+      <input type="range" id="uniCS" min="0" max="9" step="0.5" value="2">
+      <label style="font-size:0.85rem;color:var(--ink-dim);display:block;margin-top:0.4rem;">interval end d: <b id="uniD">7</b></label>
+      <input type="range" id="uniDS" min="1" max="10" step="0.5" value="7">
+      <div class="readout" id="uniReadout"></div>
+    </div>
+  </div>
+  <div class="caption">Equal widths → equal probabilities. Any 2-unit-wide interval has the same 20% chance, wherever it sits. That flatness is the whole personality of the distribution.</div>
+</div>
+
+<h3>When to use it — and why over alternatives</h3>
+<ul>
+  <li><strong>Unbiased random selection</strong> (sampling, shuffling, Monte Carlo), round-off errors, and as a <em>placeholder prior</em> when you know the range but nothing else.</li>
+  <li><strong>Chosen over other distributions</strong> when any shape assumption would be dishonest — if you don't know the shape, pretending you do (normal) injects information you don't have.</li>
+  <li><strong>Discrete uniform</strong> (the die: each face 1/6) is the same idea for a finite set of outcomes.</li>
+</ul>
+
+<!-- ============ 8. MLE ============ -->
+<h2><span class="num">08</span>Maximum Likelihood Estimation</h2>
+
+<h3>Intuition — the mountain</h3>
+<p>You have data. The true parameter is unknown. For each candidate θ, ask: <em>"if θ were the truth, how likely is the data I actually observed?"</em> The answer is the height of a "mountain" over the parameter space. <strong>MLE = walk to the peak.</strong> The θ at the top is the parameter that makes your data most plausible.</p>
+
+<div class="card key">
+  <h4>The master move — it's not normal-only, and you choose the family first</h4>
+  <p>StatQuest's example used the normal because it's the most famous family — but MLE works for <em>any</em> distribution you can write down. The catch: <strong>you must choose the family <em>before</em> MLE starts.</strong> Sections 03–07 are the menu; the data type dictates the choice (counts → Poisson, yes/no → Binomial, durations → Exponential, symmetric noise → Normal). MLE only tunes the parameters <em>within</em> the family you picked. Garbage family → confidently wrong answer.</p>
+</div>
+
+<h3>Formal theory (brief)</h3>
+<p>Multiply the probability of each observation together — that's the likelihood. Maximizing it is hard with products, so take the log: it's <em>monotonic</em>, so the peak doesn't move, and products become sums. Then differentiate, set to zero, and solve. Several parameters → several equations.</p>
+
+<div class="formula small">L(θ) = <span class="c1">Π f(xᵢ | θ)</span> &nbsp;&nbsp;→&nbsp;&nbsp; ℓ(θ) = <span class="c2">Σ ln f(xᵢ | θ)</span> &nbsp;&nbsp;→&nbsp;&nbsp; <span class="c3">θ̂ = argmax ℓ(θ)</span></div>
+
+<div class="stage">
+  <div class="stage-title">Climbing the mountain — n flips, k heads. Toggle between L(p) and ln L(p): the peak doesn't move</div>
+  <div class="radio-row">
+    <label><input type="radio" name="mleMode" value="L" checked> likelihood L(p)</label>
+    <label><input type="radio" name="mleMode" value="lnL"> log-likelihood ln L(p)</label>
+  </div>
+  <svg id="mleSvg" class="fig" viewBox="0 0 600 300" width="600" style="background:var(--code-bg);border:1px solid var(--line);border-radius:8px;"></svg>
+  <div class="ctrl" style="margin:0.8rem auto;">
+    <label>n (flips): <b id="mleN">10</b></label>
+    <input type="range" id="mleNS" min="1" max="30" value="10">
+    <label>k (heads observed): <b id="mleK">7</b></label>
+    <input type="range" id="mleKS" min="0" max="30" value="7">
+    <div class="readout" id="mleReadout"></div>
+  </div>
+  <div class="caption">The dashed line marks p̂ = k/n — the peak. Flip the toggle: the log curve is a different shape entirely, yet the peak sits at exactly the same p. That's monotonicity.</div>
+</div>
+
+<div class="stage">
+  <div class="stage-title">The normal's mountain is 2D — contour lines of the likelihood over (μ, σ²)</div>
+  <div class="pair">
+    <svg class="fig" viewBox="0 0 320 300" width="300" style="background:var(--code-bg);border:1px solid var(--line);border-radius:8px;">
+      <g stroke="var(--accent2)" fill="none" stroke-width="1">
+        <ellipse cx="160" cy="150" rx="26" ry="16"/>
+        <ellipse cx="160" cy="150" rx="52" ry="32"/>
+        <ellipse cx="160" cy="150" rx="80" ry="50"/>
+        <ellipse cx="160" cy="150" rx="110" ry="70"/>
+        <ellipse cx="160" cy="150" rx="142" ry="92"/>
+      </g>
+      <line x1="160" y1="16" x2="160" y2="284" stroke="var(--line)" stroke-dasharray="2 3"/>
+      <line x1="18" y1="150" x2="302" y2="150" stroke="var(--line)" stroke-dasharray="2 3"/>
+      <circle cx="160" cy="150" r="5" fill="var(--warn)"/>
+      <text x="166" y="142" style="fill:var(--warn);font-size:11px">peak: (x̄, s²)</text>
+      <text x="160" y="296" style="fill:var(--ink-dim);font-size:11px" text-anchor="middle">μ →</text>
+      <text x="14" y="156" style="fill:var(--ink-dim);font-size:11px" text-anchor="middle" transform="rotate(-90 14 156)">σ² →</text>
+    </svg>
+    <div style="text-align:left; max-width:280px;">
+      <p class="dim" style="font-size:0.85rem;">Two parameters → a mountain over a <em>plane</em>. The peak sits at μ̂ = x̄ (sample mean) and σ̂² = Σ(xᵢ−x̄)²/n (sample variance). Every ring is an equal-likelihood contour.</p>
+    </div>
+  </div>
+</div>
+
+<h3>When to use it — and why over alternatives</h3>
+<ul>
+  <li><strong>The default principled estimator</strong> for parameters from data, for any family you've chosen. It answers the natural question: "which parameters make my observed data most plausible?"</li>
+  <li><strong>Chosen over method-of-moments or guessing</strong> because it's statistically principled (and in most cases, efficient and consistent).</li>
+  <li><strong>The secret identity of two things you'll meet later:</strong> <em>least squares</em> = MLE under normal noise (that's why the normal's log-likelihood is a quadratic), and <em>cross-entropy loss</em> = negative log-likelihood — which is literally what LLM training maximizes.</li>
+</ul>
+
+<h3>The family table (same recipe, different mechanics)</h3>
+<table>
+  <tr><th>Family</th><th>Data it models</th><th>Parameter</th><th>MLE</th><th>Intuition</th></tr>
+  <tr><td>Bernoulli / Binomial</td><td>yes/no counts in n trials</td><td>p</td><td>k/n</td><td>share of successes</td></tr>
+  <tr><td>Poisson</td><td>rare-event counts</td><td>λ</td><td>x̄</td><td>average rate</td></tr>
+  <tr><td>Exponential</td><td>waiting times</td><td>λ</td><td>1/x̄</td><td>inverse of mean gap</td></tr>
+  <tr><td>Normal</td><td>symmetric continuous</td><td>μ, σ²</td><td>x̄, Σ(xᵢ−x̄)²/n</td><td>center &amp; spread</td></tr>
+  <tr><td>Uniform</td><td>"no idea" range</td><td>a, b</td><td>min(xᵢ), max(xᵢ)</td><td>range endpoints</td></tr>
+</table>
+
+<div class="card chat">
+  <h4>From our discussion (the full thread)</h4>
+  <ul>
+    <li><strong>Not normal-only:</strong> the StatQuest example just used the most famous family. MLE is a generic procedure.</li>
+    <li><strong>Choose the family BEFORE MLE:</strong> the data type dictates the family; MLE only tunes within it.</li>
+    <li><strong>Same recipe every time:</strong> likelihood → log → differentiate → solve. Same procedure, different mechanics per family (see the table).</li>
+    <li><strong>Why the log is legal:</strong> monotonic transformations never move a peak — the mountain's top stays the top.</li>
+    <li><strong>Caveats:</strong> (1) wrong family → confident garbage; (2) MLE ≠ "probability that θ is this value" — that's the Bayesian posterior (section 01); (3) MLE can be biased — the famous σ̂² dividing by n instead of n−1 is a correction <em>to</em> the MLE, not the MLE itself.</li>
+  </ul>
+</div>
+
+<footer>
+  Probability Phase 0 — StatQuest intuition layer (2026-08-11) · math backbone (Deisenroth ch. 6) + more sections to come as you progress
+</footer>
+
+</div>
+
+<script>
+// Shared SVG element helper
+function svgEl(tag, attrs) {
+  var el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+  for (var k in attrs) el.setAttribute(k, attrs[k]);
+  return el;
+}
+</script>
+
+<script>
+/* ===== 02. Probability vs Likelihood ===== */
+(function () {
+  var n = 10;
+  var barSvg = document.getElementById('pvBar');
+  var curSvg = document.getElementById('pvCurve');
+  var slide = document.getElementById('pvSlide');
+  var readout = document.getElementById('pvReadout');
+  var kOut = document.getElementById('pvK');
+  function comb(nn, kk) { var r = 1; for (var i = 0; i < kk; i++) r = r * (nn - i) / (i + 1); return r; }
+  function clear(svg) { while (svg.firstChild) svg.removeChild(svg.firstChild); }
+  function txt(svg, x, y, s, a) { var t = svgEl('text', a || {}); t.setAttribute('x', x); t.setAttribute('y', y); t.textContent = s; svg.appendChild(t); return t; }
+  function drawBars(k0) {
+    clear(barSvg);
+    var vals = [], mx = 0;
+    for (var k = 0; k <= n; k++) { var v = comb(n, k) * Math.pow(0.5, n); vals.push(v); if (v > mx) mx = v; }
+    var bw = 300 / (n + 1), x0 = 20, base = 205;
+    for (var k = 0; k <= n; k++) {
+      var h = vals[k] / mx * 160;
+      barSvg.appendChild(svgEl('rect', { x: x0 + k * bw + 1, y: base - h, width: bw - 2, height: h, fill: k === k0 ? 'var(--warn)' : 'var(--accent)', rx: 2 }));
+    }
+    barSvg.appendChild(svgEl('line', { x1: 12, y1: base, x2: 328, y2: base, stroke: 'var(--line)' }));
+    txt(barSvg, 14, base + 16, 'k=0', { style: 'fill:var(--ink-dim);font-size:10px' });
+    txt(barSvg, 320, base + 16, 'k=10', { style: 'fill:var(--ink-dim);font-size:10px' });
+  }
+  function drawCurve(k0) {
+    clear(curSvg);
+    var N = 80, mx = 0, pts = [];
+    for (var i = 0; i <= N; i++) {
+      var p = i / N, v = Math.pow(p, k0) * Math.pow(1 - p, n - k0);
+      if (v > mx) mx = v; pts.push([p, v]);
+    }
+    var d = 'M', first = true;
+    for (var i = 0; i < pts.length; i++) {
+      var x = 20 + pts[i][0] * 300, y = 205 - pts[i][1] / mx * 160;
+      d += (first ? '' : ' L') + x.toFixed(1) + ',' + y.toFixed(1); first = false;
+    }
+    curSvg.appendChild(svgEl('path', { d: d, fill: 'none', stroke: 'var(--accent)', 'stroke-width': 2.5 }));
+    var pk = k0 / n, xpk = 20 + pk * 300, ypk = 45;
+    curSvg.appendChild(svgEl('line', { x1: xpk, y1: ypk, x2: xpk, y2: 205, stroke: 'var(--warn)', 'stroke-dasharray': '4 3' }));
+    curSvg.appendChild(svgEl('circle', { cx: xpk, cy: ypk, r: 4, fill: 'var(--warn)' }));
+    txt(curSvg, xpk, ypk - 7, 'peak p̂=' + (Math.round(pk * 100) / 100), { style: 'fill:var(--warn);font-size:10px', 'text-anchor': 'middle' });
+    curSvg.appendChild(svgEl('line', { x1: 12, y1: 205, x2: 328, y2: 205, stroke: 'var(--line)' }));
+    txt(curSvg, 14, 221, 'p=0', { style: 'fill:var(--ink-dim);font-size:10px' });
+    txt(curSvg, 320, 221, 'p=1', { style: 'fill:var(--ink-dim);font-size:10px' });
+  }
+  function update() {
+    var k0 = parseInt(slide.value);
+    kOut.textContent = k0;
+    drawBars(k0);
+    drawCurve(k0);
+    var prob = comb(n, k0) * Math.pow(0.5, n);
+    readout.innerHTML = 'P(X=' + k0 + ' | p=0.5) = <b>' + prob.toFixed(4) + '</b> &nbsp;·&nbsp; L(p) peak: <b>p̂ = ' + (k0 / n) + '</b>';
+  }
+  slide.addEventListener('input', update);
+  update();
+})();
+</script>
+
+<script>
+/* ===== 03. Normal ===== */
+(function () {
+  var svg = document.getElementById('normSvg');
+  var muS = document.getElementById('normMuS'), sigS = document.getElementById('normSigS');
+  var muR = document.getElementById('normMu'), sigR = document.getElementById('normSig');
+  var ro = document.getElementById('normReadout');
+  var BASE = 260;
+  function clear(svg) { while (svg.firstChild) svg.removeChild(svg.firstChild); }
+  function f(mu, s, x) { return BASE - 120 * (60 / s) * Math.exp(-(x - mu) * (x - mu) / (2 * s * s)); }
+  function band(mu, s, fac, fill) {
+    var x1 = mu - fac * s, x2 = mu + fac * s, d = 'M' + x1.toFixed(1) + ',' + BASE;
+    for (var x = x1; x <= x2; x += 3) d += ' L' + x.toFixed(1) + ',' + f(mu, s, x).toFixed(1);
+    d += ' L' + x2.toFixed(1) + ',' + BASE + ' Z';
+    svg.appendChild(svgEl('path', { d: d, fill: fill, stroke: 'none' }));
+  }
+  function draw() {
+    clear(svg);
+    var mu = parseFloat(muS.value), s = parseFloat(sigS.value);
+    band(mu, s, 3, 'rgba(56,189,248,0.10)');
+    band(mu, s, 2, 'rgba(56,189,248,0.18)');
+    band(mu, s, 1, 'rgba(56,189,248,0.32)');
+    var d = 'M', first = true;
+    for (var x = 30; x <= 570; x += 3) {
+      d += (first ? '' : ' L') + x.toFixed(1) + ',' + f(mu, s, x).toFixed(1); first = false;
+    }
+    svg.appendChild(svgEl('path', { d: d, fill: 'none', stroke: 'var(--accent)', 'stroke-width': 3 }));
+    var yI = f(mu, s, mu - s);
+    [-1, 1].forEach(function (sign) {
+      var xi = mu + sign * s;
+      svg.appendChild(svgEl('line', { x1: xi, y1: yI, x2: xi, y2: BASE, stroke: 'var(--warn)', 'stroke-dasharray': '3 3' }));
+      svg.appendChild(svgEl('circle', { cx: xi, cy: yI, r: 4, fill: 'var(--warn)' }));
+    });
+    svg.appendChild(svgEl('line', { x1: 20, y1: BASE, x2: 580, y2: BASE, stroke: 'var(--line)' }));
+    muR.textContent = mu; sigR.textContent = s;
+    ro.innerHTML = 'inflection points at μ±σ = <b>' + (mu - s) + '</b> / <b>' + (mu + s) + '</b> · 68.3% within μ±σ · 95.4% within μ±2σ · 99.7% within μ±3σ';
+  }
+  muS.addEventListener('input', draw);
+  sigS.addEventListener('input', draw);
+  draw();
+})();
+</script>
+
+<script>
+/* ===== 04. Binomial ===== */
+(function () {
+  var svg = document.getElementById('binSvg');
+  var nS = document.getElementById('binNS'), pS = document.getElementById('binPS');
+  var nR = document.getElementById('binN'), pR = document.getElementById('binP');
+  var ro = document.getElementById('binReadout');
+  var BASE = 240;
+  function clear(svg) { while (svg.firstChild) svg.removeChild(svg.firstChild); }
+  function txt(svg, x, y, s, a) { var t = svgEl('text', a || {}); t.setAttribute('x', x); t.setAttribute('y', y); t.textContent = s; svg.appendChild(t); return t; }
+  function draw() {
+    clear(svg);
+    var n = parseInt(nS.value), p = parseFloat(pS.value);
+    var pmf = []; pmf[0] = Math.pow(1 - p, n); var mx = pmf[0];
+    for (var k = 1; k <= n; k++) { pmf[k] = pmf[k - 1] * (n - k + 1) / k * (p / (1 - p)); if (pmf[k] > mx) mx = pmf[k]; }
+    var bw = 560 / (n + 1), x0 = 20;
+    for (var k = 0; k <= n; k++) {
+      var h = pmf[k] / mx * 200;
+      var isMean = k === Math.round(n * p);
+      svg.appendChild(svgEl('rect', { x: x0 + k * bw + 1, y: BASE - h, width: bw - 2, height: h, fill: isMean ? 'var(--warn)' : 'var(--accent)', rx: 2 }));
+    }
+    svg.appendChild(svgEl('line', { x1: 12, y1: BASE, x2: 588, y2: BASE, stroke: 'var(--line)' }));
+    txt(svg, 14, BASE + 16, 'k=0', { style: 'fill:var(--ink-dim);font-size:10px' });
+    txt(svg, 566, BASE + 16, 'k=' + n, { style: 'fill:var(--ink-dim);font-size:10px' });
+    nR.textContent = n; pR.textContent = p;
+    ro.innerHTML = 'mean = np = <b>' + (n * p).toFixed(2) + '</b> · variance = np(1−p) = <b>' + (n * p * (1 - p)).toFixed(2) + '</b> · yellow = bar nearest the mean';
+  }
+  nS.addEventListener('input', draw);
+  pS.addEventListener('input', draw);
+  draw();
+})();
+</script>
+
+<script>
+/* ===== 05. Poisson ===== */
+(function () {
+  var svg = document.getElementById('poisSvg');
+  var lS = document.getElementById('poisLS');
+  var lR = document.getElementById('poisL');
+  var ro = document.getElementById('poisReadout');
+  var BASE = 240;
+  function clear(svg) { while (svg.firstChild) svg.removeChild(svg.firstChild); }
+  function txt(svg, x, y, s, a) { var t = svgEl('text', a || {}); t.setAttribute('x', x); t.setAttribute('y', y); t.textContent = s; svg.appendChild(t); return t; }
+  function draw() {
+    clear(svg);
+    var lam = parseFloat(lS.value);
+    var kmax = Math.max(20, Math.ceil(lam * 2.5) + 6);
+    var pmf = []; pmf[0] = Math.exp(-lam); var mx = pmf[0];
+    for (var k = 1; k <= kmax; k++) { pmf[k] = pmf[k - 1] * lam / k; if (pmf[k] > mx) mx = pmf[k]; }
+    var bw = 560 / (kmax + 1), x0 = 20;
+    for (var k = 0; k <= kmax; k++) {
+      var h = pmf[k] / mx * 200;
+      var isMode = k === Math.floor(lam);
+      svg.appendChild(svgEl('rect', { x: x0 + k * bw + 1, y: BASE - h, width: bw - 2, height: h, fill: isMode ? 'var(--warn)' : 'var(--accent)', rx: 2 }));
+    }
+    svg.appendChild(svgEl('line', { x1: 12, y1: BASE, x2: 588, y2: BASE, stroke: 'var(--line)' }));
+    txt(svg, 14, BASE + 16, 'k=0', { style: 'fill:var(--ink-dim);font-size:10px' });
+    txt(svg, 566, BASE + 16, 'k=' + kmax, { style: 'fill:var(--ink-dim);font-size:10px' });
+    lR.textContent = lam;
+    ro.innerHTML = 'mean = variance = λ = <b>' + lam + '</b> · mode ≈ floor(λ) = <b>' + Math.floor(lam) + '</b>';
+  }
+  lS.addEventListener('input', draw);
+  draw();
+})();
+</script>
+
+<script>
+/* ===== 06. Exponential ===== */
+(function () {
+  var svg = document.getElementById('expSvg');
+  var lS = document.getElementById('expLS');
+  var lR = document.getElementById('expL');
+  var ro = document.getElementById('expReadout');
+  var BASE = 260;
+  function clear(svg) { while (svg.firstChild) svg.removeChild(svg.firstChild); }
+  function f(lam, t) { return BASE - 220 * Math.exp(-lam * t); }
+  function draw() {
+    clear(svg);
+    var lam = parseFloat(lS.value);
+    var xm = 30 + (1 / lam) * 54;
+    var d = 'M' + xm.toFixed(1) + ',' + BASE;
+    for (var t = 1 / lam; t <= 10.001; t += 0.05) { var x = 30 + t * 54; d += ' L' + x.toFixed(1) + ',' + f(lam, t).toFixed(1); }
+    d += ' L570,' + BASE + ' Z';
+    svg.appendChild(svgEl('path', { d: d, fill: 'rgba(167,139,250,0.18)', stroke: 'none' }));
+    var d2 = 'M', first = true;
+    for (var t2 = 0; t2 <= 10.001; t2 += 0.05) {
+      var x2 = 30 + t2 * 54;
+      d2 += (first ? '' : ' L') + x2.toFixed(1) + ',' + f(lam, t2).toFixed(1); first = false;
+    }
+    svg.appendChild(svgEl('path', { d: d2, fill: 'none', stroke: 'var(--accent)', 'stroke-width': 3 }));
+    svg.appendChild(svgEl('line', { x1: xm, y1: f(lam, 1 / lam), x2: xm, y2: BASE, stroke: 'var(--warn)', 'stroke-dasharray': '4 3' }));
+    svg.appendChild(svgEl('circle', { cx: xm, cy: f(lam, 1 / lam), r: 4, fill: 'var(--warn)' }));
+    svg.appendChild(svgEl('line', { x1: 30, y1: BASE, x2: 570, y2: BASE, stroke: 'var(--line)' }));
+    var tl = svgEl('text'); tl.setAttribute('x', 36); tl.setAttribute('y', BASE + 16); tl.textContent = 't=0'; tl.setAttribute('style', 'fill:var(--ink-dim);font-size:10px'); svg.appendChild(tl);
+    var tr = svgEl('text'); tr.setAttribute('x', 540); tr.setAttribute('y', BASE + 16); tr.textContent = 't=10'; tr.setAttribute('style', 'fill:var(--ink-dim);font-size:10px'); svg.appendChild(tr);
+    lR.textContent = lam;
+    ro.innerHTML = 'mean gap = 1/λ = <b>' + (1 / lam).toFixed(2) + '</b> · P(T &gt; 1/λ) = e⁻¹ ≈ <b>0.368</b> (shaded tail) · P(T &gt; 3/λ) = e⁻³ ≈ 0.05';
+  }
+  lS.addEventListener('input', draw);
+  draw();
+})();
+</script>
+
+<script>
+/* ===== 07. Uniform ===== */
+(function () {
+  var svg = document.getElementById('uniSvg');
+  var cS = document.getElementById('uniCS'), dS = document.getElementById('uniDS');
+  var cR = document.getElementById('uniC'), dR = document.getElementById('uniD');
+  var ro = document.getElementById('uniReadout');
+  var TOP = 60, BASE = 260;
+  function clear(svg) { while (svg.firstChild) svg.removeChild(svg.firstChild); }
+  function xp(t) { return 30 + t * 54; }
+  function txt(svg, x, y, s, a) { var t = svgEl('text', a || {}); t.setAttribute('x', x); t.setAttribute('y', y); t.textContent = s; svg.appendChild(t); return t; }
+  function draw() {
+    clear(svg);
+    var c = parseFloat(cS.value), d = parseFloat(dS.value);
+    svg.appendChild(svgEl('rect', { x: xp(0), y: TOP, width: xp(10) - xp(0), height: BASE - TOP, fill: 'rgba(56,189,248,0.12)', stroke: 'var(--accent)', 'stroke-width': 2 }));
+    svg.appendChild(svgEl('rect', { x: xp(c), y: TOP, width: xp(d) - xp(c), height: BASE - TOP, fill: 'rgba(251,191,36,0.45)', stroke: 'var(--warn)', 'stroke-width': 1.5 }));
+    svg.appendChild(svgEl('line', { x1: 20, y1: BASE, x2: 580, y2: BASE, stroke: 'var(--line)' }));
+    txt(svg, 22, BASE + 16, 'a=0', { style: 'fill:var(--ink-dim);font-size:10px' });
+    txt(svg, 574, BASE + 16, 'b=10', { style: 'fill:var(--ink-dim);font-size:10px', 'text-anchor': 'end' });
+    txt(svg, 300, TOP - 12, 'f(x) = 1/(b−a) — flat', { style: 'fill:var(--ink-dim);font-size:11px', 'text-anchor': 'middle' });
+    txt(svg, (xp(c) + xp(d)) / 2, TOP + 18, 'area = P(c&lt;X&lt;d)', { style: 'fill:var(--warn);font-size:11px', 'text-anchor': 'middle' });
+    cR.textContent = c; dR.textContent = d;
+    ro.innerHTML = 'P(' + c + ' &lt; X &lt; ' + d + ') = (' + d + '−' + c + ') / 10 = <b>' + ((d - c) / 10).toFixed(2) + '</b> — the shaded area';
+  }
+  cS.addEventListener('input', draw);
+  dS.addEventListener('input', draw);
+  draw();
+})();
+</script>
+
+<script>
+/* ===== 08. MLE ===== */
+(function () {
+  var svg = document.getElementById('mleSvg');
+  var nS = document.getElementById('mleNS'), kS = document.getElementById('mleKS');
+  var nR = document.getElementById('mleN'), kR = document.getElementById('mleK');
+  var ro = document.getElementById('mleReadout');
+  var radios = document.getElementsByName('mleMode');
+  var BASE = 245;
+  function clear(svg) { while (svg.firstChild) svg.removeChild(svg.firstChild); }
+  function txt(svg, x, y, s, a) { var t = svgEl('text', a || {}); t.setAttribute('x', x); t.setAttribute('y', y); t.textContent = s; svg.appendChild(t); return t; }
+  function curMode() { for (var i = 0; i < radios.length; i++) if (radios[i].checked) return radios[i].value; return 'L'; }
+  function draw() {
+    clear(svg);
+    var n = parseInt(nS.value);
+    var k = parseInt(kS.value);
+    if (k > n) { k = n; kS.value = n; }
+    var logMode = curMode() === 'lnL';
+    var N = 100, vmin = Infinity, vmax = -Infinity, vals = [];
+    for (var i = 0; i <= N; i++) {
+      var p = i / N;
+      var v = logMode
+        ? (k * Math.log(p + 1e-9) + (n - k) * Math.log(1 - p + 1e-9))
+        : (Math.pow(p, k) * Math.pow(1 - p, n - k));
+      vals.push(v);
+      if (v < vmin) vmin = v;
+      if (v > vmax) vmax = v;
+    }
+    var d = 'M', first = true;
+    for (var i = 0; i <= N; i++) {
+      var x = 20 + (i / N) * 560;
+      var y = BASE - ((vals[i] - vmin) / (vmax - vmin)) * (BASE - 40);
+      d += (first ? '' : ' L') + x.toFixed(1) + ',' + y.toFixed(1); first = false;
+    }
+    svg.appendChild(svgEl('path', { d: d, fill: 'none', stroke: 'var(--accent)', 'stroke-width': 3 }));
+    var pk = k / n, xpk = 20 + pk * 560, ypk = 40;
+    svg.appendChild(svgEl('line', { x1: xpk, y1: ypk, x2: xpk, y2: BASE, stroke: 'var(--warn)', 'stroke-dasharray': '4 3' }));
+    svg.appendChild(svgEl('circle', { cx: xpk, cy: ypk, r: 5, fill: 'var(--warn)' }));
+    txt(svg, xpk, ypk - 8, 'p̂ = k/n = ' + (Math.round(pk * 1000) / 1000), { style: 'fill:var(--warn);font-size:11px', 'text-anchor': 'middle' });
+    svg.appendChild(svgEl('line', { x1: 12, y1: BASE, x2: 588, y2: BASE, stroke: 'var(--line)' }));
+    txt(svg, 14, BASE + 16, 'p=0', { style: 'fill:var(--ink-dim);font-size:10px' });
+    txt(svg, 574, BASE + 16, 'p=1', { style: 'fill:var(--ink-dim);font-size:10px' });
+    nR.textContent = n; kR.textContent = k;
+    ro.innerHTML = 'peak at <b>p̂ = ' + k + '/' + n + ' = ' + (k / n).toFixed(3) + '</b> — identical for L(p) and ln L(p). Logs are monotonic: the peak never moves.';
+  }
+  nS.addEventListener('input', draw);
+  kS.addEventListener('input', draw);
+  for (var i = 0; i < radios.length; i++) radios[i].addEventListener('change', draw);
+  draw();
+})();
+</script>
+
+</body>
+</html>
