@@ -19,7 +19,7 @@
 - [ ] Chain rule — can derive backprop by hand *(rule mechanics done — product = two strips, chain = nested zoom; but "derive backprop" deferred until after neural-network basics, since backprop needs a net to backprop through — revisit at Phase 2)*
 
 **Probability & Information Theory**
-- [ ] Distributions, Bayes, expectation, MLE *(sources: Deisenroth ch. 6 · StatQuest playlist · Blitzstein Harvard Stat 110)*
+- [ ] Distributions, Bayes, expectation, MLE *(sources: Deisenroth ch. 6 · StatQuest playlist · Blitzstein Harvard Stat 110)* — *StatQuest intuition layer done 2026-08-11 (5 distributions, Bayes, prob vs likelihood, MLE — summary: `Probability/probability-phase0-summary.html`); Deisenroth math backbone + Blitzstein pending*
 - [ ] Entropy, cross-entropy, KL divergence, perplexity *(sources: Jurafsky & Martin ch. 3 · 3Blue1Brown "coding theory" series · MacKay "Information Theory, Inference, and Learning Algorithms" ch. 1–6)*
 
 **Optimization**
@@ -30,32 +30,36 @@
 
 ---
 
-## 📋 Calculus Review Checklist
+## 📋 Probability I Review Checklist
 
-> Summary doc: `Calculus/calculus-phase0-summary.html` — skim sections 01–17, then hit these. (The old Linear Algebra checklist is implicitly retired — you've moved well past it; revisit LA only when SVD/linear algebra resurfaces in later phases.)
+> Summary doc: `Probability/probability-phase0-summary.html` — skim sections 01–08, then hit these. (The old Calculus checklist is implicitly retired — you've moved well past it; calculus retention now lives in the 5-min daily flashbacks and resurfaces in optimization/micrograd. Its re-derivations are all in `Calculus/calculus-phase0-summary.html`.)
 
 **Quick re-derivations (by hand, no notes):**
-- [ ] d/dx(x²) = 2x from the square picture (two strips of x·dx)
-- [ ] d/dx(√x) = 1/(2√x) by running the square backwards (rim dx = 2·√x·d(√x))
-- [ ] d/dx(1/x) = −1/x² from the constant-area rectangle
-- [ ] d/dx(sin x) = cos x from the unit circle (vertical tip speed of the rotating stick)
-- [ ] Product rule from the rectangle picture — and why the df·dg corner vanishes
-- [ ] Chain rule: d/dx[sin(x²)] and d/dx[√(x²+1)] without looking
-- [ ] ∫₀^π sin(x)dx = 2 via FTC; average value of sin on [0,π] = 2/π
-- [ ] e: why d/dx(eˣ) = eˣ and d/dx(ln x) = 1/x (inverse-function slopes)
+- [ ] Coin: P(7 heads in 10 flips, fair) = C(10,7)·0.5¹⁰ ≈ 0.117 — and the general binomial PMF C(n,k)·p^k·(1−p)^(n−k)
+- [ ] Bayes in symbols: P(A|B) = P(B|A)·P(A)/P(B), with P(B) expanded as P(B|A)P(A) + P(B|¬A)P(¬A)
+- [ ] Mammogram: from the tree counts, recompute P(sick | +) = 99/198 = 50% without looking — and say *why* the base rate decides it
+- [ ] Likelihood peak: show L(p) = p⁷(1−p)³ peaks at p = 0.7 (ln → differentiate → solve) — the MLE recipe
+- [ ] Poisson: P(X=2) for λ=3 by hand = 9e⁻³/2 ≈ 0.224; recall mean = variance = λ
+- [ ] Exponential: E[T] = ∫₀^∞ λt·e^(−λt)dt = 1/λ and P(T > 1/λ) = e⁻¹ ≈ 0.368
+- [ ] Normal: inflection points at μ±σ — the shoulders; 68-95-99.7 rule
+- [ ] Binomial limits: why large n → normal (bell) and tiny p → Poisson (λ = np)
 
 **Conceptual recall (explain out loud):**
-- [ ] The derivative paradox: dx treated as zero AND nonzero — resolved as a limit of ratios, not a ratio of infinitesimals
-- [ ] Why L'Hôpital works (zoom in: each function ≈ its tangent line; the ratio ≈ ratio of slopes)
-- [ ] Why the area function's slope is the function itself (FTC in one sentence)
-- [ ] Why the average value of f = the average slope of its antiderivative: (F(b)−F(a))/(b−a)
-- [ ] What f″ > 0 vs f″ < 0 means on a graph; where the inflection point sits
-- [ ] Why Taylor series have a radius of convergence (1/(1−x) diverges at x=2 even though the function is fine there)
-- [ ] The ε-δ guarantee in plain words (output tolerance demanded ⟹ input distance that guarantees it)
+- [ ] Bayes in ≤ 3 sentences: evidence updates belief; you flip the conditioning (P(B|A) → P(A|B)); the base rate is the trap
+- [ ] Probability vs likelihood: columns vs rows of the table — probability sums to 1 over data; likelihood's absolute height is meaningless, only the peak matters
+- [ ] Why MLE is NOT normal-only, and why the family must be chosen BEFORE MLE (data type → family; MLE only tunes within it)
+- [ ] Why taking ln L is legal: monotonic ⟹ the peak doesn't move; products become sums
+- [ ] Same MLE recipe, different mechanics: Bernoulli/Poisson → mean; Exponential → 1/x̄; Normal → (x̄, s²)
+- [ ] The n−1 story: MLE's σ̂² divides by n; the unbiased estimator divides by n−1
+- [ ] Memorylessness of the exponential — in one sentence, why the process "forgets" the wait so far
+- [ ] When to pick each family: counts → Poisson · yes/no in n trials → Binomial · durations → Exponential · symmetric noise → Normal · total ignorance → Uniform
 
 **Run (5 min, in Python):**
-- [ ] `(np.sin(0.001)-np.sin(0))/0.001` ≈ 1 = cos(0) and `(np.exp(0.001)-1)/0.001` ≈ 1 — the derivative definition doing its thing
-- [ ] `np.trapz(np.sin(np.linspace(0, np.pi, 1000)), dx=np.pi/999)` ≈ 2.0 — numeric area agrees with [−cos]₀^π (the FTC)
+- [ ] `math.comb(10,7)*0.5**10` ≈ 0.117 — binomial PMF check
+- [ ] `np.random.binomial(10, 0.5, 100000).mean()` ≈ 5 and `.var()` ≈ 2.5 — mean np, var np(1−p)
+- [ ] `np.random.poisson(4, 100000).mean()` and `.var()` both ≈ 4 — the mean=var fingerprint
+- [ ] `1/np.mean(np.random.exponential(scale=1/2, size=100000))` ≈ 2 — MLE of λ = 1/x̄
+- [ ] Mammogram simulation: 10,000 people, 1% sick, 99% sensitive test → fraction of test+ who are sick ≈ 0.5
 
 ---
 
@@ -236,7 +240,7 @@
 
 | Day | Primary block (LLM math, ~1–1.5 h) | Retention booster (10 min) | Secondary session (30–45 min, separate slot) |
 |---|---|---|---|
-| Wed 12 | Probability I — distributions, expectation, variance (Deisenroth ch. 6; StatQuest) | 5-min calculus flashback: re-derive chain rule on sin(x²) | — |
+| Wed 12 | Probability I — distributions, expectation, variance (Deisenroth ch. 6; StatQuest) — **✅ StatQuest layer done (2026-08-11)** | 5-min calculus flashback: re-derive chain rule on sin(x²) | — |
 | Thu 13 | Probability II — Bayes, MLE, conditional (StatQuest; Blitzstein Stat 110) | Re-derive E[X] = ∫x·p(x)dx from memory | — |
 | Fri 14 | Info theory — entropy, cross-entropy, KL, perplexity (Jurafsky ch. 3; 3B1B coding theory) | Explain entropy in ≤ 3 sentences out loud | Embedded C I: pointers + memory layout (K&R ch. 5) |
 | Sat 15 | Optimization — gradient descent / SGD / Adam (Karpathy Zero-to-Hero 1–3) | Link GD to Taylor: "linearize the loss, step downhill" | — |
