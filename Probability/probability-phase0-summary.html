@@ -193,6 +193,11 @@
   <p>Bayes is the answer to MLE's most common confusion. MLE fixes the <em>data</em> and asks "which θ makes it most likely?" — the frequentist question. Bayes fixes nothing and asks "how plausible is θ <em>now</em>, after seeing the data?" — adding a prior. Same ingredient (the likelihood!), different question. That one sentence dissolves most of the Bayes-vs-MLE confusion you'll meet in ML tutorials.</p>
 </div>
 
+<div class="card chat">
+  <h4>From our discussion — "what is the numerator, really?"</h4>
+  <p>The cleanest way to see <span class="eq">P(A|B)</span>: instead of dividing by 1 (the whole world), divide by <span class="eq">P(B)</span> — zoom into B's chunk and ask what share of it is A. The numerator <span class="eq">P(B|A)·P(A)</span> is then nothing mysterious: by the chain rule it <em>is</em> the joint <span class="eq">P(A∩B)</span> — the overlap corner — still measured as a fraction of the whole. Why the product? Because <span class="eq">P(B|A)</span> is a fraction <em>of A's chunk</em> ("99% of sick people test +"), and multiplying by <span class="eq">P(A)</span> converts it to a fraction of <em>everyone</em> ("99% of the 1% = 0.99% of all people") — the multiplication is the "and". Why write it that way instead of <span class="eq">P(A∩B)</span>? Because the overlap is exactly what you can't measure directly — you only know the base rate <span class="eq">P(A)</span> and the easy-direction conditional <span class="eq">P(B|A)</span>, so Bayes builds the corner out of those. The denominator <span class="eq">P(B) = P(B|A)P(A) + P(B|¬A)P(¬A)</span> is the size of the very chunk you zoomed into (198 people: 99 true + 99 false positives). So the formula reads: <em>overlap corner ÷ size of the B-chunk</em> = fraction of B that is A. Bonus symmetry: the same corner has two routes — A→B (<span class="eq">P(B|A)P(A)</span>) and B→A (<span class="eq">P(A|B)P(B)</span>) — the chain rule says they must agree, and Bayes just solves one route for the unknown. Example to run by hand: spam filter with P(spam)=0.2, P(word|spam)=0.6, P(word|ham)=0.1 → P(spam|word) = 0.12/0.20 = 0.6.</p>
+</div>
+
 <!-- ============ 2. PROBABILITY VS LIKELIHOOD ============ -->
 <h2><span class="num">02</span>Probability vs Likelihood</h2>
 
@@ -504,6 +509,168 @@ L(θ | X = k) = P(X = k | θ) — likelihood, the same expression as a function 
     <li><strong>Why the log is legal:</strong> monotonic transformations never move a peak — the mountain's top stays the top.</li>
     <li><strong>Caveats:</strong> (1) wrong family → confident garbage; (2) MLE ≠ "probability that θ is this value" — that's the Bayesian posterior (section 01); (3) MLE can be biased — the famous σ̂² dividing by n instead of n−1 is a correction <em>to</em> the MLE, not the MLE itself.</li>
   </ul>
+</div>
+
+<!-- ============ 9. EXPECTATION ============ -->
+<h2><span class="num">09</span>Expectation — the weighted average</h2>
+
+<h3>Intuition — it's just the average, generalized</h3>
+<p>The plain average <span class="eq">(x₁+…+xₙ)/n</span> quietly assumes every item weighs the same: <span class="eq">Σxᵢ·(1/n)</span>. The <strong>weighted average</strong> is <span class="eq">Σxᵢwᵢ/Σwᵢ</span>. <strong>Expectation = weighted average where the weights are probabilities:</strong> <span class="eq">E[X] = Σxᵢpᵢ</span>. The denominator <span class="eq">Σpᵢ = 1</span> — probability's "sums to 1" rule — makes the divisor vanish. So the arithmetic mean is the special case where all outcomes are equally likely (pᵢ = 1/n), and expectation is the general case. "MLE equals the sample mean" (section 08) is the same idea from the data side: the long-run average of samples converges to E[X].</p>
+
+<div class="card key">
+  <h4>Two ways to feel it</h4>
+  <p><strong>1. Balance point.</strong> Lay the outcomes on a number line, put a weight of size pᵢ at each. E[X] is where the seesaw balances. Weighted coin (X=0 with p=0.25, X=1 with p=0.75) balances at 0.75 — more weight at 1. A die balances at 3.5, dead center. The distribution says <em>how</em> the mass is spread; the expectation says <em>where</em> it's centered. Probability asks "how much mass here?"; expectation asks "mass × where the mass is."</p>
+  <p><strong>2. Long-run average.</strong> Repeat the random process many times and average the results — the sample mean converges to E[X] (Law of Large Numbers). Your numpy checks already showed this: binomial(10, 0.5) mean ≈ 5 = np; poisson(4) mean ≈ 4 = λ. Monte Carlo <em>is</em> expectation by simulation.</p>
+</div>
+
+<p><strong>The casino example:</strong> a $5 ticket with a 1-in-a-million chance of $2,000,000 gives <span class="eq">E[win] = 2,000,000 × 0.000001 = $2</span> — a $3 loss per play on average. Casinos are expectation machines: every game has negative expected value for you, and the Law of Large Numbers guarantees they collect it. Expectation is how you price risk — buffer sizing, queue delay, retransmission budgets are all expectation computations in disguise.</p>
+
+<div class="formula">discrete: E[X] = Σ xᵢ·pᵢ &nbsp;&nbsp;·&nbsp;&nbsp; continuous: E[X] = ∫ x·f(x)dx &nbsp;&nbsp;·&nbsp;&nbsp; linearity: E[aX + bY] = aE[X] + bE[Y]</div>
+
+<div class="stage">
+  <div class="stage-title">The balance point — where the probability mass centers</div>
+  <svg class="fig" viewBox="0 0 600 190" width="600" style="background:var(--code-bg);border:1px solid var(--line);border-radius:8px;">
+    <!-- number line -->
+    <line x1="60" y1="120" x2="540" y2="120" stroke="var(--line)" stroke-width="2"/>
+    <polygon points="540,120 530,115 530,125" fill="var(--line)"/>
+    <!-- weighted coin: masses at 0 (0.25) and 1 (0.75) -->
+    <line x1="60" y1="120" x2="60" y2="60" stroke="var(--bad)" stroke-width="3"/>
+    <line x1="60" y1="60" x2="60" y2="30" stroke="var(--bad)" stroke-width="2"/>
+    <circle cx="60" cy="30" r="7" fill="var(--bad)"/>
+    <text x="60" y="18" style="fill:var(--bad);font-size:11px" text-anchor="middle">p=0.25</text>
+    <text x="60" y="140" style="fill:var(--ink-dim);font-size:11px" text-anchor="middle">0</text>
+    <line x1="420" y1="120" x2="420" y2="40" stroke="var(--good)" stroke-width="3"/>
+    <line x1="420" y1="40" x2="420" y2="20" stroke="var(--good)" stroke-width="2"/>
+    <circle cx="420" cy="20" r="7" fill="var(--good)"/>
+    <text x="420" y="10" style="fill:var(--good);font-size:11px" text-anchor="middle">p=0.75</text>
+    <text x="420" y="140" style="fill:var(--ink-dim);font-size:11px" text-anchor="middle">1</text>
+    <!-- balance point -->
+    <line x1="330" y1="150" x2="330" y2="80" stroke="var(--accent)" stroke-width="2" stroke-dasharray="4 3"/>
+    <polygon points="330,80 322,92 338,92" fill="var(--accent)"/>
+    <text x="330" y="170" style="fill:var(--accent);font-size:12px" text-anchor="middle">balance at E[X] = 0.75</text>
+    <!-- die: six equal masses, balance at 3.5 -->
+    <line x1="60" y1="120" x2="540" y2="120" stroke="var(--line)" stroke-width="2"/>
+    <g style="opacity:0.55">
+      <circle cx="90" cy="105" r="5" fill="var(--ink-dim)"/><circle cx="170" cy="105" r="5" fill="var(--ink-dim)"/><circle cx="250" cy="105" r="5" fill="var(--ink-dim)"/>
+      <circle cx="330" cy="105" r="5" fill="var(--ink-dim)"/><circle cx="410" cy="105" r="5" fill="var(--ink-dim)"/><circle cx="490" cy="105" r="5" fill="var(--ink-dim)"/>
+      <text x="90" y="140" style="fill:var(--ink-dim);font-size:10px" text-anchor="middle">1</text><text x="170" y="140" style="fill:var(--ink-dim);font-size:10px" text-anchor="middle">2</text>
+      <text x="250" y="140" style="fill:var(--ink-dim);font-size:10px" text-anchor="middle">3</text><text x="330" y="140" style="fill:var(--ink-dim);font-size:10px" text-anchor="middle">4</text>
+      <text x="410" y="140" style="fill:var(--ink-dim);font-size:10px" text-anchor="middle">5</text><text x="490" y="140" style="fill:var(--ink-dim);font-size:10px" text-anchor="middle">6</text>
+      <line x1="300" y1="95" x2="300" y2="115" stroke="var(--accent)" stroke-width="2" stroke-dasharray="4 3"/>
+      <text x="300" y="170" style="fill:var(--ink-dim);font-size:11px" text-anchor="middle">six equal weights balance at 3.5</text>
+    </g>
+  </svg>
+  <div class="caption">Top: the weighted coin — the 0.75 mass at 1 pulls the balance point to 0.75. Bottom: a fair die — six equal masses balance exactly in the middle (3.5, which no single roll ever produces).</div>
+</div>
+
+<h3>Continuous case — where your calculus lands</h3>
+<p>For a continuous variable the sum becomes an integral: <span class="eq">E[X] = ∫x·f(x)dx</span>. Same weighted average, but the weights are infinitesimal slices: each contributes <span class="eq">value × density × thickness</span> = <span class="eq">x·f(x)dx</span>. Picture the density curve as a shape cut from cardboard — the expectation is where it balances on a knife edge. Uniform [0,1] → 1/2, obviously the middle. Exponential → <span class="eq">E[T] = ∫₀^∞ λt·e^(−λt)dt = 1/λ</span>, the balance point of that lopsided curve (checklist item!). Integration and expectation are the same move: FTC gave you <span class="eq">∫f = F</span>; expectation is <span class="eq">∫x·f</span> — the first <em>moment</em>, the center-of-mass integral.</p>
+
+<div class="card warn">
+  <h4>Two honest caveats — the name "expected" is a lie</h4>
+  <ul>
+    <li><strong>"Expected" ≠ what happens in one trial.</strong> You never roll a 3.5; the lottery winner gets $2M, not $2. Expectation is an average <em>over many trials</em>, not a prediction for one. In a single trial you get a <em>sample from the distribution</em>; only the long-run average matches E[X].</li>
+    <li><strong>Mean ≠ median for skewed distributions.</strong> The exponential has mean 1/λ but <span class="eq">P(T &gt; 1/λ) = e⁻¹ ≈ 0.368</span> — more than half the mass sits <em>below</em> the mean. The heavy right tail drags the balance point past the "typical" value. The mean is where the mass balances, not where most of it lives.</li>
+  </ul>
+</div>
+
+<h3>Expectation vs probability vs likelihood — who varies, who's fixed</h3>
+<table class="fam-table">
+  <tr><th></th><th>Answers</th><th>Varies over</th><th>Units</th><th>"Sums to" rule</th></tr>
+  <tr><td><strong>Probability</strong></td><td>"How much mass on this event?"</td><td>events (fixed distribution)</td><td>dimensionless, [0,1]</td><td>sums to 1 over events</td></tr>
+  <tr><td><strong>Expectation</strong></td><td>"What's the typical value of X?"</td><td>the <em>values</em> of X (fixed distribution)</td><td><strong>units of X</strong> — $, seconds, count</td><td>not a probability — it's a weighted mean</td></tr>
+  <tr><td><strong>Likelihood</strong></td><td>"How well does θ explain the data?"</td><td><strong>parameters</strong> (fixed data)</td><td>arbitrary height</td><td>nothing — only ratios and the peak matter</td></tr>
+</table>
+<ul>
+  <li><strong>Probability and expectation read the distribution forward</strong> (distribution fixed → answer a question about it). Likelihood reads <strong>backward</strong>: data fixed, parameter varies — that's why it's a curve over θ, not a number (sections 02, 08).</li>
+  <li><strong>Expectation is a summary of a distribution; probability is a question about it.</strong> A distribution is a complete description; E[X] is one number squeezed out of it (variance, median, … are more). Expectation is not "the probability of anything" — it lives in X's units.</li>
+  <li><strong>Probability's answer is a chance; expectation's answer is an amount.</strong> <span class="eq">P(X ≥ 3) = 0.5</span> is a chance; <span class="eq">E[X] = 3.5</span> is a value. When the MLE table says "Poisson's MLE is x̄", the bridge is: the sample mean estimates E[X], and for Poisson E[X] = λ — expectation is the invisible link between "data average" and "distribution parameter."</li>
+  <li><strong>Linearity — the superpower (for later):</strong> <span class="eq">E[aX + bY] = aE[X] + bE[Y]</span>. Weighted sums distribute, so you can compute expectations of complicated things from parts without the full distribution. Entropy is <span class="eq">E[−ln p]</span> — an expectation of a function of X — and every loss function you'll meet in optimization is an expected loss.</li>
+</ul>
+
+<div class="card chat">
+  <h4>From our discussion</h4>
+  <p>mml-book (Deisenroth ch. 6) reads as "definition + jargon" because precision is its genre — intuition must be built elsewhere first, then the book confirms it. The intuition that dissolves the formula: <strong>expectation is just the weighted average with probabilities as weights</strong>, the plain mean being the equal-weight special case. Two faces: the balance point of the probability mass (geometric) and the long-run sample average (Law of Large Numbers — your numpy Monte Carlo checks demonstrate it). The continuous integral <span class="eq">∫x·f(x)dx</span> is the same weighted average with infinitesimal slices — the calculus payoff. Gut checks to run: weighted coin (2 with p=1/3, 6 with p=2/3 → 4.67, closer to 6); die game at $3.50 entry is break-even; <span class="eq">np.random.exponential(scale=2, size=100000).mean()</span> ≈ 2 = 1/λ.</p>
+</div>
+
+<!-- ============ 10. VARIANCE ============ -->
+<h2><span class="num">10</span>Variance — the second moment</h2>
+
+<h3>Intuition — how spread out the mass is</h3>
+<p>Expectation answered "where does the mass sit?". Variance answers "how spread out is it around there?". Same weighted-average machinery as <span class="eq">E[X]</span>, one new <em>what</em>: instead of averaging <span class="eq">x</span>, average the <strong>squared distance from the mean</strong>:</p>
+
+<div class="formula">Var(X) = Σ (xᵢ − μ)²·pᵢ &nbsp;&nbsp;·&nbsp;&nbsp; continuous: Var(X) = ∫(x−μ)²·f(x)dx &nbsp;&nbsp;·&nbsp;&nbsp; σ = √Var(X)</div>
+
+<div class="card key">
+  <h4>Why square the distances? (three reasons)</h4>
+  <ul>
+    <li><strong>Plain distances cancel to zero — always.</strong> <span class="eq">Σ(xᵢ−μ)pᵢ = 0</span> by construction: that's what "balance point" means, deviations on both sides offset. So you <em>must</em> make every distance positive before summing — squaring is the standard way. This is the deep reason variance exists: the mean is defined so deviations sum to zero, making "average deviation" useless.</li>
+    <li><strong>Squaring punishes outliers harder.</strong> A deviation of 2 counts 4× more than a deviation of 1 — the same philosophy as least squares in the Linear Algebra phase: measure error by squared distance.</li>
+    <li><strong>It's smooth.</strong> <span class="eq">|x−μ|</span> has a kink at μ; <span class="eq">(x−μ)²</span> is differentiable everywhere. Optimization (gradient descent, later) needs smooth.</li>
+  </ul>
+</div>
+
+<div class="stage">
+  <div class="stage-title">Same center, different spread — the entire point of variance</div>
+  <svg class="fig" viewBox="0 0 600 210" width="600" style="background:var(--code-bg);border:1px solid var(--line);border-radius:8px;">
+    <!-- row 1: zero spread -->
+    <line x1="80" y1="50" x2="520" y2="50" stroke="var(--line)" stroke-width="2"/>
+    <polygon points="520,50 510,45 510,55" fill="var(--line)"/>
+    <text x="80" y="66" style="fill:var(--ink-dim);font-size:10px" text-anchor="middle">0</text>
+    <text x="300" y="66" style="fill:var(--ink-dim);font-size:10px" text-anchor="middle">2</text>
+    <text x="520" y="66" style="fill:var(--ink-dim);font-size:10px" text-anchor="middle">4</text>
+    <circle cx="300" cy="32" r="8" fill="var(--accent)"/>
+    <polygon points="300,50 296,42 304,42" fill="var(--accent)"/>
+    <text x="300" y="18" style="fill:var(--ink);font-size:11px" text-anchor="middle">all mass at μ</text>
+    <text x="300" y="84" style="fill:var(--ink-dim);font-size:11px" text-anchor="middle">Var = 0 · σ = 0</text>
+    <!-- row 2: maximal spread -->
+    <line x1="80" y1="140" x2="520" y2="140" stroke="var(--line)" stroke-width="2"/>
+    <polygon points="520,140 510,135 510,145" fill="var(--line)"/>
+    <circle cx="80" cy="118" r="8" fill="var(--accent)"/>
+    <circle cx="520" cy="118" r="8" fill="var(--accent)"/>
+    <line x1="80" y1="118" x2="80" y2="140" stroke="var(--ink-dim)" stroke-width="1.5" stroke-dasharray="3 3"/>
+    <line x1="520" y1="118" x2="520" y2="140" stroke="var(--ink-dim)" stroke-width="1.5" stroke-dasharray="3 3"/>
+    <polygon points="300,140 296,132 304,132" fill="var(--accent)"/>
+    <text x="80" y="156" style="fill:var(--ink-dim);font-size:10px" text-anchor="middle">0</text>
+    <text x="300" y="156" style="fill:var(--ink-dim);font-size:10px" text-anchor="middle">2</text>
+    <text x="520" y="156" style="fill:var(--ink-dim);font-size:10px" text-anchor="middle">4</text>
+    <!-- distance arrows -->
+    <line x1="80" y1="126" x2="300" y2="126" stroke="var(--warn)" stroke-width="1.5"/>
+    <polygon points="300,126 290,121 290,131" fill="var(--warn)"/>
+    <line x1="300" y1="126" x2="520" y2="126" stroke="var(--warn)" stroke-width="1.5"/>
+    <polygon points="520,126 510,121 510,131" fill="var(--warn)"/>
+    <text x="190" y="120" style="fill:var(--warn);font-size:10px" text-anchor="middle">2</text>
+    <text x="410" y="120" style="fill:var(--warn);font-size:10px" text-anchor="middle">2</text>
+    <text x="300" y="176" style="fill:var(--ink-dim);font-size:11px" text-anchor="middle">Var = ½·(2)² + ½·(2)² = 4 · σ = 2</text>
+  </svg>
+  <div class="caption">Both distributions have mean 2 — the balance points coincide. Variance is the only thing that separates them: squared distance from the mean, weighted by probability (row 2: two beads each ½ away by 2 → Var = 4).</div>
+</div>
+
+<h3>Three things to nail down</h3>
+<ul>
+  <li><strong>σ for intuition, Var for math.</strong> Variance lives in X² (dollars² — meaningless units); <span class="eq">σ = √Var</span> is in X's units — the "typical distance from the mean."</li>
+  <li><strong>Variance is quadratic, not linear.</strong> <span class="eq">E[aX+b] = aE[X]+b</span> but <span class="eq">Var(aX+b) = a²Var(X)</span>. Shifting changes nothing (spread doesn't care where you stand); doubling all values quadruples variance (distances double, squares ×4). Double your bet → average ×2, risk ×4.</li>
+  <li><strong>The one algebra trick worth doing by hand</strong> (pure algebra — linearity from section 09): <span class="eq">Var = E[(X−μ)²] = E[X²] − 2μE[X] + μ² = E[X²] − μ²</span> — "mean of squares minus square of mean." Worked example (weighted coin, section 09): E[X]=0.75, E[X²]=0.25·0+0.75·1=0.75 → Var = 0.75−0.75² = 0.1875, σ ≈ 0.43.</li>
+</ul>
+
+<h3>Family fingerprints (sections 03–07)</h3>
+<table class="fam-table">
+  <tr><th>Family</th><th>E[X]</th><th>Var(X)</th><th>Fingerprint</th></tr>
+  <tr><td>Binomial(n,p)</td><td>np</td><td>np(1−p)</td><td>max spread at p=0.5</td></tr>
+  <tr><td>Poisson(λ)</td><td>λ</td><td><strong>λ</strong></td><td><strong>mean = variance</strong> — the rare-count tell (your checklist's numpy check!)</td></tr>
+  <tr><td>Exponential(λ)</td><td>1/λ</td><td>1/λ²</td><td><strong>mean = σ</strong> — maximally skewed; why P(T&gt;mean) = e⁻¹ ≈ 0.368</td></tr>
+  <tr><td>Normal(μ, σ²)</td><td>μ</td><td>σ²</td><td>σ is a <em>parameter</em> — spread built in; 68-95-99.7</td></tr>
+  <tr><td>Uniform(a,b)</td><td>(a+b)/2</td><td>(b−a)²/12</td><td>spread ∝ range²</td></tr>
+</table>
+
+<p><strong>Your checklist's numpy checks are variance checks:</strong> <span class="eq">np.random.binomial(10, 0.5, 100000).var()</span> ≈ 2.5 = np(1−p) and <span class="eq">np.random.poisson(4, 100000).var()</span> ≈ 4 = λ. Sample variance converges to Var(X) exactly like sample mean converges to E[X] — Law of Large Numbers, second moment edition.</p>
+
+<h3>Where it sits — and why your embedded track owns it</h3>
+<p>Extending the section 09 table: probability = a <em>chance</em>; expectation = an <em>amount</em> (first moment — location); variance = a <em>spread</em> (second central moment). Both expectation and variance are <strong>summaries</strong> of a distribution — squeezed-out numbers where the distribution is the full description. The pair (μ, σ) summarizes a distribution crudely but powerfully — for the Gaussian it <em>is</em> the distribution. Deisenroth's abstract <span class="eq">E[g(X)] = ∫g(x)f(x)dx</span> is one machine producing both: mean (g = x) and spread (g = (x−μ)²). Every Kalman filter carries a mean and a covariance: mean = "where you think you are", covariance = "how sure you are". Sensor noise, ADC jitter, packet jitter — "noise" <em>is</em> variance. When you hit the EKF (Taylor linearization + Gaussian tracking), this is the vocabulary.</p>
+
+<div class="card chat">
+  <h4>From our discussion</h4>
+  <p>No new concept beyond expectation — variance is the same weighted-average machine with <span class="eq">(x−μ)²</span> as the thing averaged. The zero-cancellation insight is the keeper: because the mean is defined so plain deviations sum to zero, you must square to get any nonzero spread measure. Physics tie-in: the second central moment is literally the <em>moment of inertia</em> of the probability mass about its balance point — spread the beads, harder to spin. Gut checks: (1) X = 2 surely vs Y = 0 or 4 with p=½ — both E=2, Var 0 vs 4; (2) weighted coin → 0.1875 via E[X²]−μ²; (3) <span class="eq">np.random.normal(0,1,100000).var()</span> ≈ 1.</p>
 </div>
 
 <footer>

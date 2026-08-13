@@ -19,7 +19,7 @@
 - [ ] Chain rule — can derive backprop by hand *(rule mechanics done — product = two strips, chain = nested zoom; but "derive backprop" deferred until after neural-network basics, since backprop needs a net to backprop through — revisit at Phase 2)*
 
 **Probability & Information Theory**
-- [ ] Distributions, Bayes, expectation, MLE *(sources: Deisenroth ch. 6 · StatQuest playlist · Blitzstein Harvard Stat 110)* — *StatQuest intuition layer done 2026-08-11 (5 distributions, Bayes, prob vs likelihood, MLE — summary: `Probability/probability-phase0-summary.html`); Deisenroth math backbone + Blitzstein pending*
+- [ ] Distributions, Bayes, expectation, MLE *(sources: Deisenroth ch. 6 · StatQuest playlist · Blitzstein Harvard Stat 110)* — *StatQuest intuition layer done 2026-08-11 (5 distributions, Bayes, prob vs likelihood, MLE — summary: `Probability/probability-phase0-summary.html`, now sections 01–10). Expectation + variance deep-dive done 2026-08-13 (sections 09–10: weighted-average intuition, balance-point + long-run-average views, Var = E[X²]−μ², family fingerprints, Bayes numerator = joint P(A∩B) via chain rule). Deisenroth math backbone + Blitzstein still pending*
 - [ ] Entropy, cross-entropy, KL divergence, perplexity *(sources: Jurafsky & Martin ch. 3 · 3Blue1Brown "coding theory" series · MacKay "Information Theory, Inference, and Learning Algorithms" ch. 1–6)*
 
 **Optimization**
@@ -32,7 +32,7 @@
 
 ## 📋 Probability I Review Checklist
 
-> Summary doc: `Probability/probability-phase0-summary.html` — skim sections 01–08, then hit these. (The old Calculus checklist is implicitly retired — you've moved well past it; calculus retention now lives in the 5-min daily flashbacks and resurfaces in optimization/micrograd. Its re-derivations are all in `Calculus/calculus-phase0-summary.html`.)
+> Summary doc: `Probability/probability-phase0-summary.html` — skim sections 01–10, then hit these. (The old Calculus checklist is implicitly retired — you've moved well past it; calculus retention now lives in the 5-min daily flashbacks and resurfaces in optimization/micrograd. Its re-derivations are all in `Calculus/calculus-phase0-summary.html`.)
 
 **Quick re-derivations (by hand, no notes):**
 - [ ] Coin: P(7 heads in 10 flips, fair) = C(10,7)·0.5¹⁰ ≈ 0.117 — and the general binomial PMF C(n,k)·p^k·(1−p)^(n−k)
@@ -53,6 +53,8 @@
 - [ ] The n−1 story: MLE's σ̂² divides by n; the unbiased estimator divides by n−1
 - [ ] Memorylessness of the exponential — in one sentence, why the process "forgets" the wait so far
 - [ ] When to pick each family: counts → Poisson · yes/no in n trials → Binomial · durations → Exponential · symmetric noise → Normal · total ignorance → Uniform
+- [ ] Expectation in ≤ 3 sentences: the weighted average with probabilities as weights (plain mean = equal-weight special case); two faces — balance point of the probability mass, and long-run sample average; "expected" ≠ what one trial gives you
+- [ ] Variance in ≤ 3 sentences: average squared distance from the mean (why square: plain deviations always sum to zero — that's what "balance point" means); σ = √Var is the "typical distance" in X's units; Var = E[X²] − (E[X])²
 
 **Run (5 min, in Python):**
 - [ ] `math.comb(10,7)*0.5**10` ≈ 0.117 — binomial PMF check
@@ -60,6 +62,7 @@
 - [ ] `np.random.poisson(4, 100000).mean()` and `.var()` both ≈ 4 — the mean=var fingerprint
 - [ ] `1/np.mean(np.random.exponential(scale=1/2, size=100000))` ≈ 2 — MLE of λ = 1/x̄
 - [ ] Mammogram simulation: 10,000 people, 1% sick, 99% sensitive test → fraction of test+ who are sick ≈ 0.5
+- [ ] `np.random.normal(0, 1, 100000).mean()` ≈ 0 and `.var()` ≈ 1 — confirms μ and σ² are literally the distribution's parameters
 
 ---
 
@@ -241,7 +244,7 @@
 | Day | Primary block (LLM math, ~1–1.5 h) | Retention booster (10 min) | Secondary session (30–45 min, separate slot) |
 |---|---|---|---|
 | Wed 12 | Probability I — distributions, expectation, variance (Deisenroth ch. 6; StatQuest) — **✅ StatQuest layer done (2026-08-11)** | 5-min calculus flashback: re-derive chain rule on sin(x²) | — |
-| Thu 13 | Probability II — Bayes, MLE, conditional (StatQuest; Blitzstein Stat 110) | Re-derive E[X] = ∫x·p(x)dx from memory | — |
+| Thu 13 | Probability II — Bayes, MLE, conditional (StatQuest; Blitzstein Stat 110) — **✅ Bayes numerator intuition + expectation/variance discussion done (2026-08-13); Blitzstein + MIT 6.041 exercises pending** | Re-derive E[X] = ∫x·p(x)dx from memory | — |
 | Fri 14 | Info theory — entropy, cross-entropy, KL, perplexity (Jurafsky ch. 3; 3B1B coding theory) | Explain entropy in ≤ 3 sentences out loud | Embedded C I: pointers + memory layout (K&R ch. 5) |
 | Sat 15 | Optimization — gradient descent / SGD / Adam (Karpathy Zero-to-Hero 1–3) | Link GD to Taylor: "linearize the loss, step downhill" | — |
 | Sun 16 | 🏁 **micrograd from scratch** (2 h, hands-on) — Phase 0 complete | After coding it, re-derive backprop by hand, no notes | Phase 1 kickoff: history of NLP timeline (first 3 eras) |
