@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Information Theory — Entropy &amp; Cross-Entropy (Phase 0)</title>
+<style>
+  :root {
+    --bg: #0f172a;
+    --bg2: #1e293b;
+    --card: #1e293b;
+    --card2: #26334d;
+    --ink: #e2e8f0;
+    --ink-dim: #94a3b8;
+    --accent: #38bdf8;
+    --accent2: #a78bfa;
+    --good: #34d399;
+    --warn: #fbbf24;
+    --bad: #f87171;
+    --line: #334155;
+    --code-bg: #0b1220;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.6;
+    padding: 2rem 1rem;
+  }
+  .wrap { max-width: 900px; margin: 0 auto; }
+
+  header { text-align: center; padding: 2rem 1rem 2.5rem; border-bottom: 1px solid var(--line); margin-bottom: 2rem; }
+  header h1 { font-size: 2rem; color: var(--accent); letter-spacing: -0.02em; }
+  header p { color: var(--ink-dim); margin-top: 0.5rem; max-width: 660px; margin-left: auto; margin-right: auto; }
+  .badge {
+    display: inline-block; background: var(--card2); border: 1px solid var(--line);
+    border-radius: 999px; padding: 0.25rem 0.9rem; font-size: 0.8rem; color: var(--ink-dim); margin: 0.25rem;
+  }
+
+  h2 {
+    font-size: 1.4rem; color: var(--accent); margin: 3rem 0 1rem;
+    padding-bottom: 0.4rem; border-bottom: 2px solid var(--line);
+  }
+  h2 .num {
+    display: inline-block; background: var(--accent); color: #06283d;
+    border-radius: 8px; padding: 0.05rem 0.6rem; font-size: 1rem; margin-right: 0.6rem;
+  }
+  h3 { color: var(--accent2); margin: 1.4rem 0 0.5rem; font-size: 1.05rem; }
+
+  p { margin: 0.6rem 0; }
+  .dim { color: var(--ink-dim); }
+
+  .card {
+    background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+    padding: 1.2rem 1.4rem; margin: 1rem 0;
+  }
+  .card.tip { border-left: 4px solid var(--good); }
+  .card.warn { border-left: 4px solid var(--warn); }
+  .card.key { border-left: 4px solid var(--accent2); }
+  .card.chat { border-left: 4px solid var(--accent); }
+  .card h4 { color: var(--accent); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.5rem; }
+
+  code {
+    background: var(--code-bg); border: 1px solid var(--line); border-radius: 5px;
+    padding: 0.1rem 0.4rem; font-family: "SF Mono", Menlo, Consolas, monospace; font-size: 0.88em; color: #7dd3fc;
+  }
+  pre {
+    background: var(--code-bg); border: 1px solid var(--line); border-radius: 8px;
+    padding: 1rem; overflow-x: auto; font-size: 0.85rem; line-height: 1.5;
+  }
+  pre code { border: none; background: none; color: #a5f3fc; }
+
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.92rem; }
+  th { background: var(--card2); color: var(--accent); text-align: left; padding: 0.5rem 0.8rem; border: 1px solid var(--line); }
+  td { padding: 0.5rem 0.8rem; border: 1px solid var(--line); vertical-align: top; }
+
+  /* ============ FIGURES ============ */
+  .stage {
+    background: var(--card2); border: 1px solid var(--line); border-radius: 12px;
+    padding: 1.5rem; margin: 1rem 0; text-align: center;
+  }
+  .stage .caption { color: var(--ink-dim); font-size: 0.85rem; margin-top: 0.8rem; }
+  .stage-title { color: var(--accent2); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; }
+
+  .fig { max-width: 100%; }
+  .fig text { font-family: "SF Mono", Menlo, Consolas, monospace; }
+
+  .pair { display: flex; justify-content: center; gap: 1.2rem; flex-wrap: wrap; align-items: flex-start; }
+  .ctrl { text-align: left; max-width: 300px; min-width: 230px; margin: 0.8rem auto; }
+  .ctrl label { display: block; font-size: 0.85rem; color: var(--ink-dim); margin: 0.5rem 0 0.2rem; }
+
+  input[type="range"] { width: 100%; accent-color: var(--accent); cursor: pointer; }
+  .readout { font-family: "SF Mono", Menlo, Consolas, monospace; font-size: 0.85rem; color: var(--ink); margin-top: 0.6rem; }
+  .readout b { color: var(--warn); }
+
+  .formula {
+    background: var(--code-bg); border: 1px solid var(--line); border-radius: 10px;
+    padding: 1.2rem; text-align: center; font-size: 1.2rem; margin: 1rem 0; color: #a5f3fc;
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+  }
+  .formula .c1 { color: var(--accent); }
+  .formula .c2 { color: var(--warn); }
+  .formula .c3 { color: var(--good); }
+  .formula.small { font-size: 1.0rem; }
+
+  ul, ol { margin: 0.6rem 0 0.6rem 1.4rem; }
+  li { margin: 0.3rem 0; }
+  .eq { font-family: "SF Mono", Menlo, Consolas, monospace; }
+
+  footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--line); color: var(--ink-dim); font-size: 0.85rem; text-align: center; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>Information Theory — Entropy &amp; Cross-Entropy</h1>
+  <p>What information actually <em>is</em> (I = −log p), why surprise is measured in bits, entropy as the expected surprise, and cross-entropy as the price you pay when your model disagrees with reality — with interactive figures and the bridge to LLM training (perplexity, cross-entropy loss). Day 3 of the 5-day sprint; builds directly on the probability page.</p>
+  <div>
+    <span class="badge">3Blue1Brown</span>
+    <span class="badge">Jurafsky ch. 3</span>
+    <span class="badge">MacKay</span>
+    <span class="badge">Entropy</span>
+    <span class="badge">Cross-Entropy</span>
+    <span class="badge">KL</span>
+    <span class="badge">interactive</span>
+  </div>
+</header>
+
+<div class="card key">
+  <h4>Prereq — the one machine you need from Probability</h4>
+  <p>Everything on this page is an <em>expectation</em> — the weighted average machine from Probability section 11: <span class="eq">E[g(X)] = Σ g(xᵢ)·p(xᵢ)</span>. Information is a function of the outcome (g = −log p); entropy is its expectation. Cross-entropy is an expectation of <em>your model's</em> log-probabilities, weighted by <em>reality's</em> probabilities. If sections 09–11 of the probability page feel cold, skim them first (<code>Probability/probability-phase0-summary.html</code>).</p>
+</div>
+
+<!-- ============ 1. INTUITION ============ -->
+<h2><span class="num">01</span>Intuition — information is surprise, not data size</h2>
+
+<p>In everyday language "information" means "stuff in a message." In information theory it means something sharper: <strong>how much the message surprised you — how much it reduced your uncertainty.</strong> Same word, opposite intuition:</p>
+
+<ul>
+  <li><strong>"The sun rose this morning."</strong> True, but you already knew that. ~0 bits of information — it changed nothing you believed.</li>
+  <li><strong>"It's snowing in Delhi in July."</strong> You'd have bet heavily against it. That message is worth a lot — it forces you to tear up your mental model.</li>
+  <li><strong>A 10 GB file of zeros</strong> carries ~0 bits if you already knew it was all zeros. Size ≠ information. Information is <em>the reduction in uncertainty</em>, not the byte count.</li>
+</ul>
+
+<div class="card key">
+  <h4>The surprise ladder — same intuition as probability</h4>
+  <table>
+    <tr><th>Event</th><th>Probability (your prior)</th><th>Surprise</th></tr>
+    <tr><td>Sun rose this morning</td><td>≈ 1</td><td>~0 bits</td></tr>
+    <tr><td>Today is Tuesday</td><td>1/7</td><td>2.8 bits</td></tr>
+    <tr><td>A fair die shows 6</td><td>1/6</td><td>2.6 bits</td></tr>
+    <tr><td>Your lottery ticket wins</td><td>~10⁻⁷</td><td>~23 bits</td></tr>
+    <tr><td>A specific 128-bit key is chosen</td><td>2⁻¹²⁸</td><td>128 bits</td></tr>
+  </table>
+  <p>The pattern: <strong>the rarer the event, the more information it carries</strong>. The lottery number carries ~23 bits — the same information as 23 fair coin flips. Information is a property of an event's <em>probability</em>, not its content or importance.</p>
+</div>
+
+<div class="card warn">
+  <h4>The honest caveat — meaning is irrelevant</h4>
+  <p>Information theory deliberately ignores <em>what</em> a message says. "Heads" and "tails" carry identical information when equally likely; the sentence "it's raining" carries ~0 bits if you were already staring at rain. Meaning lives in the receiver's model; information lives only in the <em>probability of the event</em>. This feels like a cheat until you see how far pure probability gets you — all of compression, all of LLM training, all of channel coding.</p>
+</div>
+
+<!-- ============ 2. WHAT INFORMATION IS ============ -->
+<h2><span class="num">02</span>What information is, exactly — I(x) = −log p(x)</h2>
+
+<h3>Where the log comes from — counting yes/no questions</h3>
+<p>Take a fair coin: two equally likely outcomes. To tell someone which happened, you need exactly <strong>1 yes/no question</strong> — "heads?" — so the outcome carries <strong>1 bit</strong>. Now two fair coins: four equally likely outcomes, and you need <strong>2 questions</strong> (first coin? second coin?) — 2 bits. Eight fair possibilities → 3 questions → 3 bits. The pattern:</p>
+
+<div class="formula">1 of N equally likely outcomes → log₂ N bits &nbsp;&nbsp;·&nbsp;&nbsp; an event with probability p → I(p) = <span class="c1">−log₂ p</span> bits</div>
+
+<p>Each <em>halving</em> of the probability adds exactly one more question — that's what "log" <em>is</em> here: the count of halvings. An event with p = 1/8 sits among 8 equally likely candidates; finding it takes 3 questions; it carries 3 bits. The log is not an aesthetic choice — it's forced by a requirement: <strong>information must add for independent events.</strong> Knowing the result of two independent coin flips should be twice as informative as one. The only function satisfying <span class="eq">I(p·q) = I(p) + I(q)</span> is a logarithm. Base 2 → <em>bits</em>; base e → <em>nats</em> (what ML uses, since derivatives are cleaner).</p>
+
+<div class="stage">
+  <div class="stage-title">The halving ladder — rarer event, longer code, more bits</div>
+  <svg class="fig" viewBox="0 0 600 300" width="600" style="background:var(--code-bg);border:1px solid var(--line);border-radius:8px;">
+    <line x1="60" y1="250" x2="560" y2="250" stroke="var(--line)" stroke-width="2"/>
+    <line x1="60" y1="250" x2="60" y2="40" stroke="var(--line)" stroke-width="2"/>
+    <!-- gridlines at 1,2,3,4 bits -->
+    <line x1="60" y1="211.8" x2="560" y2="211.8" stroke="var(--line)" stroke-width="1" opacity="0.35"/>
+    <line x1="60" y1="173.6" x2="560" y2="173.6" stroke="var(--line)" stroke-width="1" opacity="0.35"/>
+    <line x1="60" y1="135.4" x2="560" y2="135.4" stroke="var(--line)" stroke-width="1" opacity="0.35"/>
+    <line x1="60" y1="97.2" x2="560" y2="97.2" stroke="var(--line)" stroke-width="1" opacity="0.35"/>
+    <text x="52" y="144" style="fill:var(--ink-dim);font-size:9px" text-anchor="middle" transform="rotate(-90 52 144)">information (bits)</text>
+    <!-- the curve y = -log2(p), p: 0.02..1 -> x: 60..560 -->
+    <path d="M560,250 L548.7,233.9 L536.5,219.7 L523.4,207.2 L509.6,196.2 L495.1,186.3 L480.1,177.3 L464.6,169.1 L448.8,161.6 L432.7,154.7 L416.5,148.3 L400.2,142.4 L384.0,136.9 L367.9,131.8 L352.1,127.0 L336.7,122.5 L321.7,118.3 L307.1,114.4 L293.0,110.7 L279.4,107.2 L266.3,104.0 L253.7,101.0 L241.7,98.2 L230.2,95.5 L219.3,93.0 L208.9,90.7 L199.0,88.5 L189.7,86.4 L180.8,84.5 L172.5,82.6 L164.6,80.9 L157.2,79.3 L150.3,77.7 L143.8,76.3 L137.7,74.9 L132.0,73.6 L126.8,72.4 L121.9,71.2 L117.4,70.1 L113.2,69.0 L109.4,68.0 L105.8,67.0 L102.6,66.1 L99.6,65.3 L96.8,64.5 L94.2,63.7 L91.9,63.0 L89.7,62.3 L87.7,61.6 L85.8,61.0 L84.1,60.4 L82.5,59.8 L81.0,59.3 L79.6,58.7 L78.3,58.2 L77.0,57.8 L75.9,57.3 L74.8,56.9 L73.8,56.5 L72.8,56.1 L71.9,55.7 L71.0,55.4 L70.2,55.0 L69.4,54.7 L68.7,54.4 L68.0,54.1 L67.3,53.8 L66.7,53.5 L66.1,53.2 L65.5,52.9 L65.0,52.7 L64.5,52.4 L64.0,52.2 L63.5,52.0 L63.0,51.7 L62.6,51.5 L62.2,51.3 L61.8,51.1 L61.4,50.9 L61.0,50.7 L60.7,50.5 L60.3,50.3 L60.0,50.1" fill="none" stroke="var(--accent)" stroke-width="2.5"/>
+    <!-- points at p=1/2, 1/4, 1/8, 1/16 -->
+    <line x1="305" y1="211.8" x2="305" y2="250" stroke="var(--warn)" stroke-width="1" stroke-dasharray="2 3" opacity="0.7"/>
+    <line x1="177.3" y1="173.6" x2="177.3" y2="250" stroke="var(--warn)" stroke-width="1" stroke-dasharray="2 3" opacity="0.7"/>
+    <line x1="113.6" y1="135.4" x2="113.6" y2="250" stroke="var(--warn)" stroke-width="1" stroke-dasharray="2 3" opacity="0.7"/>
+    <line x1="81.7" y1="97.2" x2="81.7" y2="250" stroke="var(--warn)" stroke-width="1" stroke-dasharray="2 3" opacity="0.7"/>
+    <circle cx="305" cy="211.8" r="4" fill="var(--warn)"/>
+    <circle cx="177.3" cy="173.6" r="4" fill="var(--warn)"/>
+    <circle cx="113.6" cy="135.4" r="4" fill="var(--warn)"/>
+    <circle cx="81.7" cy="97.2" r="4" fill="var(--warn)"/>
+    <text x="312" y="205" style="fill:var(--warn);font-size:9.5px">p=½ → 1 bit (fair coin)</text>
+    <text x="185" y="167" style="fill:var(--warn);font-size:9.5px">p=¼ → 2 bits</text>
+    <text x="120" y="129" style="fill:var(--warn);font-size:9.5px">p=⅛ → 3 bits</text>
+    <text x="88" y="91" style="fill:var(--warn);font-size:9.5px">p=1/16 → 4 bits</text>
+    <text x="300" y="272" style="fill:var(--ink-dim);font-size:10px" text-anchor="middle">probability of the event →</text>
+    <text x="556" y="264" style="fill:var(--ink-dim);font-size:9px" text-anchor="middle">1</text>
+    <text x="305" y="264" style="fill:var(--ink-dim);font-size:9px" text-anchor="middle">½</text>
+    <text x="177.3" y="264" style="fill:var(--ink-dim);font-size:9px" text-anchor="middle">¼</text>
+    <text x="113.6" y="264" style="fill:var(--ink-dim);font-size:9px" text-anchor="middle">⅛</text>
+    <text x="60" y="30" style="fill:var(--ink-dim);font-size:9.5px">base-2 log → bits; ln → nats (ML's default) — same curve, different units</text>
+  </svg>
+  <div class="caption">Each halving of the probability adds exactly one bit — the curve <span class="eq">I = −log₂ p</span> is just "how many times did we halve?" A fair coin (p=½) costs 1 yes/no question; an event at p=1/16 costs 4. This is also the code-length view: rare events deserve longer binary codes.</div>
+</div>
+
+<h3>Worked examples</h3>
+<ul>
+  <li><strong>Fair coin:</strong> P(H) = ½ → I(H) = −log₂(½) = <strong>1 bit</strong>.</li>
+  <li><strong>Loaded coin, P(H) = 0.9:</strong> I(H) = −log₂ 0.9 ≈ <strong>0.15 bits</strong> (barely surprising — you expected heads), but I(T) = −log₂ 0.1 ≈ <strong>3.32 bits</strong> — the rare tail is worth ~22× more. This asymmetry is the seed of everything in section 03.</li>
+  <li><strong>Two independent coins, HH:</strong> p = ¼ → I = 2 bits = I(first) + I(second) — information adds, which is why log is the only choice.</li>
+  <li><strong>128-bit key:</strong> p = 2⁻¹²⁸ → I = 128 bits — "how many yes/no questions you'd need to guess it," which is exactly why 128-bit keys are chosen.</li>
+</ul>
+
+<div class="card chat">
+  <h4>From our discussion — information vs the RV's "weights"</h4>
+  <p>This is the same induced-weight machinery you probed in Probability section 11: the RV assigns each outcome a weight p(x); information is a <em>function of</em> that weight (<span class="eq">−log p(x)</span>). The trap is the same one as Jensen: <span class="eq">E[−log p(X)] ≠ −log(E[X])</span>. The "average surprise" is not the surprise of the average event — which is exactly why entropy (next) is a number you must compute, not guess.</p>
+</div>
+
+<!-- ============ 3. ENTROPY ============ -->
+<h2><span class="num">03</span>Entropy — the expected surprise</h2>
+
+<h3>Intuition — one number for "how unpredictable is this source?"</h3>
+<p>Information told you how surprising a <em>single</em> outcome is. But a source (a coin, a die, a language, a next-token distribution) produces many outcomes. <strong>Entropy = the average surprise per symbol</strong> — the expected information, using the E[g(X)] machine with g = −log p:</p>
+
+<div class="formula">H(X) = E[−log p(X)] = <span class="c1">−Σ p(xᵢ)·log₂ p(xᵢ)</span> &nbsp;&nbsp;·&nbsp;&nbsp; (natural log → nats)</div>
+
+<p>Three readings of the same number — all correct:</p>
+<ul>
+  <li><strong>Average surprise:</strong> how surprised you should be, on average, at each symbol.</li>
+  <li><strong>Average yes/no questions:</strong> the minimum bits per symbol you need to transmit the stream (Shannon's source-coding theorem — you can't beat H, and you can reach it).</li>
+  <li><strong>Uncertainty:</strong> how hard the next symbol is to predict. For LLMs: entropy of the next-token distribution = "how confused the model is about what comes next."</li>
+</ul>
+
+<div class="card key">
+  <h4>The illustrative example — a coin you can bend</h4>
+  <p>Fair coin: <span class="eq">H = −(½·log₂½ + ½·log₂½) = 1 bit</span> — one question per flip, always needed. Loaded coin (P(H)=0.9): <span class="eq">H = −(0.9·log₂0.9 + 0.1·log₂0.1) ≈ 0.469 bits</span>. <strong>Less than 1!</strong> Because you can do better than asking "heads?" every time — you'd code the common outcome with a short code and the rare one with a long code (0.9·1 + 0.1·3 ≈ 1.2 bits if you must use whole bits, approaching 0.469 with fractional codes). The more lopsided the coin, the lower the entropy; a certain event has H = 0 — zero questions needed, zero surprise, zero information. <strong>Entropy is maximized when all outcomes are equally likely</strong> (uniform): that's when you're maximally uncertain.</p>
+</div>
+
+<div class="stage">
+  <div class="stage-title">H(p) for a binary source — slide p and watch the uncertainty</div>
+  <div class="pair">
+    <svg id="entSvg" class="fig" viewBox="0 0 560 300" width="560" style="background:var(--code-bg);border:1px solid var(--line);border-radius:8px;"></svg>
+    <svg id="surpriseSvg" class="fig" viewBox="0 0 300 300" width="300" style="background:var(--code-bg);border:1px solid var(--line);border-radius:8px;"></svg>
+  </div>
+  <div class="ctrl">
+    <label>P(heads) = p: <b id="entP">0.50</b></label>
+    <input type="range" id="entPS" min="0.05" max="0.95" step="0.01" value="0.5">
+    <div class="readout" id="entReadout"></div>
+  </div>
+  <div class="caption">Left: entropy H(p) — the classic inverted U, max = 1 bit exactly at p = ½ (the maximally unpredictable coin), falling to 0 as the coin becomes deterministic. Right: the two outcomes' individual surprises as bars — the rare outcome's bar towers over the common one's — and the dashed line shows H(p), their probability-weighted average. Entropy = E[surprise].</div>
+</div>
+
+<h3>The family table — entropy fingerprints</h3>
+<table>
+  <tr><th>Source</th><th>Distribution</th><th>Entropy</th><th>Intuition</th></tr>
+  <tr><td>Certain event</td><td>p = 1</td><td>0 bits</td><td>no surprise, no questions</td></tr>
+  <tr><td>Fair coin</td><td>(½, ½)</td><td>1 bit</td><td>one question per flip</td></tr>
+  <tr><td>Loaded coin 0.9/0.1</td><td>(0.9, 0.1)</td><td>0.469 bits</td><td>mostly predictable</td></tr>
+  <tr><td>Fair 6-sided die</td><td>uniform 6</td><td>log₂ 6 ≈ 2.585 bits</td><td>≈ 2.6 questions</td></tr>
+  <tr><td>Fair 8-sided die</td><td>uniform 8</td><td>3 bits</td><td>exactly 3 questions</td></tr>
+  <tr><td>Uniform over 27 chars</td><td>a–z + space</td><td>log₂ 27 ≈ 4.75 bits</td><td>the naive English model</td></tr>
+  <tr><td>Real English text</td><td>≈ letter frequencies + context</td><td>≈ 1–1.5 bits/char</td><td>Shannon: massively predictable</td></tr>
+</table>
+
+<div class="card tip">
+  <h4>Gut checks</h4>
+  <ul>
+    <li>Fair 6-sided die: H = log₂ 6 ≈ 2.585 — confirm it's less than 3 (the 8-sided die). Fewer outcomes, less uncertainty.</li>
+    <li>Two independent fair coins (one source, 4 outcomes): H = 2 bits = 1 + 1 — entropy adds for independent sources, exactly like information.</li>
+    <li>Why is H(0.9/0.1) ≈ 0.47 &lt; 1? <em>Because surprise is a nonlinear function (log): the 0.9-probability event is only slightly less than certain, and it dominates the average.</em></li>
+  </ul>
+</div>
+
+<!-- ============ 4. CROSS ENTROPY ============ -->
+<h2><span class="num">04</span>Cross entropy — your model vs reality</h2>
+
+<h3>Intuition — you built your code for a world that isn't quite this one</h3>
+<p>Entropy is a property of <em>one</em> distribution. But machine learning lives in a two-distribution world: <strong>p = reality</strong> (the true distribution your data comes from) and <strong>q = your model</strong> (what you believe, what your neural net outputs). You built your code / your probabilities with q in mind — but reality keeps drawing from p. <strong>Cross entropy = how many bits you actually pay per symbol, on average, when your beliefs q meet reality p.</strong></p>
+
+<div class="formula">H(p, q) = <span class="c1">−Σ p(x)·log₂ q(x)</span> &nbsp;&nbsp;=&nbsp;&nbsp; H(p) + <span class="c2">KL(p ‖ q)</span> &nbsp;&nbsp;·&nbsp;&nbsp; KL = Σ p(x)·log₂ <span class="c3">p(x)/q(x)</span></div>
+
+<p>Read the formula with the expectation machine: <span class="eq">H(p,q) = E_p[−log q(X)]</span> — an expectation of <em>your model's</em> log-probabilities, weighted by <em>reality's</em> probabilities. It splits into two parts:</p>
+<ul>
+  <li><strong>H(p)</strong> — the unavoidable cost: even a perfect model pays the entropy of reality.</li>
+  <li><strong>KL(p‖q)</strong> — the <em>extra</em> bits you pay because q isn't p. The penalty for wrong beliefs. <strong>KL ≥ 0 always</strong> (Gibbs' inequality), and KL = 0 exactly when q = p. So <strong>H(p,q) ≥ H(p)</strong> — cross entropy can never beat reality's own entropy; a mismatched model only ever adds cost.</li>
+</ul>
+
+<div class="card key">
+  <h4>Worked example — the fair coin, mis-modeled</h4>
+  <p>Reality: fair coin, <span class="eq">p = (½, ½)</span>. Your model (wrongly) believes <span class="eq">q = (0.9, 0.1)</span>. Your code spends −log₂ q bits on each outcome, but reality produces them with p's probabilities:</p>
+  <div class="formula small">H(p,q) = −(½·log₂0.9 + ½·log₂0.1) = −(½·(−0.152) + ½·(−3.322)) = <span class="c1">1.737 bits</span> &nbsp;·&nbsp; H(p) = 1 &nbsp;·&nbsp; KL = <span class="c2">0.737</span></div>
+  <p>You pay 1.737 bits per symbol where a perfect model pays 1 — the extra 0.737 bits are the tax on being wrong. Notice the penalty is asymmetric: if you flip it (reality 0.9/0.1, model fair), <span class="eq">H(q,p) = 1.000</span> — different price! Cross entropy is <em>not</em> symmetric, because the penalty explodes when your model assigns ~0 probability to something reality actually produces (log₂ 0.1 = −3.32), while overestimating the common event is cheap (log₂ 0.9 = −0.15). <strong>Being overconfident about rare events is the expensive sin.</strong></p>
+</div>
+
+<div class="stage">
+  <div class="stage-title">The decomposition — H(p,q) = H(p) + KL, for the fair-coin / 0.9-model example</div>
+  <svg class="fig" viewBox="0 0 460 300" width="460" style="background:var(--code-bg);border:1px solid var(--line);border-radius:8px;">
+    <line x1="40" y1="240" x2="420" y2="240" stroke="var(--line)" stroke-width="2"/>
+    <line x1="40" y1="240" x2="40" y2="40" stroke="var(--line)" stroke-width="2"/>
+    <line x1="40" y1="140" x2="420" y2="140" stroke="var(--line)" stroke-width="1" stroke-dasharray="4 3" opacity="0.5"/>
+    <text x="46" y="134" style="fill:var(--ink-dim);font-size:9px">1 bit</text>
+    <text x="46" y="44" style="fill:var(--ink-dim);font-size:9px">2 bits</text>
+    <!-- H(p) reference bar -->
+    <rect x="70" y="140" width="50" height="100" fill="var(--accent)" rx="2"/>
+    <text x="95" y="262" style="fill:var(--accent);font-size:10px" text-anchor="middle">H(p) = 1.00</text>
+    <!-- H(q) bar -->
+    <rect x="150" y="193.1" width="50" height="46.9" fill="rgba(148,163,184,0.45)" rx="2"/>
+    <text x="175" y="262" style="fill:var(--ink-dim);font-size:10px" text-anchor="middle">H(q) = 0.47</text>
+    <!-- stacked H(p,q) -->
+    <rect x="260" y="140" width="70" height="100" fill="var(--accent)" rx="2"/>
+    <rect x="260" y="66.3" width="70" height="73.7" fill="var(--warn)" rx="2"/>
+    <rect x="260" y="66.3" width="70" height="173.7" fill="none" stroke="var(--good)" stroke-width="1.5"/>
+    <text x="252" y="190" style="fill:var(--accent);font-size:9.5px" text-anchor="end">H(p)</text>
+    <text x="252" y="105" style="fill:var(--warn);font-size:9.5px" text-anchor="end">KL = 0.74</text>
+    <text x="295" y="58" style="fill:var(--good);font-size:10px" text-anchor="middle">H(p,q) = 1.74 bits</text>
+    <text x="295" y="262" style="fill:var(--ink-dim);font-size:10px" text-anchor="middle">H(p,q) = H(p) + KL</text>
+    <text x="230" y="286" style="fill:var(--ink-dim);font-size:9px" text-anchor="middle">cost of encoding the fair coin's outcomes with the 0.9-model's code</text>
+  </svg>
+  <div class="caption">Left bar: reality's entropy — the floor you can never go below (1 bit). Middle: the model's own entropy (0.47 bits) — <em>irrelevant</em> to the cost; how confident q feels about itself doesn't matter. Right: what you actually pay — H(p) plus the amber KL penalty for believing q when reality is p. Slide p and q in section 05 to see the penalty grow and vanish.</div>
+</div>
+
+<div class="card chat">
+  <h4>Why LLMs train on this — the bridge to section 05</h4>
+  <p>Next-token prediction: reality p is the true distribution of the next token given the context; the model outputs q. Training = minimizing the average <span class="eq">−log q(token)</span> over real data — i.e., minimizing cross entropy (equivalently maximizing log-likelihood; recall Probability section 08: cross-entropy loss = negative log-likelihood). The minimum is achieved exactly when q = p — so <strong>training is literally "make your model's beliefs match reality,"</strong> and the best you can ever do is pay reality's own entropy H(p). Section 05 makes this relationship visible.</p>
+</div>
+
+<!-- ============ 5. CROSS ENTROPY ILLUSTRATED ============ -->
+<h2><span class="num">05</span>Cross entropy illustrated — how one context relates to another</h2>
+
+<h3>Two sources, one slider each — watch the penalty appear and vanish</h3>
+<p>Here's the whole story in one interactive: <strong>p = reality</strong> (true bias of a coin) and <strong>q = your model's belief</strong> (the bias you assume). The left panel shows both distributions; the right panel shows the three entropies — H(p) (reality's floor), H(q) (your model's self-confidence, irrelevant to the cost), and H(p,q) (the stacked bar: floor + penalty). The amber penalty is KL: it's zero when q = p, and grows the more your model disagrees with reality.</p>
+
+<div class="stage">
+  <div class="stage-title">The relationship: H(p,q) = H(p) + KL(p‖q) — reality's entropy plus the price of your model</div>
+  <div class="pair">
+    <svg id="ceDistSvg" class="fig" viewBox="0 0 460 300" width="460" style="background:var(--code-bg);border:1px solid var(--line);border-radius:8px;"></svg>
+    <svg id="ceEntSvg" class="fig" viewBox="0 0 360 320" width="360" style="background:var(--code-bg);border:1px solid var(--line);border-radius:8px;"></svg>
+  </div>
+  <div class="ctrl">
+    <label>reality p — P(heads): <b id="ceP">0.50</b></label>
+    <input type="range" id="cePS" min="0.05" max="0.95" step="0.01" value="0.5">
+    <label>your model q — P(heads): <b id="ceQ">0.90</b></label>
+    <input type="range" id="ceQS" min="0.05" max="0.95" step="0.01" value="0.9">
+    <div class="readout" id="ceReadout"></div>
+  </div>
+  <div class="caption">Set q = p and the amber penalty vanishes: H(p,q) = H(p), the floor. Move q away and the penalty grows — fast when q gets overconfident about an outcome reality actually produces (rare-event overconfidence is the expensive sin). The green-outlined bar is always H(p) + KL = H(p,q), never below the blue floor. Perplexity = 2^H(p,q): "the effective number of equally-likely choices the model is confused between."</div>
+</div>
+
+<h3>Entropy of one context vs another — the three relationships to keep</h3>
+<ul>
+  <li><strong>H(p,q) ≥ H(p):</strong> cross entropy can never beat the true entropy — the best model pays exactly the floor, a wrong model pays more. This is the "no free lunch" of compression and of prediction.</li>
+  <li><strong>H(p,q) = H(q,p) only when p = q:</strong> cross entropy is asymmetric (KL is asymmetric). Believing q when reality is p costs a different amount than the reverse — the price of overconfidence about rare events isn't refunded.</li>
+  <li><strong>H(q) is a distraction:</strong> a model's own entropy measures how <em>confident it feels</em>, not how <em>right</em> it is. A confidently wrong model can have tiny H(q) and huge H(p,q). (This is why a model's "I'm 99% sure" means nothing without calibration against reality.)</li>
+</ul>
+
+<div class="card tip">
+  <h4>Gut checks (do these against the demo, then by hand)</h4>
+  <ul>
+    <li>Set q = p = 0.5: KL = 0, H(p,q) = 1.000 = H(p) ✓.</li>
+    <li>Set q = p = 0.9: H(p,q) = H(p) = 0.469 — a wrong-looking model can still be perfect <em>if it matches reality</em>. The cost is about mismatch, not about q being "fair."</li>
+    <li>p = 0.5, q = 0.05: your model is <em>sure</em> the fair coin is heavily loaded — H(p,q) = −(0.5·log₂0.05 + 0.5·log₂0.95) ≈ 2.17 bits, KL ≈ 1.17. The rare-event overconfidence tax, visible.</li>
+    <li>By hand: H(0.9, 0.1) = 0.469 bits and perplexity = 2^0.469 ≈ 1.38 — "the model is confused between ~1.4 equally likely outcomes" (mostly it knows).</li>
+  </ul>
+</div>
+
+<!-- ============ 6. LLM PAYOFF ============ -->
+<h2><span class="num">06</span>The LLM payoff — perplexity, and why training is cross-entropy</h2>
+
+<h3>Putting it together for a next-token predictor</h3>
+<ul>
+  <li><strong>Training:</strong> the model outputs q(token | context). The loss averaged over real data is the empirical cross entropy <span class="eq">−(1/N)Σ log q(yᵢ)</span> — an expectation over reality p of −log q. Minimizing it pushes q → p (section 05's demo: penalty → 0). This is exactly the "cross-entropy = negative log-likelihood = LLM training objective" bridge from Probability section 08.</li>
+  <li><strong>Evaluation:</strong> <strong>perplexity = 2^H(p,q)</strong> — the effective number of equally-likely next tokens the model is confused between. Perplexity 20 ≈ "as confused as a fair 20-sided die"; perplexity 1 = perfectly confident and right. Lower perplexity = better model (on that data).</li>
+  <li><strong>Why log base matters:</strong> bits vs nats is a constant factor (log₂ x = ln x / ln 2). ML libraries report nats (natural log) because derivatives of ln are cleaner; perplexity conventionally uses base 2. Don't let the unit switch scare you — it's a rescaling, not a different concept.</li>
+</ul>
+
+<div class="card key">
+  <h4>Where this block lands in your plan</h4>
+  <ul>
+    <li><strong>Covered here:</strong> intuition, I = −log p, entropy, cross entropy + KL-as-gap, the p-vs-q relationship, perplexity definition.</li>
+    <li><strong>Next (Jurafsky &amp; Martin ch. 3):</strong> perplexity worked on real corpora, smoothing, and why n-gram models are entropy machines. (web.stanford.edu/~jurafsky/slp3)</li>
+    <li><strong>Reference (MacKay ch. 1–6):</strong> source coding, the noiseless channel theorem, and the beautiful "20 questions" framing — inference.org.uk/mackay/itila</li>
+    <li><strong>Conceptual primer:</strong> 3Blue1Brown's coding-theory / Hamming-Shannon videos — why entropy is <em>the</em> unit of surprise.</li>
+    <li><strong>Optimization next (Day 4):</strong> you now know the loss you're minimizing — gradient descent will be "walk downhill on −Σ log q."</li>
+  </ul>
+</div>
+
+<div class="card chat">
+  <h4>From our discussion — the honest summary</h4>
+  <p>Information is surprise, measured in yes/no questions (log). Entropy is the average surprise of a source — how unpredictable it is. Cross entropy is what you actually pay when your beliefs (q) meet reality (p): the floor H(p) plus the KL penalty for mismatch. The penalty is ≥ 0, asymmetric, and explodes for rare events your model writes off. LLMs are trained by minimizing exactly this, and perplexity reports it on a familiar scale. Everything here is one expectation — the E[g(X)] machine from Probability section 11, with g = −log q and weights p.</p>
+</div>
+
+<footer>
+  Information Theory — Phase 0 · Day 3 of the 5-day sprint (2026-08-16) · builds on Probability sections 09–16 · sources: 3Blue1Brown coding theory · Jurafsky &amp; Martin ch. 3 · MacKay ch. 1–6
+</footer>
+
+</div>
+
+<script>
+function svgEl(tag, attrs) {
+  var el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+  for (var k in attrs) el.setAttribute(k, attrs[k]);
+  return el;
+}
+</script>
+
+<script>
+/* ===== 03. Binary entropy H(p) + surprise bars ===== */
+(function () {
+  var svg = document.getElementById('entSvg');
+  var bars = document.getElementById('surpriseSvg');
+  var sl = document.getElementById('entPS');
+  var pR = document.getElementById('entP');
+  var ro = document.getElementById('entReadout');
+  function clear(s) { while (s.firstChild) s.removeChild(s.firstChild); }
+  function txt(s, x, y, str, a) { var t = svgEl('text', a || {}); t.setAttribute('x', x); t.setAttribute('y', y); t.textContent = str; s.appendChild(t); return t; }
+  function H2(p) { if (p <= 0 || p >= 1) return 0; return -(p * Math.log2(p) + (1 - p) * Math.log2(1 - p)); }
+  function draw() {
+    var p = parseFloat(sl.value);
+    pR.textContent = p.toFixed(2);
+    /* ---- entropy curve ---- */
+    clear(svg);
+    svg.appendChild(svgEl('line', { x1: 60, y1: 250, x2: 520, y2: 250, stroke: 'var(--line)', 'stroke-width': 2 }));
+    svg.appendChild(svgEl('line', { x1: 60, y1: 250, x2: 60, y2: 50, stroke: 'var(--line)', 'stroke-width': 2 }));
+    txt(svg, 290, 272, 'p →', { style: 'fill:var(--ink-dim);font-size:11px', 'text-anchor': 'middle' });
+    txt(svg, 52, 258, '0', { style: 'fill:var(--ink-dim);font-size:10px', 'text-anchor': 'middle' });
+    txt(svg, 520, 258, '1', { style: 'fill:var(--ink-dim);font-size:10px', 'text-anchor': 'middle' });
+    txt(svg, 52, 38, 'H(p) bits', { style: 'fill:var(--ink-dim);font-size:10px' });
+    svg.appendChild(svgEl('line', { x1: 60, y1: 50, x2: 520, y2: 50, stroke: 'var(--warn)', 'stroke-dasharray': '4 3', 'stroke-width': 1 }));
+    txt(svg, 290, 42, 'max = 1 bit at p = ½', { style: 'fill:var(--warn);font-size:10px', 'text-anchor': 'middle' });
+    var f = 'M60,250', first = true;
+    for (var q = 0.002; q <= 0.998; q += 0.004) {
+      var x = 60 + q * 460, y = 250 - H2(q) * 200;
+      f += (first ? '' : ' L') + x.toFixed(1) + ',' + y.toFixed(1); first = false;
+    }
+    f += ' L520,250 Z';
+    svg.appendChild(svgEl('path', { d: f, fill: 'rgba(56,189,248,0.07)', stroke: 'none' }));
+    var d = 'M', first2 = true;
+    for (var q2 = 0.002; q2 <= 0.998; q2 += 0.004) {
+      var x2 = 60 + q2 * 460, y2 = 250 - H2(q2) * 200;
+      d += (first2 ? '' : ' L') + x2.toFixed(1) + ',' + y2.toFixed(1); first2 = false;
+    }
+    svg.appendChild(svgEl('path', { d: d, fill: 'none', stroke: 'var(--accent)', 'stroke-width': 3 }));
+    var xp = 60 + p * 460, yp = 250 - H2(p) * 200;
+    svg.appendChild(svgEl('line', { x1: xp, y1: 250, x2: xp, y2: yp, stroke: 'var(--warn)', 'stroke-dasharray': '3 3' }));
+    svg.appendChild(svgEl('circle', { cx: xp, cy: yp, r: 5, fill: 'var(--warn)' }));
+    txt(svg, xp, yp - 8, 'H = ' + H2(p).toFixed(3), { style: 'fill:var(--warn);font-size:10px', 'text-anchor': 'middle' });
+    ro.innerHTML = 'H(X) = <b>' + H2(p).toFixed(3) + ' bits</b> · I(heads) = ' + (-Math.log2(p)).toFixed(2) + ' bits · I(tails) = ' + (-Math.log2(1 - p)).toFixed(2) + ' bits';
+    /* ---- surprise bars ---- */
+    clear(bars);
+    var base = 260, scale = 40;
+    var ih = -Math.log2(p), it = -Math.log2(1 - p), hh = H2(p);
+    var bh = Math.min(ih * scale, 240), bt = Math.min(it * scale, 240), hy = hh * scale;
+    bars.appendChild(svgEl('line', { x1: 40, y1: base, x2: 270, y2: base, stroke: 'var(--line)', 'stroke-width': 2 }));
+    bars.appendChild(svgEl('rect', { x: 85, y: base - bh, width: 50, height: bh, fill: 'var(--warn)', rx: 2 }));
+    bars.appendChild(svgEl('rect', { x: 185, y: base - bt, width: 50, height: bt, fill: 'var(--accent)', rx: 2 }));
+    txt(bars, 110, base - bh - 6, ih.toFixed(2) + ' b', { style: 'fill:var(--warn);font-size:10px', 'text-anchor': 'middle' });
+    txt(bars, 210, base - bt - 6, it.toFixed(2) + ' b', { style: 'fill:var(--accent);font-size:10px', 'text-anchor': 'middle' });
+    txt(bars, 110, base + 16, 'heads (p=' + p.toFixed(2) + ')', { style: 'fill:var(--ink-dim);font-size:9px', 'text-anchor': 'middle' });
+    txt(bars, 210, base + 16, 'tails (' + (1 - p).toFixed(2) + ')', { style: 'fill:var(--ink-dim);font-size:9px', 'text-anchor': 'middle' });
+    bars.appendChild(svgEl('line', { x1: 70, y1: base - hy, x2: 272, y2: base - hy, stroke: 'var(--good)', 'stroke-dasharray': '5 3', 'stroke-width': 1.5 }));
+    txt(bars, 274, base - hy + 3, 'E[surprise] = H(p)', { style: 'fill:var(--good);font-size:9px', 'text-anchor': 'end' });
+    txt(bars, 150, 20, 'the two surprises → their average = entropy', { style: 'fill:var(--ink-dim);font-size:9.5px', 'text-anchor': 'middle' });
+  }
+  sl.addEventListener('input', draw);
+  draw();
+})();
+</script>
+
+<script>
+/* ===== 05. Cross-entropy: p vs q ===== */
+(function () {
+  var distSvg = document.getElementById('ceDistSvg');
+  var entSvg = document.getElementById('ceEntSvg');
+  var pS = document.getElementById('cePS'), qS = document.getElementById('ceQS');
+  var pR = document.getElementById('ceP'), qR = document.getElementById('ceQ');
+  var ro = document.getElementById('ceReadout');
+  function clear(s) { while (s.firstChild) s.removeChild(s.firstChild); }
+  function txt(s, x, y, str, a) { var t = svgEl('text', a || {}); t.setAttribute('x', x); t.setAttribute('y', y); t.textContent = str; s.appendChild(t); return t; }
+  function H2(p) { if (p <= 0 || p >= 1) return 0; return -(p * Math.log2(p) + (1 - p) * Math.log2(1 - p)); }
+  function draw() {
+    var p = parseFloat(pS.value), q = parseFloat(qS.value);
+    pR.textContent = p.toFixed(2); qR.textContent = q.toFixed(2);
+    var hp = H2(p), hq = H2(q);
+    var xent = -(p * Math.log2(q) + (1 - p) * Math.log2(1 - q));
+    var kl = xent - hp;
+    /* ---- distributions panel ---- */
+    clear(distSvg);
+    var base = 250, scale = 180;
+    function group(x0, pv, col, name) {
+      var hh = pv * scale, ht = (1 - pv) * scale;
+      distSvg.appendChild(svgEl('rect', { x: x0, y: base - hh, width: 45, height: hh, fill: col, rx: 2 }));
+      distSvg.appendChild(svgEl('rect', { x: x0 + 70, y: base - ht, width: 45, height: ht, fill: col, rx: 2, opacity: 0.55 }));
+      txt(distSvg, x0 + 22, base - hh - 6, pv.toFixed(2), { style: 'fill:' + col + ';font-size:10px', 'text-anchor': 'middle' });
+      txt(distSvg, x0 + 92, base - ht - 6, (1 - pv).toFixed(2), { style: 'fill:' + col + ';font-size:10px', 'text-anchor': 'middle' });
+      txt(distSvg, x0 + 22, base + 16, 'heads', { style: 'fill:var(--ink-dim);font-size:9px', 'text-anchor': 'middle' });
+      txt(distSvg, x0 + 92, base + 16, 'tails', { style: 'fill:var(--ink-dim);font-size:9px', 'text-anchor': 'middle' });
+      txt(distSvg, x0 + 57, 20, name, { style: 'fill:' + col + ';font-size:12px', 'text-anchor': 'middle' });
+    }
+    distSvg.appendChild(svgEl('line', { x1: 40, y1: base, x2: 420, y2: base, stroke: 'var(--line)', 'stroke-width': 2 }));
+    group(60, p, 'var(--accent)', 'true p');
+    group(260, q, 'var(--warn)', 'model q');
+    txt(distSvg, 230, base + 16, 'vs', { style: 'fill:var(--ink-dim);font-size:11px', 'text-anchor': 'middle' });
+    txt(distSvg, 230, 285, 'reality p (blue) vs your beliefs q (amber) — same two outcomes, different weights', { style: 'fill:var(--ink-dim);font-size:9px', 'text-anchor': 'middle' });
+    /* ---- entropies panel ---- */
+    clear(entSvg);
+    var eb = 280, esc = 55;
+    function bar(x0, h, col, label, valCol) {
+      var hh = h * esc;
+      entSvg.appendChild(svgEl('rect', { x: x0, y: eb - hh, width: 50, height: hh, fill: col, rx: 2 }));
+      txt(entSvg, x0 + 25, eb - hh - 6, h.toFixed(3), { style: 'fill:' + (valCol || 'var(--ink)') + ';font-size:10px', 'text-anchor': 'middle' });
+      txt(entSvg, x0 + 25, eb + 16, label, { style: 'fill:var(--ink-dim);font-size:10px', 'text-anchor': 'middle' });
+    }
+    entSvg.appendChild(svgEl('line', { x1: 40, y1: eb, x2: 340, y2: eb, stroke: 'var(--line)', 'stroke-width': 2 }));
+    bar(50, hp, 'var(--accent)', 'H(p)');
+    bar(150, hq, 'rgba(148,163,184,0.5)', 'H(q)');
+    var x3 = 250, hh3 = hp * esc, kl3 = Math.max(kl, 0) * esc;
+    entSvg.appendChild(svgEl('rect', { x: x3, y: eb - hh3 - kl3, width: 50, height: hh3, fill: 'var(--accent)', rx: 2 }));
+    entSvg.appendChild(svgEl('rect', { x: x3, y: eb - hh3 - kl3, width: 50, height: kl3, fill: 'var(--warn)', rx: 2 }));
+    entSvg.appendChild(svgEl('rect', { x: x3, y: eb - hh3 - kl3, width: 50, height: hh3 + kl3, fill: 'none', stroke: 'var(--good)', 'stroke-width': 1.5 }));
+    txt(entSvg, x3 + 25, eb - hh3 - kl3 - 6, (hp + kl).toFixed(3), { style: 'fill:var(--good);font-size:10px', 'text-anchor': 'middle' });
+    if (kl > 0.25) txt(entSvg, x3 + 25, eb - hh3 - kl3 + 12, 'KL', { style: 'fill:var(--warn);font-size:9px', 'text-anchor': 'middle' });
+    txt(entSvg, x3 + 25, eb + 16, 'H(p,q)', { style: 'fill:var(--good);font-size:10px', 'text-anchor': 'middle' });
+    txt(entSvg, 195, 18, "floor H(p) · model's own H(q) · what you pay H(p,q) = H(p) + KL", { style: 'fill:var(--ink-dim);font-size:9.5px', 'text-anchor': 'middle' });
+    ro.innerHTML = 'H(p) = <b>' + hp.toFixed(3) + '</b> · H(q) = <b>' + hq.toFixed(3) + '</b> · KL(p‖q) = <b>' + kl.toFixed(3) + '</b> · H(p,q) = <b>' + (hp + kl).toFixed(3) + ' bits</b> · perplexity = 2^H(p,q) = <b>' + Math.pow(2, hp + kl).toFixed(2) + '</b>';
+  }
+  pS.addEventListener('input', draw);
+  qS.addEventListener('input', draw);
+  draw();
+})();
+</script>
+
+</body>
+</html>

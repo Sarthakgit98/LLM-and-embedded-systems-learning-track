@@ -19,8 +19,8 @@
 - [ ] Chain rule — can derive backprop by hand *(rule mechanics done — product = two strips, chain = nested zoom; but "derive backprop" deferred until after neural-network basics, since backprop needs a net to backprop through — revisit at Phase 2)*
 
 **Probability & Information Theory**
-- [ ] Distributions, Bayes, expectation, MLE *(sources: Deisenroth ch. 6 · StatQuest playlist · Blitzstein Harvard Stat 110)* — *StatQuest intuition layer done 2026-08-11 (5 distributions, Bayes, prob vs likelihood, MLE — summary: `Probability/probability-phase0-summary.html`, now sections 01–10). Expectation + variance deep-dive done 2026-08-13 (sections 09–10: weighted-average intuition, balance-point + long-run-average views, Var = E[X²]−μ², family fingerprints, Bayes numerator = joint P(A∩B) via chain rule). Deisenroth math backbone + Blitzstein still pending*
-- [ ] Entropy, cross-entropy, KL divergence, perplexity *(sources: Jurafsky & Martin ch. 3 · 3Blue1Brown "coding theory" series · MacKay "Information Theory, Inference, and Learning Algorithms" ch. 1–6)*
+- [ ] Distributions, Bayes, expectation, MLE *(sources: StatQuest playlist · Blitzstein Harvard Stat 110 · **MIT 6.041 (Bertsekas & Tsitsiklis) — Deisenroth/mml-book SKIPPED by choice 2026-08-15, time constraints**)* — *StatQuest intuition layer done 2026-08-11 (5 distributions, Bayes, prob vs likelihood, MLE — summary: `Probability/probability-phase0-summary.html`, now sections 01–16). Expectation + variance deep-dive done 2026-08-13 (sections 09–10: weighted-average intuition, balance-point + long-run-average views, Var = E[X²]−μ², family fingerprints, Bayes numerator = joint P(A∩B) via chain rule). **MIT 6.041 backbone landed 2026-08-15 (videos 1–12 skimmed): new sections 09 (CDF/PDF), 11 (E[g(X)] — Jensen, E[1/X]=∞, n−1 sequel), 13 (joint), 14 (marginal), 15 (conditional density + continuous Bayes), 16 (conditional expectation — tower property, dice E[S|X]=X+3.5, x+y workhorse) inserted at logical points, renumbering 09–10 → 10/12*
+- [ ] Entropy, cross-entropy, KL divergence, perplexity *(sources: Jurafsky & Martin ch. 3 · 3Blue1Brown "coding theory" series · MacKay "Information Theory, Inference, and Learning Algorithms" ch. 1–6)* — *page generated 2026-08-15: `InformationTheory/information-theory-phase0-summary.html` (sections 01–06 — I = −log p + halving ladder, entropy = E[surprise] with interactive H(p) curve, cross entropy H(p,q) = H(p) + KL with two-distribution interactive demo, perplexity = 2^H(p,q), LLM training bridge). Covered conceptually: entropy, cross-entropy, KL-as-the-gap. Still open: Jurafsky ch. 3 perplexity worked examples + MacKay reference reading (Day-3 sources)*
 
 **Optimization**
 - [ ] Gradient descent / SGD / Adam concepts
@@ -32,7 +32,7 @@
 
 ## 📋 Probability I Review Checklist
 
-> Summary doc: `Probability/probability-phase0-summary.html` — skim sections 01–10, then hit these. (The old Calculus checklist is implicitly retired — you've moved well past it; calculus retention now lives in the 5-min daily flashbacks and resurfaces in optimization/micrograd. Its re-derivations are all in `Calculus/calculus-phase0-summary.html`.)
+> Summary doc: `Probability/probability-phase0-summary.html` — skim sections 01–16, then hit these. (The old Calculus checklist is implicitly retired — you've moved well past it; calculus retention now lives in the 5-min daily flashbacks and resurfaces in optimization/micrograd. Its re-derivations are all in `Calculus/calculus-phase0-summary.html`.)
 
 **Quick re-derivations (by hand, no notes):**
 - [ ] Coin: P(7 heads in 10 flips, fair) = C(10,7)·0.5¹⁰ ≈ 0.117 — and the general binomial PMF C(n,k)·p^k·(1−p)^(n−k)
@@ -244,8 +244,9 @@
 | Day | Primary block (LLM math, ~1–1.5 h) | Retention booster (10 min) | Secondary session (30–45 min, separate slot) |
 |---|---|---|---|
 | Wed 12 | Probability I — distributions, expectation, variance (Deisenroth ch. 6; StatQuest) — **✅ StatQuest layer done (2026-08-11)** | 5-min calculus flashback: re-derive chain rule on sin(x²) | — |
-| Thu 13 | Probability II — Bayes, MLE, conditional (StatQuest; Blitzstein Stat 110) — **✅ Bayes numerator intuition + expectation/variance discussion done (2026-08-13); Blitzstein + MIT 6.041 exercises pending** | Re-derive E[X] = ∫x·p(x)dx from memory | — |
-| Fri 14 | Info theory — entropy, cross-entropy, KL, perplexity (Jurafsky ch. 3; 3B1B coding theory) | Explain entropy in ≤ 3 sentences out loud | Embedded C I: pointers + memory layout (K&R ch. 5) |
+| Thu 13 | Probability II — Bayes, MLE, conditional (StatQuest; Blitzstein Stat 110) — **✅ Bayes numerator intuition + expectation/variance discussion done (2026-08-13); MIT 6.041 wrap-up pending** | Re-derive E[X] = ∫x·p(x)dx from memory | — |
+| Fri 14→15 (shifted) | **Probability wrap-up — MIT 6.041** (math backbone + exercises; mml-book/Deisenroth **skipped** — StatQuest intuition + MIT rigor replaces it). Spills into Sat; info theory / optimization / micrograd shift one slot each | | |
+| Fri 14 | Info theory — entropy, cross-entropy, KL, perplexity (Jurafsky ch. 3; 3B1B coding theory) — **✅ done 2026-08-15 (shifted one day): page generated — entropy + cross-entropy + KL-as-gap + perplexity; Jurafsky/MacKay reference reading still open** | Explain entropy in ≤ 3 sentences out loud | Embedded C I: pointers + memory layout (K&R ch. 5) |
 | Sat 15 | Optimization — gradient descent / SGD / Adam (Karpathy Zero-to-Hero 1–3) | Link GD to Taylor: "linearize the loss, step downhill" | — |
 | Sun 16 | 🏁 **micrograd from scratch** (2 h, hands-on) — Phase 0 complete | After coding it, re-derive backprop by hand, no notes | Phase 1 kickoff: history of NLP timeline (first 3 eras) |
 
@@ -257,7 +258,7 @@
 
 **Probability I & II (Wed–Thu) — exact sources:**
 
-1. **Deisenroth ch. 6 — "Probability and Distributions"** (*Mathematics for Machine Learning*, free PDF at mml-book.github.io) — the math backbone: probability spaces, sum & product rules, Bayes' theorem, expectation/variance, ML-relevant distributions (Bernoulli, Binomial, Categorical, Gaussian, Exponential, Laplace).
+1. **Deisenroth ch. 6 — "Probability and Distributions"** (*Mathematics for Machine Learning*, free PDF at mml-book.github.io) — ~~the math backbone~~ **❌ SKIPPED (2026-08-15)** — user dropped it for time; MIT 6.041 now fills this role (lectures as backbone + exercises).
 2. **StatQuest** (YouTube, Josh Starmer) — ⚠️ *NOT* the "Statistics Fundamentals" playlist (that's frequentist hypothesis testing — p-values, t-tests, ANOVA — irrelevant to this block). Watch these specific videos instead (search by exact title):
    - *Bayes Theorem*
    - *Probability vs Likelihood*
@@ -265,7 +266,7 @@
    - *The Normal (Gaussian) Distribution* · *The Binomial Distribution* · *The Poisson Distribution* · *The Exponential Distribution* · *The Uniform Distribution*
    - Order: watch first for intuition → then Deisenroth for the math (~90 min total)
 3. **Blitzstein — Harvard Stat 110** (free YouTube lectures; book: *Introduction to Probability*, Blitzstein & Hwang) — watch 3–5 lectures only (random variables, expectation, Bayes); gold standard for depth, the rest is reference.
-4. **MIT 6.041 (Tsitsiklis)** — *Introduction to Probability* (Bertsekas & Tsitsiklis), free PDF via MIT OCW — role: **exercises** (the highest-value part; turns "watched a video" into "can derive it").
+4. **MIT 6.041 (Tsitsiklis)** — *Introduction to Probability* (Bertsekas & Tsitsiklis), free PDF via MIT OCW — role: **now the primary math backbone** (replacing Deisenroth ch. 6) + exercises. **Videos 1–12 skimmed 2026-08-15; notes landed in the summary as sections 09–16** (CDF/PDF, joint/marginal/conditional densities, E[g(X)], conditional expectation). Still to do: exercises from the OCW problem sets (the "can derive it" step). Skip: Bernoulli/Poisson processes, Markov chains, transforms-in-depth, inference/statistics chapters (LLM-track-irrelevant at this stage).
 
 **Info theory (Fri) — exact sources:**
 
@@ -278,7 +279,7 @@
 | Day | Watch/read order |
 |---|---|
 | Wed — Probability I | StatQuest distributions → Deisenroth ch. 6 (distributions, expectation, variance) |
-| Thu — Probability II | StatQuest Bayes + MLE → Blitzstein Stat 110 lectures (Bayes, expectation) → MIT 6.041 exercises |
+| Thu — Probability II | StatQuest Bayes + MLE → Blitzstein Stat 110 lectures (Bayes, expectation) → **MIT 6.041 lectures + exercises (now the backbone; Deisenroth dropped)** |
 | Fri — Info theory | 3B1B coding theory (primer) → Jurafsky ch. 3 (perplexity) → MacKay ch. 1–6 as reference |
 
 ## ⚠️ Sprint rules that keep retention high

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Probability — Phase 0 Summary (StatQuest intuition layer)</title>
+<title>Probability — Phase 0 Summary (StatQuest + MIT 6.041)</title>
 <style>
   :root {
     --bg: #0f172a;
@@ -117,12 +117,13 @@
 
 <header>
   <h1>Probability — Phase 0</h1>
-  <p>StatQuest probability videos — Bayes' theorem, probability vs likelihood, the Normal / Binomial / Poisson / Exponential / Uniform distributions, and Maximum Likelihood Estimation. Intuition-first notes with interactive figures. <em>This is the intuition layer of the 5-day sprint (Day 1–2); the math backbone (Deisenroth ch. 6) lands next, and more sections get added as you progress.</em></p>
+  <p>StatQuest probability videos — Bayes' theorem, probability vs likelihood, the Normal / Binomial / Poisson / Exponential / Uniform distributions, and Maximum Likelihood Estimation — plus the MIT 6.041 (Bertsekas &amp; Tsitsiklis) backbone: CDF/PDF, joint / marginal / conditional densities, and the expectation machinery. Intuition-first notes with interactive figures. <em>StatQuest layer = sections 01–08; MIT 6.041 backbone landed 2026-08-15 (sections 09–16). Deisenroth ch. 6 (mml-book) skipped.</em></p>
   <div>
     <span class="badge">StatQuest</span>
     <span class="badge">Bayes</span>
     <span class="badge">Likelihood</span>
     <span class="badge">MLE</span>
+    <span class="badge">MIT 6.041</span>
     <span class="badge">Distributions</span>
     <span class="badge">interactive</span>
   </div>
@@ -511,8 +512,81 @@ L(θ | X = k) = P(X = k | θ) — likelihood, the same expression as a function 
   </ul>
 </div>
 
-<!-- ============ 9. EXPECTATION ============ -->
-<h2><span class="num">09</span>Expectation — the weighted average</h2>
+<!-- ============ 9. CDF / PDF ============ -->
+<h2><span class="num">09</span>CDF &amp; PDF — describing a random variable</h2>
+
+<h3>Intuition — one universal description, two dialects</h3>
+<p>You've met distributions as <em>lists of outcomes with weights</em> (a die: six faces, 1/6 each) and as <em>density curves</em> (the normal bell). The formalism names them: the <strong>PMF</strong> (probability mass function — the discrete weights themselves) and the <strong>PDF</strong> (probability density function — the continuous curve). But there's a third description that works for <em>both</em> with a single definition, and the whole course hangs off it:</p>
+
+<div class="formula">CDF: F(x) = P(X ≤ x) &nbsp;&nbsp;—&nbsp;&nbsp; "how much mass sits at or below x"</div>
+
+<p>The CDF is a running total. Walk along the number line and keep a running tally of all the probability you've passed — that's F(x). It starts at 0 (nothing below −∞), ends at 1 (everything below +∞), and never decreases (you only ever add). <strong>Everything about a random variable — its median, its quantiles, its expectation — can be recovered from this one curve.</strong> Discrete and continuous are just two shapes of the same object: a staircase vs a smooth ramp.</p>
+
+<div class="card key">
+  <h4>Discrete = staircase · continuous = ramp · linked by the FTC</h4>
+  <ul>
+    <li><strong>Discrete:</strong> a die's CDF jumps by 1/6 at each face. The jump height at x <em>is</em> the PMF: F(x) = Σ p(xᵢ) over all xᵢ ≤ x. The CDF is the PMF <em>accumulated</em>.</li>
+    <li><strong>Continuous:</strong> the density is the <em>slope</em> of the CDF; the CDF is the <em>area under</em> the density. That's exactly the Fundamental Theorem of Calculus from your calculus phase, in probability clothing: <span class="eq">F(x) = ∫₋∞^x f(t)dt</span> and <span class="eq">f(x) = F′(x)</span> — CDF = antiderivative of the PDF.</li>
+    <li><strong>Interval probabilities fall straight out:</strong> <span class="eq">P(a &lt; X ≤ b) = F(b) − F(a) = ∫ₐ^b f(x)dx</span> — one subtraction, no separate sum or integral.</li>
+  </ul>
+</div>
+
+<div class="stage">
+  <div class="stage-title">One definition, three shapes — the same F(x) = P(X ≤ x), both dialects</div>
+  <div class="pair">
+    <svg class="fig" viewBox="0 0 200 170" width="200" style="background:var(--code-bg);border:1px solid var(--line);border-radius:8px;">
+      <line x1="30" y1="140" x2="195" y2="140" stroke="var(--line)" stroke-width="2"/>
+      <line x1="30" y1="140" x2="30" y2="15" stroke="var(--line)" stroke-width="2"/>
+      <text x="24" y="12" style="fill:var(--ink-dim);font-size:9px" text-anchor="middle">1</text>
+      <polyline points="30,140 40,140 40,119.2 68,119.2 68,98.3 96,98.3 96,77.5 124,77.5 124,56.7 152,56.7 152,35.8 180,35.8 180,15 195,15" fill="none" stroke="var(--accent)" stroke-width="2.5"/>
+      <text x="48" y="133" style="fill:var(--warn);font-size:8px">jump = p(x) = 1/6</text>
+      <text x="112" y="160" style="fill:var(--ink-dim);font-size:8.5px" text-anchor="middle">die face →</text>
+      <text x="112" y="8" style="fill:var(--accent);font-size:9px" text-anchor="middle">die · CDF = staircase</text>
+    </svg>
+    <svg class="fig" viewBox="0 0 200 170" width="200" style="background:var(--code-bg);border:1px solid var(--line);border-radius:8px;">
+      <line x1="30" y1="140" x2="175" y2="140" stroke="var(--line)" stroke-width="2"/>
+      <line x1="30" y1="140" x2="30" y2="15" stroke="var(--line)" stroke-width="2"/>
+      <polyline points="30,140 38.4,107.6 46.8,83.6 55.2,65.8 63.6,52.6 74.8,40.2 86,31.9 100,25.3 114,21.2 142,17.3 170,15.9" fill="none" stroke="var(--accent)" stroke-width="2.5"/>
+      <line x1="63.6" y1="140" x2="63.6" y2="52.6" stroke="var(--warn)" stroke-width="1.5" stroke-dasharray="3 3"/>
+      <circle cx="63.6" cy="52.6" r="3.5" fill="var(--warn)"/>
+      <text x="66" y="64" style="fill:var(--warn);font-size:8.5px">height = F(x₀) ≈ 0.70</text>
+      <text x="63.6" y="153" style="fill:var(--warn);font-size:8px" text-anchor="middle">x₀ = 1.2</text>
+      <text x="112" y="160" style="fill:var(--ink-dim);font-size:8.5px" text-anchor="middle">x →</text>
+      <text x="112" y="8" style="fill:var(--accent);font-size:9px" text-anchor="middle">exp · CDF = ramp</text>
+    </svg>
+    <svg class="fig" viewBox="0 0 200 170" width="200" style="background:var(--code-bg);border:1px solid var(--line);border-radius:8px;">
+      <line x1="30" y1="140" x2="175" y2="140" stroke="var(--line)" stroke-width="2"/>
+      <line x1="30" y1="140" x2="30" y2="15" stroke="var(--line)" stroke-width="2"/>
+      <polygon points="30,140 30,30 38.4,58.5 46.8,79.6 55.2,95.2 63.6,106.9 63.6,140" fill="var(--good)" opacity="0.2"/>
+      <polyline points="30,30 38.4,58.5 46.8,79.6 55.2,95.2 63.6,106.9 74.8,117.8 86,125.1 100,131 114,134.5 142,138 170,139.3" fill="none" stroke="var(--accent)" stroke-width="2.5"/>
+      <line x1="63.6" y1="140" x2="63.6" y2="106.9" stroke="var(--warn)" stroke-width="1.5" stroke-dasharray="3 3"/>
+      <text x="36" y="130" style="fill:var(--good);font-size:8.5px">area = F(x₀) ≈ 0.70</text>
+      <text x="63.6" y="153" style="fill:var(--warn);font-size:8px" text-anchor="middle">x₀ = 1.2</text>
+      <text x="112" y="160" style="fill:var(--ink-dim);font-size:8.5px" text-anchor="middle">x →</text>
+      <text x="112" y="8" style="fill:var(--accent);font-size:9px" text-anchor="middle">exp · PDF = curve</text>
+    </svg>
+  </div>
+  <div class="caption">Left: the discrete dialect — the die's CDF is a staircase; each jump's height is that face's PMF. Middle and right: the <em>same exponential</em> in the two continuous dialects — read the dashed x₀ = 1.2 line across both: its height on the CDF (middle, F ≈ 0.70) equals the shaded area under the PDF (right, F ≈ 0.70). That equality — CDF = antiderivative of PDF, slope of CDF = density — is the Fundamental Theorem of Calculus.</div>
+</div>
+
+<h3>Why "density" — and the one weird consequence</h3>
+<ul>
+  <li><strong>f(x) is mass per unit length, not mass.</strong> It can exceed 1 (a tall, skinny curve) — only <em>areas</em> under it are probabilities. That's why f has units "1/seconds" for a time variable, and why the exponential's f(0) = λ is literally a <em>rate</em> (events per second, section 06).</li>
+  <li><strong>P(X = x) = 0 for a continuous X — always.</strong> A single point has zero width, so zero area under the curve. "The light turns at exactly 2.000000… seconds" has probability 0 — though it can still happen (probability zero ≠ impossible; these are the measure-zero events that matter for technicalities later). What carries weight is <em>intervals</em>: P(1.9 &lt; X &lt; 2.1).</li>
+  <li><strong>Median &amp; quantiles = read the CDF backward.</strong> The median m satisfies F(m) = ½. For the exponential: 1 − e^(−λm) = ½ → m = ln2/λ ≈ 0.693/λ, <em>below</em> the mean 1/λ — the same right-tail story as section 10.</li>
+</ul>
+
+<div class="card tip">
+  <h4>Gut checks</h4>
+  <ul>
+    <li>Uniform(0,2): write F(x) and f(x) by hand. <em>F(x) = x/2 on [0,2], f(x) = ½ — and F′(x) = ½ = f(x) ✓.</em></li>
+    <li>Exponential(λ): confirm F(0) = 0, F(∞) = 1, and P(T &gt; t) = 1 − F(t) = e^(−λt) — the survival probability from section 06.</li>
+    <li>True or false: if f(3) = 0.4, then P(X = 3) = 0.4. <em>False — P(X = 3) = 0 for a continuous X; f is a density, not a probability.</em></li>
+  </ul>
+</div>
+
+<!-- ============ 10. EXPECTATION ============ -->
+<h2><span class="num">10</span>Expectation — the weighted average</h2>
 
 <h3>Intuition — it's just the average, generalized</h3>
 <p>The plain average <span class="eq">(x₁+…+xₙ)/n</span> quietly assumes every item weighs the same: <span class="eq">Σxᵢ·(1/n)</span>. The <strong>weighted average</strong> is <span class="eq">Σxᵢwᵢ/Σwᵢ</span>. <strong>Expectation = weighted average where the weights are probabilities:</strong> <span class="eq">E[X] = Σxᵢpᵢ</span>. The denominator <span class="eq">Σpᵢ = 1</span> — probability's "sums to 1" rule — makes the divisor vanish. So the arithmetic mean is the special case where all outcomes are equally likely (pᵢ = 1/n), and expectation is the general case. "MLE equals the sample mean" (section 08) is the same idea from the data side: the long-run average of samples converges to E[X].</p>
@@ -593,8 +667,72 @@ L(θ | X = k) = P(X = k | θ) — likelihood, the same expression as a function 
   <p>mml-book (Deisenroth ch. 6) reads as "definition + jargon" because precision is its genre — intuition must be built elsewhere first, then the book confirms it. The intuition that dissolves the formula: <strong>expectation is just the weighted average with probabilities as weights</strong>, the plain mean being the equal-weight special case. Two faces: the balance point of the probability mass (geometric) and the long-run sample average (Law of Large Numbers — your numpy Monte Carlo checks demonstrate it). The continuous integral <span class="eq">∫x·f(x)dx</span> is the same weighted average with infinitesimal slices — the calculus payoff. Gut checks to run: weighted coin (2 with p=1/3, 6 with p=2/3 → 4.67, closer to 6); die game at $3.50 entry is break-even; <span class="eq">np.random.exponential(scale=2, size=100000).mean()</span> ≈ 2 = 1/λ.</p>
 </div>
 
-<!-- ============ 10. VARIANCE ============ -->
-<h2><span class="num">10</span>Variance — the second moment</h2>
+<!-- ============ 11. EXPECTATION OF FUNCTIONS ============ -->
+<h2><span class="num">11</span>Expectation of functions — the E[g(X)] machine</h2>
+
+<h3>Intuition — one machine, every moment is a special case</h3>
+<p>Section 10's expectation was a weighted average of the <em>values</em> x. Nothing stops you from averaging any <em>function</em> of X instead — the weights stay exactly the same; only the thing being averaged changes:</p>
+
+<div class="formula">E[g(X)] = Σ g(xᵢ)·p(xᵢ) &nbsp;&nbsp;·&nbsp;&nbsp; E[g(X)] = ∫ g(x)·f(x)dx</div>
+
+<p>The probability weights don't know or care what you're averaging — <strong>E[g(X)] is the weighted average of g's outputs, using X's weights.</strong> Mean is g(x) = x. Variance (section 12) is g(x) = (x−μ)². Second moment is g(x) = x². Entropy (info theory, next) is E[−ln p(X)]. Every loss function in ML is E[loss(X)]. It's the most reused machine in the whole course.</p>
+
+<div class="card key">
+  <h4>The trap — E[g(X)] ≠ g(E[X])</h4>
+  <p>Linearity (section 10) only lets you pull <em>linear</em> moves through the expectation: <span class="eq">E[aX + b] = aE[X] + b</span>. A nonlinear g gets <em>inside</em> the average — the average of g's outputs is generally not g of the average input:</p>
+  <div class="formula small"><span class="c1">convex g ⟹ E[g(X)] ≥ g(E[X])</span> &nbsp;&nbsp;(Jensen) &nbsp;·&nbsp; E[X²] ≥ (E[X])² &nbsp;·&nbsp; E[1/X] ≠ 1/E[X]</div>
+  <p>Why: a convex function bows upward — the outputs at extreme inputs sit above the straight-line interpolation between them. Weighted coin (X = 1 with p = 0.75): E[X] = 0.75 but E[X²] = 0.75 ≠ 0.75² = 0.5625. The squaring happens <em>before</em> the averaging, so the 0.75 of mass at 1 contributes 1²·0.75 = 0.75.</p>
+</div>
+
+<div class="stage">
+  <div class="stage-title">Jensen in one picture — on the curve vs on the chord</div>
+  <svg class="fig" viewBox="0 0 600 245" width="600" style="background:var(--code-bg);border:1px solid var(--line);border-radius:8px;">
+    <line x1="60" y1="210" x2="560" y2="210" stroke="var(--line)" stroke-width="2"/>
+    <line x1="60" y1="210" x2="60" y2="20" stroke="var(--line)" stroke-width="2"/>
+    <text x="560" y="228" style="fill:var(--ink-dim);font-size:10px" text-anchor="middle">x →</text>
+    <text x="52" y="24" style="fill:var(--ink-dim);font-size:10px" text-anchor="middle">g(x)</text>
+    <text x="300" y="28" style="fill:var(--ink-dim);font-size:11px" text-anchor="middle">weighted coin: X = 0 (w=¼) · X = 1 (w=¾)</text>
+    <polyline points="60,210 96.7,208.8 133.3,205.2 170,199.2 206.7,190.8 243.3,180 280,166.8 316.7,151.2 353.3,133.2 390,112.8 426.7,90 463.3,64.8 500,37.2" fill="none" stroke="var(--accent)" stroke-width="2.5"/>
+    <line x1="60" y1="210" x2="243.3" y2="180" stroke="var(--warn)" stroke-width="1.5" stroke-dasharray="5 4"/>
+    <circle cx="60" cy="210" r="5" fill="var(--ink-dim)"/>
+    <circle cx="243.3" cy="180" r="5" fill="var(--ink-dim)"/>
+    <line x1="197.5" y1="210" x2="197.5" y2="186" stroke="var(--warn)" stroke-width="1.5"/>
+    <circle cx="197.5" cy="193.1" r="4" fill="var(--good)"/>
+    <circle cx="197.5" cy="187.5" r="4" fill="var(--warn)"/>
+    <line x1="197.5" y1="193.1" x2="98" y2="153" stroke="var(--good)" stroke-width="1" stroke-dasharray="3 3" opacity="0.75"/>
+    <line x1="197.5" y1="187.5" x2="98" y2="171" stroke="var(--warn)" stroke-width="1" stroke-dasharray="3 3" opacity="0.75"/>
+    <text x="90" y="150" style="fill:var(--good);font-size:9.5px">g(E[X]) = 0.5625 — on the curve</text>
+    <text x="90" y="168" style="fill:var(--warn);font-size:9.5px">E[g(X)] = 0.75 — on the chord</text>
+    <text x="60" y="230" style="fill:var(--ink-dim);font-size:9px" text-anchor="middle">X=0 (w=¼)</text>
+    <text x="197.5" y="230" style="fill:var(--warn);font-size:9px" text-anchor="middle">E[X] = 0.75</text>
+    <text x="243.3" y="230" style="fill:var(--ink-dim);font-size:9px" text-anchor="middle">X=1 (w=¾)</text>
+  </svg>
+  <div class="caption">The parabola is convex, so the chord between the two mass points sits <em>above</em> the curve. E[g(X)] — the average of the outputs — lands on the chord (amber dot); g(E[X]) — the output of the average — lands on the curve (green dot) below it. The vertical gap between them is Jensen's gap.</div>
+</div>
+
+<h3>Worked examples — the ones that actually bite</h3>
+<ul>
+  <li><strong>Die:</strong> E[X] = 3.5; E[X²] = (1+4+9+16+25+36)/6 = 91/6 ≈ 15.17. Then Var = E[X²] − (E[X])² = 91/6 − 12.25 = 35/12 ≈ 2.92 — the die variance, produced by the <em>same machine</em> as the mean. This is why variance needs E[g(X)]: "mean of squares minus square of mean" (section 12) is the machine run twice.</li>
+  <li><strong>Exponential — the honest shocker (from our discussion):</strong> for one exponential sample, <span class="eq">E[1/X] = ∫₀^∞ (1/x)·λe^(−λx)dx = ∞</span>. The weights near 0 are tiny, but 1/x blows up fast enough to give the integral infinite total mass. Jensen had already promised E[1/X] ≥ 1/E[X] = λ — the bound is satisfied, dramatically.</li>
+  <li><strong>And the n−1 sequel:</strong> with n samples, <span class="eq">E[1/x̄] = nλ/(n−1)</span> — finite, but too big by the factor n/(n−1). The MLE 1/x̄ systematically over-estimates the rate, exactly as σ̂² under-estimates variance (section 08's caveat). Bias isn't fixed by hand-waving — it's a number you compute with this machine.</li>
+</ul>
+
+<div class="card chat">
+  <h4>From our discussion — "doesn't the RV assign weights?"</h4>
+  <p>Yes — and this machine is exactly those weights in action. The RV's induced weights (its <em>law</em>: P(X = x) = P({ω : X(ω) = x})) are precisely the p(xᵢ) that E[g(X)] averages over; the RV <em>partitions</em> the original weights into bins, it never re-weights them. The genuine traps live in <em>functions of</em> X: E[g(X)] ≠ g(E[X]) (Jensen, this section), non-injective transforms folding weights (lecture 10's derived distributions), and confusing which projection of a joint you're holding (sections 13–16). All accepted traits — the distribution <em>is</em> the summary; the discipline is knowing which summary you're holding.</p>
+</div>
+
+<div class="card tip">
+  <h4>Gut checks</h4>
+  <ul>
+    <li>Weighted coin (X = 1 with p = 0.75): confirm E[X²] = 0.75 and (E[X])² = 0.5625. Which is bigger, and why? <em>E[X²] — squaring happens before averaging.</em></li>
+    <li>X ~ Uniform(0,1): E[X²] = ∫₀¹x²dx = 1/3 vs (E[X])² = 1/4. The Jensen gap is 1/12 — which is exactly Var(X) = (b−a)²/12 from section 12. <em>The gap between E[X²] and (E[X])² IS the variance.</em></li>
+    <li>Linearity still applies <em>inside</em>: E[(X+Y)²] = E[X²] + 2E[XY] + E[Y²] — the sum distributes, but you still need the joint E[XY] (sections 13–16).</li>
+  </ul>
+</div>
+
+<!-- ============ 12. VARIANCE ============ -->
+<h2><span class="num">12</span>Variance — the second moment</h2>
 
 <h3>Intuition — how spread out the mass is</h3>
 <p>Expectation answered "where does the mass sit?". Variance answers "how spread out is it around there?". Same weighted-average machinery as <span class="eq">E[X]</span>, one new <em>what</em>: instead of averaging <span class="eq">x</span>, average the <strong>squared distance from the mean</strong>:</p>
@@ -650,7 +788,7 @@ L(θ | X = k) = P(X = k | θ) — likelihood, the same expression as a function 
 <ul>
   <li><strong>σ for intuition, Var for math.</strong> Variance lives in X² (dollars² — meaningless units); <span class="eq">σ = √Var</span> is in X's units — the "typical distance from the mean."</li>
   <li><strong>Variance is quadratic, not linear.</strong> <span class="eq">E[aX+b] = aE[X]+b</span> but <span class="eq">Var(aX+b) = a²Var(X)</span>. Shifting changes nothing (spread doesn't care where you stand); doubling all values quadruples variance (distances double, squares ×4). Double your bet → average ×2, risk ×4.</li>
-  <li><strong>The one algebra trick worth doing by hand</strong> (pure algebra — linearity from section 09): <span class="eq">Var = E[(X−μ)²] = E[X²] − 2μE[X] + μ² = E[X²] − μ²</span> — "mean of squares minus square of mean." Worked example (weighted coin, section 09): E[X]=0.75, E[X²]=0.25·0+0.75·1=0.75 → Var = 0.75−0.75² = 0.1875, σ ≈ 0.43.</li>
+  <li><strong>The one algebra trick worth doing by hand</strong> (pure algebra — linearity from section 10): <span class="eq">Var = E[(X−μ)²] = E[X²] − 2μE[X] + μ² = E[X²] − μ²</span> — "mean of squares minus square of mean." Worked example (weighted coin, section 10): E[X]=0.75, E[X²]=0.25·0+0.75·1=0.75 → Var = 0.75−0.75² = 0.1875, σ ≈ 0.43.</li>
 </ul>
 
 <h3>Family fingerprints (sections 03–07)</h3>
@@ -666,15 +804,207 @@ L(θ | X = k) = P(X = k | θ) — likelihood, the same expression as a function 
 <p><strong>Your checklist's numpy checks are variance checks:</strong> <span class="eq">np.random.binomial(10, 0.5, 100000).var()</span> ≈ 2.5 = np(1−p) and <span class="eq">np.random.poisson(4, 100000).var()</span> ≈ 4 = λ. Sample variance converges to Var(X) exactly like sample mean converges to E[X] — Law of Large Numbers, second moment edition.</p>
 
 <h3>Where it sits — and why your embedded track owns it</h3>
-<p>Extending the section 09 table: probability = a <em>chance</em>; expectation = an <em>amount</em> (first moment — location); variance = a <em>spread</em> (second central moment). Both expectation and variance are <strong>summaries</strong> of a distribution — squeezed-out numbers where the distribution is the full description. The pair (μ, σ) summarizes a distribution crudely but powerfully — for the Gaussian it <em>is</em> the distribution. Deisenroth's abstract <span class="eq">E[g(X)] = ∫g(x)f(x)dx</span> is one machine producing both: mean (g = x) and spread (g = (x−μ)²). Every Kalman filter carries a mean and a covariance: mean = "where you think you are", covariance = "how sure you are". Sensor noise, ADC jitter, packet jitter — "noise" <em>is</em> variance. When you hit the EKF (Taylor linearization + Gaussian tracking), this is the vocabulary.</p>
+<p>Extending the section 10 table: probability = a <em>chance</em>; expectation = an <em>amount</em> (first moment — location); variance = a <em>spread</em> (second central moment). Both expectation and variance are <strong>summaries</strong> of a distribution — squeezed-out numbers where the distribution is the full description. The pair (μ, σ) summarizes a distribution crudely but powerfully — for the Gaussian it <em>is</em> the distribution. The E[g(X)] machine (section 11) is one machine producing both: mean (g = x) and spread (g = (x−μ)²). Every Kalman filter carries a mean and a covariance: mean = "where you think you are", covariance = "how sure you are". Sensor noise, ADC jitter, packet jitter — "noise" <em>is</em> variance. When you hit the EKF (Taylor linearization + Gaussian tracking), this is the vocabulary.</p>
 
 <div class="card chat">
   <h4>From our discussion</h4>
   <p>No new concept beyond expectation — variance is the same weighted-average machine with <span class="eq">(x−μ)²</span> as the thing averaged. The zero-cancellation insight is the keeper: because the mean is defined so plain deviations sum to zero, you must square to get any nonzero spread measure. Physics tie-in: the second central moment is literally the <em>moment of inertia</em> of the probability mass about its balance point — spread the beads, harder to spin. Gut checks: (1) X = 2 surely vs Y = 0 or 4 with p=½ — both E=2, Var 0 vs 4; (2) weighted coin → 0.1875 via E[X²]−μ²; (3) <span class="eq">np.random.normal(0,1,100000).var()</span> ≈ 1.</p>
 </div>
 
+<!-- ============ 13. JOINT DENSITIES ============ -->
+<h2><span class="num">13</span>Joint densities — two random variables at once</h2>
+
+<h3>Intuition — the honest, complete picture</h3>
+<p>So far each random variable described one experiment alone. Real questions involve pairs — packet size <em>and</em> latency, temperature <em>and</em> battery, token <em>and</em> position. The <strong>joint distribution</strong> is the complete picture: the weights assigned to <em>pairs</em> of outcomes, keeping the coupling between X and Y.</p>
+
+<div class="formula">joint PMF: p(x, y) = P(X = x, Y = y) &nbsp;&nbsp;·&nbsp;&nbsp; joint PDF: f(x, y) — mass per unit area</div>
+
+<ul>
+  <li><strong>Discrete = a table.</strong> Two dice: 36 cells, each with weight 1/36. The joint PMF is a table of weights over (x, y) pairs; the weights over all cells sum to 1.</li>
+  <li><strong>Continuous = a surface.</strong> f(x, y) is mass per unit <em>area</em> over the (x, y)-plane; probabilities are <em>volumes</em> under the surface: <span class="eq">P((X, Y) ∈ R) = ∫∫_R f(x, y) dx dy</span>, and the total volume under the surface is 1.</li>
+  <li><strong>Independence = factorization.</strong> X and Y are independent iff <span class="eq">p(x, y) = p(x)·p(y)</span> (or <span class="eq">f(x, y) = f(x)·f(y)</span>): every cell is the product of its row and column totals. Test any table by multiplying the marginals (section 14) and comparing. Independence means knowing X tells you <em>nothing</em> about Y — the joint is fully determined by the two single-variable distributions.</li>
+</ul>
+
+<div class="stage">
+  <div class="stage-title">The unit square — the simplest joint: X, Y independent uniforms on [0,1]</div>
+  <svg class="fig" viewBox="0 0 470 300" width="470" style="background:var(--code-bg);border:1px solid var(--line);border-radius:8px;">
+    <rect x="40" y="30" width="200" height="200" fill="var(--card2)" stroke="var(--line)" stroke-width="2"/>
+    <polygon points="40,30 240,30 40,230" fill="var(--good)" opacity="0.35"/>
+    <line x1="40" y1="30" x2="240" y2="230" stroke="var(--warn)" stroke-width="2"/>
+    <text x="140" y="120" style="fill:var(--good);font-size:12px" text-anchor="middle">X + Y ≤ 1</text>
+    <text x="300" y="100" style="fill:var(--accent);font-size:12px">f(x,y) = 1 everywhere</text>
+    <text x="300" y="120" style="fill:var(--ink-dim);font-size:11px">flat slab of height 1 —</text>
+    <text x="300" y="137" style="fill:var(--ink-dim);font-size:11px">every region's probability</text>
+    <text x="300" y="154" style="fill:var(--ink-dim);font-size:11px">is just its area</text>
+    <text x="300" y="190" style="fill:var(--good);font-size:11px">P(X+Y ≤ 1) = ½</text>
+    <text x="300" y="207" style="fill:var(--ink-dim);font-size:11px">triangle: ½ × 1 × 1 = ½</text>
+    <line x1="40" y1="248" x2="240" y2="248" stroke="var(--line)"/>
+    <text x="140" y="266" style="fill:var(--ink-dim);font-size:10px" text-anchor="middle">X →</text>
+    <line x1="24" y1="230" x2="24" y2="30" stroke="var(--line)"/>
+    <text x="16" y="135" style="fill:var(--ink-dim);font-size:10px" text-anchor="middle" transform="rotate(-90 16 135)">Y →</text>
+  </svg>
+  <div class="caption">Independent uniforms: the joint density is a flat slab of height 1, so probabilities are areas. X+Y ≤ 1 is the lower-left triangle — area ½. When the surface is not flat, areas become volumes (integrals) and the game gets real — that's the workhorse f(x,y) = x+y next.</div>
+</div>
+
+<div class="card key">
+  <h4>The workhorse — f(x, y) = x + y on the unit square</h4>
+  <p>Check first that it's a valid density: <span class="eq">∫₀¹∫₀¹ (x+y) dx dy = 1</span> (total volume 1 ✓). It does <em>not</em> factorize into g(x)·h(y), so the pair is <strong>dependent</strong> — knowing Y changes X's distribution. But here's the subtle part: the surface is tallest at the top-right corner (1,1), yet the conditional mean of X actually <em>decreases</em> as Y grows (section 16 computes it: 2/3 → 5/9). "Tallest corner" ≠ "positively correlated" — the mass also spreads along the top edge and the right edge, and the dependence direction is only visible through the conditional/marginal machinery (sections 14–16). Keep this example: it's the workhorse for everything that follows.</p>
+</div>
+
+<!-- ============ 14. MARGINAL DENSITIES ============ -->
+<h2><span class="num">14</span>Marginal densities — pooling the other variable away</h2>
+
+<h3>Intuition — the joint table's column totals</h3>
+<p>The joint is the full picture, but often you only care about X — "who cares what Y did; pool over all of it." The <strong>marginal</strong> is exactly that: the single-variable distribution you get by summing (discrete) or integrating (continuous) over every possible Y.</p>
+
+<div class="formula">discrete: p(x) = Σ_y p(x, y) &nbsp;&nbsp;·&nbsp;&nbsp; continuous: f(x) = ∫ f(x, y) dy</div>
+
+<p>Read it straight off a table: the marginal of X is the <strong>column totals</strong>; the marginal of Y is the row totals. In the two-dice table (36 cells of 1/36), each column sums to 6/36 = 1/6 — X alone is uniform, as it must be. The marginal has <em>forgotten</em> Y completely — it's the projection of the joint onto the X-axis. (This is the information loss you asked about: the joint knows the pairing, the marginal doesn't — exactly like a 2D point's x-coordinate knows nothing about its y.)</p>
+
+<div class="stage">
+  <div class="stage-title">Marginalizing the workhorse — f(x,y) = x+y → f(x) = x + ½</div>
+  <div class="pair">
+    <svg class="fig" viewBox="0 0 260 250" width="260" style="background:var(--code-bg);border:1px solid var(--line);border-radius:8px;">
+      <defs>
+        <linearGradient id="mgrad14" x1="0" y1="1" x2="1" y2="0">
+          <stop offset="0" stop-color="var(--accent)" stop-opacity="0.22"/>
+          <stop offset="1" stop-color="var(--accent)" stop-opacity="0.9"/>
+        </linearGradient>
+      </defs>
+      <rect x="30" y="20" width="200" height="200" fill="url(#mgrad14)" stroke="var(--line)" stroke-width="2"/>
+      <line x1="80" y1="20" x2="80" y2="220" stroke="var(--warn)" stroke-width="1.5" stroke-dasharray="3 3"/>
+      <line x1="130" y1="20" x2="130" y2="220" stroke="var(--warn)" stroke-width="1.5" stroke-dasharray="3 3"/>
+      <line x1="180" y1="20" x2="180" y2="220" stroke="var(--warn)" stroke-width="1.5" stroke-dasharray="3 3"/>
+      <text x="130" y="14" style="fill:var(--ink-dim);font-size:9px" text-anchor="middle">f(x,y) = x+y (darker = taller)</text>
+      <text x="105" y="240" style="fill:var(--warn);font-size:9px" text-anchor="middle">sum each column →</text>
+    </svg>
+    <svg class="fig" viewBox="0 0 260 250" width="260" style="background:var(--code-bg);border:1px solid var(--line);border-radius:8px;">
+      <line x1="30" y1="210" x2="230" y2="210" stroke="var(--line)" stroke-width="2"/>
+      <line x1="30" y1="210" x2="30" y2="60" stroke="var(--line)" stroke-width="2"/>
+      <polygon points="30,210 130,140 230,70 230,210" fill="var(--accent)" opacity="0.15"/>
+      <polyline points="30,210 130,140 230,70" fill="none" stroke="var(--accent)" stroke-width="2.5"/>
+      <text x="130" y="12" style="fill:var(--accent);font-size:10px" text-anchor="middle">f(x) = x + ½</text>
+      <text x="130" y="120" style="fill:var(--ink-dim);font-size:9px" text-anchor="middle">area = 1 ✓</text>
+      <text x="130" y="232" style="fill:var(--ink-dim);font-size:9px" text-anchor="middle">x →</text>
+    </svg>
+  </div>
+  <div class="caption">Left: the joint surface with columns outlined — the marginal sums the whole column at each x. Right: the result, f(x) = x + ½, a straight ramp. X is <em>not</em> uniform even though the domain is a square: the y-dependence leaks into the x-marginal as a slope.</div>
+</div>
+
+<div class="card warn">
+  <h4>The trap — a slice is not a marginal</h4>
+  <p>Fixing y and looking at f(x, y₀) — a <em>slice</em> of the surface — is neither the marginal nor the conditional. The slice has the right <em>shape</em> in x but the wrong normalization (its area over x is not 1). The marginal integrates over <em>all</em> y; the conditional (section 15) normalizes the slice to total 1. Three objects, three questions: "ignoring Y" (marginal), "given Y = y" (conditional), "the joint itself" (slice).</p>
+</div>
+
+<p><strong>Not everything is a marginal.</strong> The sum S = X + Y of two dice is a <em>derived distribution</em> — a function of the pair, not a projection — and its PMF is the triangle 1/36, 2/36, …, 6/36, …, 1/36 (convolution; lecture 12). Marginals pool <em>one variable away</em>; derived distributions transform the pair into something new. Same instinct as section 11: functions of random variables are their own topic.</p>
+
+<!-- ============ 15. CONDITIONAL DENSITY ============ -->
+<h2><span class="num">15</span>Conditional density — the slice, renormalized</h2>
+
+<h3>Intuition — conditioning is the same move as section 01</h3>
+<p>Bayes' theorem started as "given B, zoom into the B-chunk and reweight." Nothing changes when the "given" is a <em>value of a random variable</em> instead of an event: you zoom into the row (or column) where Y = y and renormalize so the weights in that row sum to 1.</p>
+
+<div class="formula">discrete: p(x | y) = p(x, y) / p(y) &nbsp;&nbsp;·&nbsp;&nbsp; continuous: f(x | y) = f(x, y) / f(y)</div>
+
+<p>The joint table again: the conditional of X given Y = y is the <strong>row y, divided by the row total</strong>. Division by p(y) is just renormalization — "within everyone with Y = y, what share has X = x?". Same for densities: the conditional density is the slice of the surface at height y, rescaled so the area under it is 1.</p>
+
+<div class="card key">
+  <h4>The shape is the slice — normalization is the only change</h4>
+  <p>For a fixed y, p(y) (or f(y)) is a constant — it doesn't depend on x. So <strong>the shape of f(x | y) as a function of x is exactly the shape of the slice f(x, y)</strong>; dividing by f(y) only sets the total area to 1. Contrast with the marginal (section 14), which pooled <em>all</em> y: marginal = "forget Y", conditional = "pretend you know Y exactly".</p>
+</div>
+
+<div class="stage">
+  <div class="stage-title">Workhorse slices — f(x,y) = x+y, three "givens"</div>
+  <div class="pair">
+    <svg class="fig" viewBox="0 0 200 180" width="200" style="background:var(--code-bg);border:1px solid var(--line);border-radius:8px;">
+      <line x1="40" y1="150" x2="190" y2="150" stroke="var(--line)" stroke-width="2"/>
+      <polygon points="40,150 190,10 190,150" fill="var(--accent)" opacity="0.15"/>
+      <polyline points="40,150 190,10" fill="none" stroke="var(--accent)" stroke-width="2.5"/>
+      <text x="115" y="12" style="fill:var(--accent);font-size:9px" text-anchor="middle">y=0: f(x|0) = 2x</text>
+    </svg>
+    <svg class="fig" viewBox="0 0 200 180" width="200" style="background:var(--code-bg);border:1px solid var(--line);border-radius:8px;">
+      <line x1="40" y1="150" x2="190" y2="150" stroke="var(--line)" stroke-width="2"/>
+      <polygon points="40,150 40,115 190,45 190,150" fill="var(--accent)" opacity="0.15"/>
+      <polyline points="40,115 190,45" fill="none" stroke="var(--accent)" stroke-width="2.5"/>
+      <text x="115" y="12" style="fill:var(--accent);font-size:9px" text-anchor="middle">y=½: f(x|½) = x+½</text>
+    </svg>
+    <svg class="fig" viewBox="0 0 200 180" width="200" style="background:var(--code-bg);border:1px solid var(--line);border-radius:8px;">
+      <line x1="40" y1="150" x2="190" y2="150" stroke="var(--line)" stroke-width="2"/>
+      <polygon points="40,150 40,103.3 190,56.7 190,150" fill="var(--accent)" opacity="0.15"/>
+      <polyline points="40,103.3 190,56.7" fill="none" stroke="var(--accent)" stroke-width="2.5"/>
+      <text x="115" y="12" style="fill:var(--accent);font-size:9px" text-anchor="middle">y=1: f(x|1) = (2/3)(x+1)</text>
+    </svg>
+  </div>
+  <div class="caption">Same joint, three givens. Given y=0, X is pushed hard toward 1 (density 2x — twice as much mass at x=1 as at x=0). Given y=1 the density is taller but flatter — the relative preference for large x weakens, and X's conditional mean drops from 2/3 to 5/9 (section 16). Middle panel (y=½) coincides with the marginal f(x) = x+½ — a coincidence of this example (f(½) = 1), not a rule.</div>
+</div>
+
+<div class="card chat">
+  <h4>Bayes on densities — the mammogram tree becomes an integral</h4>
+  <p>The section 01 machinery carries over with sums becoming integrals:</p>
+  <div class="formula small">f(x | y) = <span class="c1">f(y | x)·f(x)</span> / <span class="c2">∫ f(y | x′)·f(x′) dx′</span></div>
+  <p>The numerator is the joint f(x, y) written two ways (chain rule: f(x,y) = f(x|y)·f(y) = f(y|x)·f(x)); the denominator is the marginal f(y) — "total probability", integrated. The mammogram's 99/198 tree is the discrete special case; the integral is what you do when the "given" is continuous — sensor readings, embeddings, packet delays.</p>
+</div>
+
+<!-- ============ 16. CONDITIONAL EXPECTATION ============ -->
+<h2><span class="num">16</span>Conditional expectation — the group means, averaged</h2>
+
+<h3>Intuition — split, average within, then average the averages</h3>
+<p>You know E[X] — the balance point of X's distribution. <strong>Conditional expectation</strong> asks: knowing Y = y, where does X balance <em>now</em>? Same expectation machine (section 10), but the weights are the conditional distribution (section 15):</p>
+
+<div class="formula">E[X | Y = y] = Σ x·p(x|y) &nbsp;&nbsp;·&nbsp;&nbsp; E[X | Y = y] = ∫ x·f(x|y) dx</div>
+
+<p>For each fixed y this is a plain number — the mean of X <em>within</em> the Y = y group. But y itself is random, so as y varies you get a function of y — and composing it with the random Y makes <strong>E[X | Y] a random variable</strong>. This is the big conceptual step: one expression, two personalities — a number when y is given, a random variable when it isn't.</p>
+
+<div class="card key">
+  <h4>The tower property — E[E[X | Y]] = E[X]</h4>
+  <p>The group means, averaged over the groups (weighted by group size), give back the overall mean — a weighted average of weighted averages, the same machine run twice. And it's not a curiosity: <strong>E[X | Y] is the best predictor of X from Y</strong> — the function g(Y) that minimizes E[(X − g(Y))²] is exactly the conditional expectation. This is where linear regression comes from, and what a neural net trained on squared error approximates.</p>
+</div>
+
+<div class="stage">
+  <div class="stage-title">Two dice: X = first die, S = X + Y. Given X, S's conditional mean is X + 3.5</div>
+  <svg class="fig" viewBox="0 0 600 250" width="600" style="background:var(--code-bg);border:1px solid var(--line);border-radius:8px;">
+    <line x1="60" y1="200" x2="560" y2="200" stroke="var(--line)" stroke-width="2"/>
+    <text x="560" y="220" style="fill:var(--ink-dim);font-size:10px" text-anchor="middle">X (first die) →</text>
+    <polyline points="80,190 168,166 256,142 344,118 432,94 520,70" fill="none" stroke="var(--accent)" stroke-width="2.5"/>
+    <line x1="60" y1="130" x2="560" y2="130" stroke="var(--warn)" stroke-width="1.5" stroke-dasharray="5 4"/>
+    <text x="66" y="124" style="fill:var(--warn);font-size:10px">E[S] = 7</text>
+    <line x1="256" y1="200" x2="256" y2="142" stroke="var(--good)" stroke-width="2"/>
+    <circle cx="256" cy="142" r="4" fill="var(--good)"/>
+    <text x="256" y="236" style="fill:var(--good);font-size:10px" text-anchor="middle">X=3: E[S|X=3] = 3 + 3.5 = 6.5</text>
+    <text x="310" y="30" style="fill:var(--ink-dim);font-size:10.5px">E[S | X] = X + 3.5 — a line of slope 1</text>
+    <text x="310" y="46" style="fill:var(--ink-dim);font-size:10.5px">tower: E[E[S|X]] = 3.5 + 3.5 = 7 ✓</text>
+  </svg>
+  <div class="caption">Given X = 3, S = 3 + Y ranges 4..9 uniformly, so its mean is 6.5 — the group mean. The group means ride along X at slope 1. Averaging them over X's distribution recovers E[S] = 7 — the dashed line — the tower property in action.</div>
+</div>
+
+<h3>Workhorse, continued — the x+y surface</h3>
+<p>With f(x, y) = x + y on the unit square, <span class="eq">f(x|y) = (x+y)/(y+½)</span> (section 15), so <span class="eq">E[X | Y=y] = ∫₀¹ x·(x+y)/(y+½) dx = (1/3 + y/2)/(y + ½)</span>:</p>
+<ul>
+  <li>y = 0: (1/3)/(½) = <strong>2/3</strong> · y = 1: (1/3 + ½)/(3/2) = (5/6)/(3/2) = <strong>5/9</strong> ≈ 0.556 · y = ½: (1/3 + ¼)/1 = <strong>7/12</strong> = E[X] (the coincidence from section 15).</li>
+  <li><strong>The dependence direction:</strong> knowing Y is large makes X smaller on average. The conditional density f(x|y) ∝ x + y flattens as y grows, shifting weight off the extreme x = 1 toward moderate x. This is the subtlety from section 13: the surface peaks at (1,1), yet X and Y are (slightly) <em>negatively</em> associated — the "tallest corner" intuition is wrong.</li>
+  <li><strong>Tower by hand:</strong> <span class="eq">E[E[X|Y]] = ∫₀¹ (1/3 + y/2)/(y+½) · (y+½) dy = ∫₀¹(1/3 + y/2)dy = 7/12 = E[X]</span> — the (y+½) cancels, the machinery closes the loop.</li>
+</ul>
+
+<div class="card tip">
+  <h4>Why this is the lecture that matters for LLMs</h4>
+  <ul>
+    <li><strong>Next-token prediction is conditional.</strong> The model estimates P(token | context) — a conditional distribution (section 15's machinery). Perplexity (info theory, next) is built from the conditional expectation of −ln P(token | context).</li>
+    <li><strong>Regression IS conditional expectation.</strong> The best predictor of Y given X in the mean-squared sense is E[Y | X] — whether the predictor is linear regression or a deep net. The tower property is why "predict the conditional mean" is the right default for squared error.</li>
+    <li><strong>Embedded tie:</strong> the Kalman filter's measurement update is E[state | measurements] — a conditional expectation — made tractable by Gaussians. Same object you'll meet in the EKF.</li>
+  </ul>
+</div>
+
+<div class="card chat">
+  <h4>Gut checks</h4>
+  <ul>
+    <li>Two dice, S = X + Y: E[S | X=1] = 4.5, E[S | X=6] = 9.5; tower: E[E[S|X]] = E[X + 3.5] = 7 ✓.</li>
+    <li>Workhorse: verify E[X|Y=0] = 2/3 and E[X|Y=1] = 5/9 by hand, then the tower integral above — the (y+½) cancels.</li>
+    <li>Sanity: if X and Y are independent, E[X | Y] = E[X] — knowing Y changes nothing, because the conditional distribution equals the marginal.</li>
+  </ul>
+</div>
+
 <footer>
-  Probability Phase 0 — StatQuest intuition layer (2026-08-11) · math backbone (Deisenroth ch. 6) + more sections to come as you progress
+  Probability Phase 0 — StatQuest intuition layer (2026-08-11) · MIT 6.041 backbone, sections 09–16 (2026-08-15) · more sections as you progress
 </footer>
 
 </div>
