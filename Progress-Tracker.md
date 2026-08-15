@@ -23,10 +23,10 @@
 - [ ] Entropy, cross-entropy, KL divergence, perplexity *(sources: Jurafsky & Martin ch. 3 · 3Blue1Brown "coding theory" series · MacKay "Information Theory, Inference, and Learning Algorithms" ch. 1–6)* — *page generated 2026-08-15: `InformationTheory/information-theory-phase0-summary.html` (sections 01–06 — I = −log p + halving ladder, entropy = E[surprise] with interactive H(p) curve, cross entropy H(p,q) = H(p) + KL with two-distribution interactive demo, perplexity = 2^H(p,q), LLM training bridge). Covered (page sections 01–06): intuition, I = −log p, entropy, cross-entropy, KL-as-the-gap, perplexity definition, LLM training bridge. **NOT yet covered (pending 2026-08-15):** KL divergence full treatment (properties, Gibbs inequality, asymmetry), joint & conditional entropy H(X,Y)/H(X|Y) + chain rule, mutual information, differential entropy (continuous), source-coding theorem (why H = min bits/symbol), 3B1B coding-theory primer, Jurafsky ch. 3 perplexity worked examples, MacKay ch. 1–6 reference*
 
 **Optimization**
-- [ ] Gradient descent / SGD / Adam concepts
+- [ ] Gradient descent / SGD / Adam concepts — *concept primer done 2026-08-15: `Optimization/optimization-primer.html` (~20 min — loss as expectation, GD = "linearize (Taylor) &amp; step downhill" with interactive LR demo, local-minima landscape demo, SGD = Monte-Carlo gradient estimate, Adam names-only, bridge to micrograd). GD loop itself lands inside micrograd (Sun)*
 
 **🏁 Milestone: micrograd implemented** (Karpathy video 3, ~100 lines Python)
-- [ ] `micrograd` coded from scratch and trained a tiny net
+- [ ] `micrograd` coded from scratch and trained a tiny net — *🛡️ LOCKED for Sun 2026-08-16 (Phase 0 gate; 2 h hands-on). Prep: read the optimization primer first (20 min), then code. Probability exercises deferred → daily 5-min flashback loop; info-theory gaps deferred → Phase 1/2*
 
 ---
 
@@ -84,7 +84,7 @@
 - [ ] Jurafsky & Martin ch. 3 — perplexity worked examples on real text
 - [ ] MacKay ch. 1–6 (reference reading)
 
-**3. Optimization (Sat) & micrograd (Sun) — unchanged, one slot later than the original plan**
+**3. Optimization → concepts covered by the primer page (2026-08-15); the GD loop itself is folded into micrograd day. micrograd 🛡️ LOCKED for Sun 16 (the Phase 0 gate). Deferred by choice: probability exercises → daily 5-min flashback loop (one Probability I Review Checklist item per morning) + MIT 6.041 exercises to a later weekend; info-theory gaps → Phase 1/2 (they land better with perplexity/attention context)**
 
 ---
 
@@ -271,8 +271,8 @@
 | Thu 13 | Probability II — Bayes, MLE, conditional (StatQuest; Blitzstein Stat 110) — **✅ Bayes numerator intuition + expectation/variance discussion done (2026-08-13); MIT 6.041 wrap-up pending** | Re-derive E[X] = ∫x·p(x)dx from memory | — |
 | Fri 14→15 (shifted) | **Probability wrap-up — MIT 6.041** — **✅ theory done 2026-08-15** (videos 1–12 skimmed → summary sections 09–16); **⏳ remaining: OCW problem-set exercises + Probability I Review Checklist** (the hands-on step). mml-book/Deisenroth **skipped** | | |
 | Fri 14 | Info theory — entropy, cross-entropy, KL, perplexity (Jurafsky ch. 3; 3B1B coding theory) — **✅ done 2026-08-15 (shifted one day): page generated — entropy + cross-entropy + KL-as-gap + perplexity; Jurafsky/MacKay reference reading still open** | Explain entropy in ≤ 3 sentences out loud | Embedded C I: pointers + memory layout (K&R ch. 5) |
-| Sat 15 | Optimization — gradient descent / SGD / Adam (Karpathy Zero-to-Hero 1–3) — **⏳ pending (shifted: probability exercises + info-theory gaps land first)** | Link GD to Taylor: "linearize the loss, step downhill" | — |
-| Sun 16 | 🏁 **micrograd from scratch** (2 h, hands-on) — Phase 0 complete | After coding it, re-derive backprop by hand, no notes | Phase 1 kickoff: history of NLP timeline (first 3 eras) |
+| Sat 15 | Optimization — gradient descent / SGD / Adam (Karpathy Zero-to-Hero 1–3) — **✅ concepts covered 2026-08-15 via the primer page (`Optimization/optimization-primer.html`); the GD loop itself lands inside micrograd (Sun)** | Link GD to Taylor: "linearize the loss, step downhill" | — |
+| Sun 16 | 🏁 **micrograd from scratch** (2 h, hands-on) — Phase 0 complete — **🛡️ LOCKED (2026-08-15); prep = read the optimization primer (20 min), then code** | After coding it, re-derive backprop by hand, no notes | Phase 1 kickoff: history of NLP timeline (first 3 eras) |
 
 **Why this order (retention-first):** probability builds directly on integration (expectation = ∫x·p(x)dx, CDF = antiderivative) — fresh calculus, immediate payoff; info theory builds on probability (entropy = −Σp·ln p); optimization is just Taylor/linearization + the chain rule; micrograd then *uses* every piece. Each day's booster re-activates the previous day, and the two tracks stay in separate sessions.
 

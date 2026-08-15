@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Optimization — GD, SGD &amp; Adam (Phase 0 primer)</title>
+<style>
+  :root {
+    --bg: #0f172a;
+    --bg2: #1e293b;
+    --card: #1e293b;
+    --card2: #26334d;
+    --ink: #e2e8f0;
+    --ink-dim: #94a3b8;
+    --accent: #38bdf8;
+    --accent2: #a78bfa;
+    --good: #34d399;
+    --warn: #fbbf24;
+    --bad: #f87171;
+    --line: #334155;
+    --code-bg: #0b1220;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.6;
+    padding: 2rem 1rem;
+  }
+  .wrap { max-width: 900px; margin: 0 auto; }
+
+  header { text-align: center; padding: 2rem 1rem 2.5rem; border-bottom: 1px solid var(--line); margin-bottom: 2rem; }
+  header h1 { font-size: 2rem; color: var(--accent); letter-spacing: -0.02em; }
+  header p { color: var(--ink-dim); margin-top: 0.5rem; max-width: 660px; margin-left: auto; margin-right: auto; }
+  .badge {
+    display: inline-block; background: var(--card2); border: 1px solid var(--line);
+    border-radius: 999px; padding: 0.25rem 0.9rem; font-size: 0.8rem; color: var(--ink-dim); margin: 0.25rem;
+  }
+
+  h2 {
+    font-size: 1.4rem; color: var(--accent); margin: 3rem 0 1rem;
+    padding-bottom: 0.4rem; border-bottom: 2px solid var(--line);
+  }
+  h2 .num {
+    display: inline-block; background: var(--accent); color: #06283d;
+    border-radius: 8px; padding: 0.05rem 0.6rem; font-size: 1rem; margin-right: 0.6rem;
+  }
+  h3 { color: var(--accent2); margin: 1.4rem 0 0.5rem; font-size: 1.05rem; }
+
+  p { margin: 0.6rem 0; }
+  .dim { color: var(--ink-dim); }
+
+  .card {
+    background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+    padding: 1.2rem 1.4rem; margin: 1rem 0;
+  }
+  .card.tip { border-left: 4px solid var(--good); }
+  .card.warn { border-left: 4px solid var(--warn); }
+  .card.key { border-left: 4px solid var(--accent2); }
+  .card.chat { border-left: 4px solid var(--accent); }
+  .card h4 { color: var(--accent); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.5rem; }
+
+  code {
+    background: var(--code-bg); border: 1px solid var(--line); border-radius: 5px;
+    padding: 0.1rem 0.4rem; font-family: "SF Mono", Menlo, Consolas, monospace; font-size: 0.88em; color: #7dd3fc;
+  }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.92rem; }
+  th { background: var(--card2); color: var(--accent); text-align: left; padding: 0.5rem 0.8rem; border: 1px solid var(--line); }
+  td { padding: 0.5rem 0.8rem; border: 1px solid var(--line); vertical-align: top; }
+
+  /* ============ FIGURES ============ */
+  .stage {
+    background: var(--card2); border: 1px solid var(--line); border-radius: 12px;
+    padding: 1.5rem; margin: 1rem 0; text-align: center;
+  }
+  .stage .caption { color: var(--ink-dim); font-size: 0.85rem; margin-top: 0.8rem; }
+  .stage-title { color: var(--accent2); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; }
+
+  .fig { max-width: 100%; }
+  .fig text { font-family: "SF Mono", Menlo, Consolas, monospace; }
+
+  .pair { display: flex; justify-content: center; gap: 1.2rem; flex-wrap: wrap; align-items: flex-start; }
+  .ctrl { text-align: left; max-width: 460px; margin: 0.8rem auto; }
+  .ctrl label { display: block; font-size: 0.85rem; color: var(--ink-dim); margin: 0.5rem 0 0.2rem; }
+
+  input[type="range"] { width: 100%; accent-color: var(--accent); cursor: pointer; }
+  .readout { font-family: "SF Mono", Menlo, Consolas, monospace; font-size: 0.85rem; color: var(--ink); margin-top: 0.6rem; }
+  .readout b { color: var(--warn); }
+
+  .formula {
+    background: var(--code-bg); border: 1px solid var(--line); border-radius: 10px;
+    padding: 1.2rem; text-align: center; font-size: 1.2rem; margin: 1rem 0; color: #a5f3fc;
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+  }
+  .formula .c1 { color: var(--accent); }
+  .formula .c2 { color: var(--warn); }
+  .formula .c3 { color: var(--good); }
+  .formula.small { font-size: 1.0rem; }
+
+  ul, ol { margin: 0.6rem 0 0.6rem 1.4rem; }
+  li { margin: 0.3rem 0; }
+  .eq { font-family: "SF Mono", Menlo, Consolas, monospace; }
+
+  footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--line); color: var(--ink-dim); font-size: 0.85rem; text-align: center; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>Optimization — Gradient Descent, SGD &amp; Adam</h1>
+  <p>A ~20-minute conceptual primer before micrograd. Read this, play with the two demos, and you'll recognize every piece of tomorrow's 100-line implementation: the loss, the gradient, the step. One sentence to carry out: <em>linearize the loss, step downhill, repeat.</em></p>
+  <div>
+    <span class="badge">Karpathy</span>
+    <span class="badge">Gradient Descent</span>
+    <span class="badge">SGD</span>
+    <span class="badge">Adam</span>
+    <span class="badge">Taylor</span>
+    <span class="badge">interactive</span>
+  </div>
+</header>
+
+<div class="card key">
+  <h4>Prereqs — everything this page leans on</h4>
+  <ul>
+    <li><strong>Derivatives &amp; the chain rule</strong> — Calculus page sections 03–06 (the derivative is the slope; the chain rule multiplies slopes through a pipeline).</li>
+    <li><strong>Taylor series</strong> — Calculus page section 15: <span class="eq">f(x+Δ) ≈ f(x) + f′(x)·Δ</span> is the local linearization that gradient descent exploits.</li>
+    <li><strong>Expectation = weighted average</strong> — Probability sections 10–11: a loss is an expectation; its gradient is an expectation of gradients; SGD estimates it by sampling (your numpy Monte-Carlo checks).</li>
+    <li><strong>The loss you'll minimize</strong> — squared error (regression) and cross-entropy (classification) — Probability section 08 (least squares = MLE under normal noise) and Information Theory sections 04–06.</li>
+  </ul>
+</div>
+
+<!-- ============ 1. THE PROBLEM ============ -->
+<h2><span class="num">01</span>The problem — pick θ to minimize the loss</h2>
+
+<p>Every machine-learning task reduces to one move: <strong>choose parameters θ so that a loss function L(θ) is as small as possible.</strong> The loss measures how wrong the model is:</p>
+
+<ul>
+  <li><strong>Regression:</strong> L = average squared error between predictions and truth — the <span class="eq">(y − ŷ)²</span> machine you know from variance (Probability section 12).</li>
+  <li><strong>Classification / LLMs:</strong> L = cross-entropy <span class="eq">H(p,q)</span> — "how many extra bits your model pays for believing q when reality is p" (Info Theory sections 04–05).</li>
+  <li><strong>Both are expectations:</strong> <span class="eq">L(θ) = E[ℓ(x, y; θ)]</span> — the average cost over all the data, using the Probability section 11 machine. Data in, cost out.</li>
+</ul>
+
+<div class="card key">
+  <h4>The loop that never changes</h4>
+  <ol>
+    <li><strong>Forward:</strong> feed data through the model → predictions.</li>
+    <li><strong>Loss:</strong> compare predictions to truth → one number.</li>
+    <li><strong>Gradient:</strong> compute how the loss changes with each parameter — the slope of L at θ.</li>
+    <li><strong>Step:</strong> nudge θ downhill, against the gradient. Repeat ①–④ thousands of times.</li>
+  </ol>
+  <p>θ is a vector with thousands to millions of entries, so the "landscape" of L lives in a high-dimensional space — but the mechanics are exactly the 1D story of section 02. Nothing else about training is more fundamental than this loop.</p>
+</div>
+
+<!-- ============ 2. GRADIENT DESCENT ============ -->
+<h2><span class="num">02</span>Gradient descent — linearize, step downhill</h2>
+
+<h3>The 1D recipe first</h3>
+<p>Take <span class="eq">f(x) = x²</span>. At any x, the derivative <span class="eq">f′(x) = 2x</span> tells you which way f increases. To decrease f, step <em>against</em> the derivative:</p>
+
+<div class="formula">x ← x − <span class="c2">η</span>·f′(x) &nbsp;&nbsp;·&nbsp;&nbsp; θ ← θ − <span class="c2">η</span>·∇L(θ)</div>
+
+<p><strong>Why this is Taylor in disguise</strong> (Calculus section 15): for a small step Δ, <span class="eq">f(x+Δ) ≈ f(x) + f′(x)·Δ</span> — the loss is locally a straight line with slope f′(x). If f′(x) &gt; 0, f rises to the right, so step left (Δ = −η·f′(x)); if f′(x) &lt; 0, step right. <strong>η (the learning rate) is how far you trust that local linearization.</strong> Too big and the approximation breaks (you overshoot past the minimum); too small and you crawl.</p>
+
+<div class="stage">
+  <div class="stage-title">Gradient descent on a bowl — slide η and watch the steps</div>
+  <svg id="gdSvg" class="fig" viewBox="0 0 600 300" width="600" style="background:var(--code-bg);border:1px solid var(--line);border-radius:8px;"></svg>
+  <div class="ctrl">
+    <label>learning rate η: <b id="gdLR">0.10</b></label>
+    <input type="range" id="gdLRS" min="0.01" max="1.5" step="0.01" value="0.1">
+    <label>start x₀: <b id="gdX0">+3.0</b></label>
+    <input type="range" id="gdX0S" min="-4.5" max="4.5" step="0.1" value="3">
+    <div class="readout" id="gdReadout"></div>
+  </div>
+  <div class="caption">40 steps on f(x) = x² (minimum at x = 0). η = 0.1 crawls steadily; η = 0.5 lands almost exactly on the minimum in one step; η = 1.0 flips sign forever (x ← −x, the update is exact); η &gt; 1 diverges. The learning rate is the single most important number you'll tune tomorrow.</div>
+</div>
+
+<h3>Multiple dimensions — the gradient vector</h3>
+<p>With thousands of parameters, the derivative becomes the <strong>gradient</strong> ∇L — a vector whose entries are the partial derivatives ∂L/∂θᵢ. It points <em>uphill</em>, in the direction of steepest increase (perpendicular to the level curves — the same level-lines picture from Linear Algebra's duality section). Stepping against it, <span class="eq">θ ← θ − η·∇L</span>, is the steepest-descent move. That single line — with the gradient supplied by backprop — is the entire training loop.</p>
+
+<!-- ============ 3. LANDSCAPES ============ -->
+<h2><span class="num">03</span>Landscapes aren't bowls — local minima, and where you start</h2>
+
+<p>Real losses are bumpy: many valleys, some shallow, some deep. Gradient descent walks into whichever valley it started in — unless the learning rate is big enough to leap a ridge.</p>
+
+<div class="stage">
+  <div class="stage-title">A bumpy landscape — start position and η decide which valley you land in</div>
+  <svg id="bumpSvg" class="fig" viewBox="0 0 600 300" width="600" style="background:var(--code-bg);border:1px solid var(--line);border-radius:8px;"></svg>
+  <div class="ctrl">
+    <label>learning rate η: <b id="bumpLR">0.10</b></label>
+    <input type="range" id="bumpLRS" min="0.01" max="0.9" step="0.01" value="0.1">
+    <label>start x₀: <b id="bumpX0">+1.5</b></label>
+    <input type="range" id="bumpX0S" min="-2" max="2" step="0.1" value="1.5">
+    <div class="readout" id="bumpReadout"></div>
+  </div>
+  <div class="caption">Two valleys joined by a ridge: the global min at x ≈ −1.5 (f ≈ −3.2, green tick) and a shallow local min at x ≈ +1.2 (f ≈ 0.4), separated by a ridge crest at f ≈ 2.3. Start at +1.5 with η = 0.1: <em>trapped</em> in the local min. Start at −1.5: straight into the global min. Crank η to ~0.8 from +1.5: the steps leap the ridge and roll into the global valley. (Start exactly at a minimum and <em>no</em> η moves you — the gradient is zero there.) <em>Where you start and how big your steps are decide what you find.</em></div>
+</div>
+
+<div class="card warn">
+  <h4>Honest caveat — don't over-fear minima in deep learning</h4>
+  <ul>
+    <li><strong>High-dimensional losses have many local minima, but they're mostly "good enough"</strong> — in overparameterized networks, training loss often reaches near zero anyway (the interpolation regime), and the generalization gap is the real concern, not the valley you landed in.</li>
+    <li><strong>Saddle points dominate in high dimensions</strong> — points where the slope is ~0 but it's not a minimum. They're more common than true minima and trickier to escape (which is part of why momentum and Adam, section 05, help).</li>
+    <li><strong>Initialization matters</strong> — that's why networks start with small random weights, not zeros or big values. You'll meet "how to init" as a real design choice later; for micrograd it's just "small random numbers."</li>
+  </ul>
+</div>
+
+<!-- ============ 4. GD VS SGD ============ -->
+<h2><span class="num">04</span>GD vs SGD — the gradient is an expectation</h2>
+
+<p>The loss is <span class="eq">L(θ) = E[ℓ(X; θ)]</span> — an average over data. Its gradient is <em>also</em> an expectation:</p>
+
+<div class="formula">∇L(θ) = E[∇ℓ(X; θ)] &nbsp;&nbsp;— gradient passes through expectation <span class="c1">(linearity, Prob §10)</span></div>
+
+<p>This one fact splits training into two flavors:</p>
+
+<table>
+  <tr><th></th><th>Full-batch GD</th><th>SGD (stochastic)</th></tr>
+  <tr><td><strong>Gradient estimate</strong></td><td>average over <em>all</em> data — exact</td><td>average over one sample or a small random <em>batch</em> — noisy</td></tr>
+  <tr><td><strong>Cost per step</strong></td><td>expensive (all data)</td><td>cheap (one batch)</td></tr>
+  <tr><td><strong>Direction</strong></td><td>true downhill</td><td>roughly downhill, wobbles</td></tr>
+  <tr><td><strong>Uses</strong></td><td>small problems, math proofs</td><td><strong>everything real</strong> — including LLM training</td></tr>
+</table>
+
+<div class="card key">
+  <h4>Why the noise is fine — and even useful</h4>
+  <ul>
+    <li><strong>Law of Large Numbers (Probability §09):</strong> a batch average of gradients converges to the true expectation as batch size grows — your numpy checks (binomial mean ≈ np) are the same move: sample, average, estimate. Training just iterates it.</li>
+    <li><strong>Noise is a feature:</strong> the wobble helps wander out of shallow valleys and flat spots a clean full-batch walk would stall in.</li>
+    <li><strong>Minibatch is the sweet spot:</strong> one sample = too noisy; all data = too slow. A few dozen to a few hundred samples per step is the default everywhere. "Batch size" is one of the dials you'll see in every training run.</li>
+  </ul>
+</div>
+
+<!-- ============ 5. ADAM ============ -->
+<h2><span class="num">05</span>Adam — names only (the upgrade you don't need tomorrow)</h2>
+
+<p>Plain GD uses one global step size η for every parameter. Adam — <em>adaptive moment estimation</em> — makes the step smarter per parameter, with three ideas:</p>
+
+<ul>
+  <li><strong>Momentum (velocity):</strong> keep a running average of past gradients, like a ball with inertia. Zig-zag directions cancel out; consistent downhill direction accumulates speed. Escapes flat spots faster.</li>
+  <li><strong>Per-parameter step sizes (RMSProp idea):</strong> track the average squared gradient of each parameter. Parameters with big past gradients get smaller steps (they're noisy/large); parameters with tiny gradients get bigger steps (they're stuck on a plateau). No more one-size-fits-all η.</li>
+  <li><strong>Bias correction:</strong> the running averages start at zero, so the first few steps are corrected to avoid a cold-start bias. A detail that matters in the first iterations only.</li>
+</ul>
+
+<p>Result: one default η (0.001-ish) that "just works" across problems — which is why Adam is the default optimizer in virtually every framework. <strong>For micrograd tomorrow, plain SGD is enough</strong> — Adam is the upgrade you'll reach for when you start tuning real networks.</p>
+
+<!-- ============ 6. BRIDGE TO MICROGRAD ============ -->
+<h2><span class="num">06</span>The bridge to micrograd — what tomorrow's 100 lines do</h2>
+
+<p>micrograd (Karpathy) is the minimal honest implementation of the loop above:</p>
+
+<ol>
+  <li><strong>Forward:</strong> build a tiny computation graph — every number is a node that remembers what made it (x, w·x, +, tanh, …). This is the chain-rule pipeline from Calculus section 06, as data.</li>
+  <li><strong>Loss:</strong> mean squared error, <span class="eq">L = (1/n)Σ(yᵢ − ŷᵢ)²</span> — the E[g(X)] machine with g = squared error; the same (x−μ)² as variance (Probability §12), the same least-squares-equals-MLE story (Probability §08).</li>
+  <li><strong>Backward (the star):</strong> <code>backward()</code> walks the graph from the loss back to the inputs, multiplying derivatives along each edge — the chain rule in ~20 lines. Every weight learns its gradient ∂L/∂wᵢ.</li>
+  <li><strong>Step:</strong> <span class="eq">w ← w − η·∇w</span> for every weight — section 02's line, executed on real data until the loss flattens.</li>
+</ol>
+
+<div class="card tip">
+  <h4>Readiness check — can you say this out loud? (the Day-4 booster)</h4>
+  <p><strong>"Linearize the loss, step downhill."</strong> Gradient descent = trust the local straight-line approximation (Taylor), move against the slope (−∇L), scaled by a learning rate that respects how far the linearization is valid. SGD = estimate that slope from a random batch instead of all data. Adam = per-parameter step sizes plus momentum. If you can expand each sentence, you're ready to write the code.</p>
+</div>
+
+<div class="card chat">
+  <h4>Gut checks (2 minutes, by hand)</h4>
+  <ul>
+    <li>f(x) = x², x = 3, η = 0.1: where's the next step? <em>x = 3 − 0.1·6 = 2.4.</em></li>
+    <li>Why does η = 1.0 on x² oscillate forever? <em>The update is x ← x − 2x = −x — an exact flip, never approaching 0.</em></li>
+    <li>Which is noisier, GD or SGD? Which is cheaper per step? <em>SGD on both counts — that's the trade.</em></li>
+    <li>Why does gradient pass through expectation? <em>Both are linear in the data; linearity (Probability §10) lets you move ∇ inside E.</em></li>
+  </ul>
+</div>
+
+<footer>
+  Optimization — Phase 0 primer (2026-08-15) · read before micrograd (Sun 2026-08-16) · builds on Calculus (Taylor §15, chain rule §06) · Probability (expectation §10–11, MLE §08) · Info Theory (cross-entropy §04–06)
+</footer>
+
+</div>
+
+<script>
+function svgEl(tag, attrs) {
+  var el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+  for (var k in attrs) el.setAttribute(k, attrs[k]);
+  return el;
+}
+</script>
+
+<script>
+/* ===== 02. GD on a bowl f(x)=x^2 ===== */
+(function () {
+  var svg = document.getElementById('gdSvg');
+  var lrS = document.getElementById('gdLRS'), lrR = document.getElementById('gdLR');
+  var x0S = document.getElementById('gdX0S'), x0R = document.getElementById('gdX0');
+  var ro = document.getElementById('gdReadout');
+  function f(x) { return x * x; }
+  function fp(x) { return 2 * x; }
+  function clear(s) { while (s.firstChild) s.removeChild(s.firstChild); }
+  function txt(s, x, y, str, a) { var t = svgEl('text', a || {}); t.setAttribute('x', x); t.setAttribute('y', y); t.textContent = str; s.appendChild(t); return t; }
+  function draw() {
+    clear(svg);
+    var eta = parseFloat(lrS.value), x0 = parseFloat(x0S.value);
+    lrR.textContent = eta.toFixed(2); x0R.textContent = (x0 > 0 ? '+' : '') + x0.toFixed(1);
+    svg.appendChild(svgEl('line', { x1: 60, y1: 250, x2: 560, y2: 250, stroke: 'var(--line)', 'stroke-width': 2 }));
+    svg.appendChild(svgEl('line', { x1: 60, y1: 250, x2: 60, y2: 40, stroke: 'var(--line)', 'stroke-width': 2 }));
+    txt(svg, 560, 270, 'x →', { style: 'fill:var(--ink-dim);font-size:11px', 'text-anchor': 'middle' });
+    txt(svg, 52, 30, 'f(x)', { style: 'fill:var(--ink-dim);font-size:11px' });
+    txt(svg, 60, 264, '−5', { style: 'fill:var(--ink-dim);font-size:9px', 'text-anchor': 'middle' });
+    txt(svg, 560, 264, '5', { style: 'fill:var(--ink-dim);font-size:9px', 'text-anchor': 'middle' });
+    var d = 'M', first = true;
+    for (var x = -5; x <= 5.001; x += 0.05) {
+      var px = 60 + (x + 5) * 50, py = 250 - f(x) * 8;
+      d += (first ? '' : ' L') + px.toFixed(1) + ',' + py.toFixed(1); first = false;
+    }
+    svg.appendChild(svgEl('path', { d: d, fill: 'none', stroke: 'var(--accent)', 'stroke-width': 3 }));
+    var x = x0, path = [], prev = null;
+    for (var i = 0; i < 40; i++) { path.push(x); x = x - eta * fp(x); }
+    path.forEach(function (xi) {
+      var PX = 60 + (xi + 5) * 50, PY = 250 - f(xi) * 8;
+      if (prev) svg.appendChild(svgEl('line', { x1: prev[0], y1: prev[1], x2: PX, y2: PY, stroke: 'var(--warn)', 'stroke-width': 1.2, opacity: 0.5 }));
+      svg.appendChild(svgEl('circle', { cx: PX, cy: PY, r: 3, fill: 'var(--warn)' }));
+      prev = [PX, PY];
+    });
+    var xf = path[path.length - 1];
+    var diverge = Math.abs(xf) > 100;
+    ro.innerHTML = diverge
+      ? '⚠️ <b>diverged</b> — |x| exploded to ' + xf.toExponential(2) + ' (η too big for this bowl)'
+      : 'after 40 steps: x = <b>' + xf.toFixed(3) + '</b> · f(x) = <b>' + f(xf).toFixed(4) + '</b> (true min f(0) = 0)';
+  }
+  lrS.addEventListener('input', draw);
+  x0S.addEventListener('input', draw);
+  draw();
+})();
+</script>
+
+<script>
+/* ===== 03. GD on a bumpy landscape ===== */
+(function () {
+  var svg = document.getElementById('bumpSvg');
+  var lrS = document.getElementById('bumpLRS'), lrR = document.getElementById('bumpLR');
+  var x0S = document.getElementById('bumpX0S'), x0R = document.getElementById('bumpX0');
+  var ro = document.getElementById('bumpReadout');
+  /* Two parabolic wells + smooth cubic bridge (f and f' continuous):
+     left (global)  fL = (x+1.5)^2 - 3.2,  min (-1.5, -3.2)
+     right (local)  fR = 0.4 + 1.8(x-1.2)^2, min (1.2, 0.4)
+     bridge on [-0.5, 0.2] matching value+slope at both ends (ridge crest f~2.3) */
+  var BR0 = -0.5, BR1 = 0.2, Y0 = -2.2, M0 = 2.0, Y1 = 2.164, M1 = -3.6;
+  function f(x) {
+    if (x <= BR0) return (x + 1.5) * (x + 1.5) - 3.2;
+    if (x >= BR1) return 0.4 + 1.8 * (x - 1.2) * (x - 1.2);
+    var t = (x - BR0) / (BR1 - BR0);
+    var h00 = 2*t*t*t - 3*t*t + 1, h10 = t*t*t - 2*t*t + t, h01 = -2*t*t*t + 3*t*t, h11 = t*t*t - t*t;
+    return h00*Y0 + h10*(BR1-BR0)*M0 + h01*Y1 + h11*(BR1-BR0)*M1;
+  }
+  function fp(x) {
+    if (x <= BR0) return 2 * (x + 1.5);
+    if (x >= BR1) return 3.6 * (x - 1.2);
+    var t = (x - BR0) / (BR1 - BR0);
+    var dh00 = 6*t*t - 6*t, dh10 = 3*t*t - 4*t + 1, dh01 = -6*t*t + 6*t, dh11 = 3*t*t - 2*t;
+    return (dh00*Y0 + dh10*(BR1-BR0)*M0 + dh01*Y1 + dh11*(BR1-BR0)*M1) / (BR1 - BR0);
+  }
+  function px(x) { return 60 + (x + 2.2) * 113.6364; }
+  function py(x) { return 250 - (f(x) + 3.2) * 37.2727; }
+  function clear(s) { while (s.firstChild) s.removeChild(s.firstChild); }
+  function txt(s, x, y, str, a) { var t = svgEl('text', a || {}); t.setAttribute('x', x); t.setAttribute('y', y); t.textContent = str; s.appendChild(t); return t; }
+  function draw() {
+    clear(svg);
+    var eta = parseFloat(lrS.value), x0 = parseFloat(x0S.value);
+    lrR.textContent = eta.toFixed(2); x0R.textContent = (x0 > 0 ? '+' : '') + x0.toFixed(1);
+    svg.appendChild(svgEl('line', { x1: 60, y1: 250, x2: 560, y2: 250, stroke: 'var(--line)', 'stroke-width': 2 }));
+    svg.appendChild(svgEl('line', { x1: 60, y1: 250, x2: 60, y2: 40, stroke: 'var(--line)', 'stroke-width': 2 }));
+    txt(svg, 560, 270, 'x →', { style: 'fill:var(--ink-dim);font-size:11px', 'text-anchor': 'middle' });
+    txt(svg, 52, 30, 'f(x)', { style: 'fill:var(--ink-dim);font-size:11px' });
+    txt(svg, 60, 264, '−2.2', { style: 'fill:var(--ink-dim);font-size:9px', 'text-anchor': 'middle' });
+    txt(svg, 560, 264, '2.2', { style: 'fill:var(--ink-dim);font-size:9px', 'text-anchor': 'middle' });
+    var d = 'M', first = true;
+    for (var x = -2.2; x <= 2.2001; x += 0.01) {
+      d += (first ? '' : ' L') + px(x).toFixed(1) + ',' + py(x).toFixed(1); first = false;
+    }
+    svg.appendChild(svgEl('path', { d: d, fill: 'none', stroke: 'var(--accent)', 'stroke-width': 3 }));
+    var gm = -2.2, gv = 1e18;
+    for (var s = -2.2; s <= 2.2001; s += 0.001) { var v = f(s); if (v < gv) { gv = v; gm = s; } }
+    svg.appendChild(svgEl('line', { x1: px(gm), y1: py(gm), x2: px(gm), y2: 250, stroke: 'var(--good)', 'stroke-dasharray': '3 3', 'stroke-width': 1 }));
+    svg.appendChild(svgEl('circle', { cx: px(gm), cy: py(gm), r: 4, fill: 'var(--good)' }));
+    txt(svg, px(gm), py(gm) - 7, 'global min f≈' + gv.toFixed(2), { style: 'fill:var(--good);font-size:9px', 'text-anchor': 'middle' });
+    var x = x0, path = [], prev = null;
+    for (var i = 0; i < 150; i++) { path.push(x); x = x - eta * fp(x); }
+    path.forEach(function (xi) {
+      var PX = px(xi), PY = py(xi);
+      if (prev) svg.appendChild(svgEl('line', { x1: prev[0], y1: prev[1], x2: PX, y2: PY, stroke: 'var(--warn)', 'stroke-width': 1.2, opacity: 0.5 }));
+      svg.appendChild(svgEl('circle', { cx: PX, cy: PY, r: 2.5, fill: 'var(--warn)' }));
+      prev = [PX, PY];
+    });
+    var xf = path[path.length - 1], lv = f(xf);
+    var ok = lv < gv + 0.05, div = Math.abs(xf) > 10;
+    ro.innerHTML = 'start ' + x0.toFixed(1) + ' · landed x = <b>' + xf.toFixed(2) + '</b> · f = <b>' + lv.toFixed(2) + '</b> · ' +
+      (div ? '<b>⚠️ diverged</b>' : (ok ? '<b>✅ global min</b>' : '<b>⚠️ local min — trapped</b>')) +
+      ' · global f = ' + gv.toFixed(2) + ' · η = ' + eta.toFixed(2);
+  }
+  lrS.addEventListener('input', draw);
+  x0S.addEventListener('input', draw);
+  draw();
+})();
+</script>
+
+</body>
+</html>
