@@ -19,8 +19,8 @@
 - [ ] Chain rule — can derive backprop by hand *(rule mechanics done — product = two strips, chain = nested zoom; but "derive backprop" deferred until after neural-network basics, since backprop needs a net to backprop through — revisit at Phase 2)*
 
 **Probability & Information Theory**
-- [ ] Distributions, Bayes, expectation, MLE *(sources: StatQuest playlist · Blitzstein Harvard Stat 110 · **MIT 6.041 (Bertsekas & Tsitsiklis) — Deisenroth/mml-book SKIPPED by choice 2026-08-15, time constraints**)* — *StatQuest intuition layer done 2026-08-11 (5 distributions, Bayes, prob vs likelihood, MLE — summary: `Probability/probability-phase0-summary.html`, now sections 01–16). Expectation + variance deep-dive done 2026-08-13 (sections 09–10: weighted-average intuition, balance-point + long-run-average views, Var = E[X²]−μ², family fingerprints, Bayes numerator = joint P(A∩B) via chain rule). **MIT 6.041 backbone landed 2026-08-15 (videos 1–12 skimmed): new sections 09 (CDF/PDF), 11 (E[g(X)] — Jensen, E[1/X]=∞, n−1 sequel), 13 (joint), 14 (marginal), 15 (conditional density + continuous Bayes), 16 (conditional expectation — tower property, dice E[S|X]=X+3.5, x+y workhorse) inserted at logical points, renumbering 09–10 → 10/12*
-- [ ] Entropy, cross-entropy, KL divergence, perplexity *(sources: Jurafsky & Martin ch. 3 · 3Blue1Brown "coding theory" series · MacKay "Information Theory, Inference, and Learning Algorithms" ch. 1–6)* — *page generated 2026-08-15: `InformationTheory/information-theory-phase0-summary.html` (sections 01–06 — I = −log p + halving ladder, entropy = E[surprise] with interactive H(p) curve, cross entropy H(p,q) = H(p) + KL with two-distribution interactive demo, perplexity = 2^H(p,q), LLM training bridge). Covered conceptually: entropy, cross-entropy, KL-as-the-gap. Still open: Jurafsky ch. 3 perplexity worked examples + MacKay reference reading (Day-3 sources)*
+- [ ] Distributions, Bayes, expectation, MLE *(sources: StatQuest playlist · Blitzstein Harvard Stat 110 · **MIT 6.041 (Bertsekas & Tsitsiklis) — Deisenroth/mml-book SKIPPED by choice 2026-08-15, time constraints**)* — *StatQuest intuition layer done 2026-08-11 (5 distributions, Bayes, prob vs likelihood, MLE — summary: `Probability/probability-phase0-summary.html`, now sections 01–16). Expectation + variance deep-dive done 2026-08-13 (sections 09–10: weighted-average intuition, balance-point + long-run-average views, Var = E[X²]−μ², family fingerprints, Bayes numerator = joint P(A∩B) via chain rule). **MIT 6.041 backbone landed 2026-08-15 (videos 1–12 skimmed): new sections 09 (CDF/PDF), 11 (E[g(X)] — Jensen, E[1/X]=∞, n−1 sequel), 13 (joint), 14 (marginal), 15 (conditional density + continuous Bayes), 16 (conditional expectation — tower property, dice E[S|X]=X+3.5, x+y workhorse) inserted at logical points, renumbering 09–10 → 10/12. **Theory layer COMPLETE (2026-08-15); remaining = HANDS-ON: MIT 6.041 OCW problem-set exercises + the Probability I Review Checklist below** *
+- [ ] Entropy, cross-entropy, KL divergence, perplexity *(sources: Jurafsky & Martin ch. 3 · 3Blue1Brown "coding theory" series · MacKay "Information Theory, Inference, and Learning Algorithms" ch. 1–6)* — *page generated 2026-08-15: `InformationTheory/information-theory-phase0-summary.html` (sections 01–06 — I = −log p + halving ladder, entropy = E[surprise] with interactive H(p) curve, cross entropy H(p,q) = H(p) + KL with two-distribution interactive demo, perplexity = 2^H(p,q), LLM training bridge). Covered (page sections 01–06): intuition, I = −log p, entropy, cross-entropy, KL-as-the-gap, perplexity definition, LLM training bridge. **NOT yet covered (pending 2026-08-15):** KL divergence full treatment (properties, Gibbs inequality, asymmetry), joint & conditional entropy H(X,Y)/H(X|Y) + chain rule, mutual information, differential entropy (continuous), source-coding theorem (why H = min bits/symbol), 3B1B coding-theory primer, Jurafsky ch. 3 perplexity worked examples, MacKay ch. 1–6 reference*
 
 **Optimization**
 - [ ] Gradient descent / SGD / Adam concepts
@@ -32,7 +32,7 @@
 
 ## 📋 Probability I Review Checklist
 
-> Summary doc: `Probability/probability-phase0-summary.html` — skim sections 01–16, then hit these. (The old Calculus checklist is implicitly retired — you've moved well past it; calculus retention now lives in the 5-min daily flashbacks and resurfaces in optimization/micrograd. Its re-derivations are all in `Calculus/calculus-phase0-summary.html`.)
+> Summary doc: `Probability/probability-phase0-summary.html` — skim sections 01–16, then hit these. (The old Calculus checklist is implicitly retired — you've moved well past it; calculus retention now lives in the 5-min daily flashbacks and resurfaces in optimization/micrograd. Its re-derivations are all in `Calculus/calculus-phase0-summary.html`.) **This checklist + the MIT 6.041 OCW problem-set exercises are the remaining probability hands-on step (2026-08-15).**
 
 **Quick re-derivations (by hand, no notes):**
 - [ ] Coin: P(7 heads in 10 flips, fair) = C(10,7)·0.5¹⁰ ≈ 0.117 — and the general binomial PMF C(n,k)·p^k·(1−p)^(n−k)
@@ -63,6 +63,28 @@
 - [ ] `1/np.mean(np.random.exponential(scale=1/2, size=100000))` ≈ 2 — MLE of λ = 1/x̄
 - [ ] Mammogram simulation: 10,000 people, 1% sick, 99% sensitive test → fraction of test+ who are sick ≈ 0.5
 - [ ] `np.random.normal(0, 1, 100000).mean()` ≈ 0 and `.var()` ≈ 1 — confirms μ and σ² are literally the distribution's parameters
+
+---
+
+## ⏳ Phase 0 — Pending (as of 2026-08-15)
+
+> Snapshot of what's left before Phase 0 closes. Theory layers are done (probability: StatQuest + MIT 6.041 videos 1–12, summary sections 01–16; info theory: page sections 01–06). The two active pending blocks:
+
+**1. Probability — hands-on (turns "watched/read it" into "can derive it"):**
+- [ ] MIT 6.041 OCW problem-set exercises (Bertsekas & Tsitsiklis, free PDF via MIT OCW — the "can derive it" step)
+- [ ] Probability I Review Checklist above — by-hand re-derivations, explain-out-loud, numpy checks (all unticked)
+
+**2. Info theory — gaps beyond the page:**
+- [ ] KL divergence full treatment — properties, Gibbs inequality (KL ≥ 0, equality iff q = p), asymmetry intuition
+- [ ] Joint & conditional entropy: H(X,Y), H(X|Y), chain rule H(X,Y) = H(X) + H(Y|X) (uses Probability sections 13–16 machinery)
+- [ ] Mutual information I(X;Y) = H(X) − H(X|Y) — "how much knowing Y cuts X's entropy" (LLM-relevant: token ↔ context)
+- [ ] Differential entropy (continuous X — where the discrete story changes)
+- [ ] Source-coding theorem — why H is the minimum bits/symbol (3B1B coding theory / Shannon; ties to section 02's code-length intuition)
+- [ ] 3B1B coding-theory primer (conceptual)
+- [ ] Jurafsky & Martin ch. 3 — perplexity worked examples on real text
+- [ ] MacKay ch. 1–6 (reference reading)
+
+**3. Optimization (Sat) & micrograd (Sun) — unchanged, one slot later than the original plan**
 
 ---
 
@@ -239,15 +261,17 @@
 
 > The original weekday/weekend template assumed 10–12 hrs/wk. You've proven you can move far faster — the risk is now **forgetting**, not pace. The plan below closes Phase 0 and opens the other tracks, with a built-in daily review loop and one-track-per-session discipline.
 
+> **Status 2026-08-15:** Probability THEORY done (StatQuest + MIT 6.041 videos 1–12, summary 01–16); info-theory core page done (01–06). Remaining before Phase 0 closes: **probability hands-on** (MIT 6.041 exercises + review checklist) and **info-theory gaps** (KL full, joint/conditional entropy, mutual info, differential entropy, source coding, Jurafsky/MacKay) — then optimization and micrograd slide one slot.
+
 ## 📅 Next 5 Days — Close Phase 0, Open the Other Tracks
 
 | Day | Primary block (LLM math, ~1–1.5 h) | Retention booster (10 min) | Secondary session (30–45 min, separate slot) |
 |---|---|---|---|
 | Wed 12 | Probability I — distributions, expectation, variance (Deisenroth ch. 6; StatQuest) — **✅ StatQuest layer done (2026-08-11)** | 5-min calculus flashback: re-derive chain rule on sin(x²) | — |
 | Thu 13 | Probability II — Bayes, MLE, conditional (StatQuest; Blitzstein Stat 110) — **✅ Bayes numerator intuition + expectation/variance discussion done (2026-08-13); MIT 6.041 wrap-up pending** | Re-derive E[X] = ∫x·p(x)dx from memory | — |
-| Fri 14→15 (shifted) | **Probability wrap-up — MIT 6.041** (math backbone + exercises; mml-book/Deisenroth **skipped** — StatQuest intuition + MIT rigor replaces it). Spills into Sat; info theory / optimization / micrograd shift one slot each | | |
+| Fri 14→15 (shifted) | **Probability wrap-up — MIT 6.041** — **✅ theory done 2026-08-15** (videos 1–12 skimmed → summary sections 09–16); **⏳ remaining: OCW problem-set exercises + Probability I Review Checklist** (the hands-on step). mml-book/Deisenroth **skipped** | | |
 | Fri 14 | Info theory — entropy, cross-entropy, KL, perplexity (Jurafsky ch. 3; 3B1B coding theory) — **✅ done 2026-08-15 (shifted one day): page generated — entropy + cross-entropy + KL-as-gap + perplexity; Jurafsky/MacKay reference reading still open** | Explain entropy in ≤ 3 sentences out loud | Embedded C I: pointers + memory layout (K&R ch. 5) |
-| Sat 15 | Optimization — gradient descent / SGD / Adam (Karpathy Zero-to-Hero 1–3) | Link GD to Taylor: "linearize the loss, step downhill" | — |
+| Sat 15 | Optimization — gradient descent / SGD / Adam (Karpathy Zero-to-Hero 1–3) — **⏳ pending (shifted: probability exercises + info-theory gaps land first)** | Link GD to Taylor: "linearize the loss, step downhill" | — |
 | Sun 16 | 🏁 **micrograd from scratch** (2 h, hands-on) — Phase 0 complete | After coding it, re-derive backprop by hand, no notes | Phase 1 kickoff: history of NLP timeline (first 3 eras) |
 
 **Why this order (retention-first):** probability builds directly on integration (expectation = ∫x·p(x)dx, CDF = antiderivative) — fresh calculus, immediate payoff; info theory builds on probability (entropy = −Σp·ln p); optimization is just Taylor/linearization + the chain rule; micrograd then *uses* every piece. Each day's booster re-activates the previous day, and the two tracks stay in separate sessions.
