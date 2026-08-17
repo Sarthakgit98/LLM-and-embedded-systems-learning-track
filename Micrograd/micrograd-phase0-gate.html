@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>micrograd — The Phase 0 Gate (backprop from scratch)</title>
+<style>
+  :root {
+    --bg: #0f172a;
+    --bg2: #1e293b;
+    --card: #1e293b;
+    --card2: #26334d;
+    --ink: #e2e8f0;
+    --ink-dim: #94a3b8;
+    --accent: #38bdf8;
+    --accent2: #a78bfa;
+    --good: #34d399;
+    --warn: #fbbf24;
+    --bad: #f87171;
+    --line: #334155;
+    --code-bg: #0b1220;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.6;
+    padding: 2rem 1rem;
+  }
+  .wrap { max-width: 900px; margin: 0 auto; }
+
+  header { text-align: center; padding: 2rem 1rem 2.5rem; border-bottom: 1px solid var(--line); margin-bottom: 2rem; }
+  header h1 { font-size: 2rem; color: var(--accent); letter-spacing: -0.02em; }
+  header p { color: var(--ink-dim); margin-top: 0.5rem; max-width: 680px; margin-left: auto; margin-right: auto; }
+  .badge {
+    display: inline-block; background: var(--card2); border: 1px solid var(--line);
+    border-radius: 999px; padding: 0.25rem 0.9rem; font-size: 0.8rem; color: var(--ink-dim); margin: 0.25rem;
+  }
+  .badge.done { border-color: var(--good); color: var(--good); }
+
+  h2 {
+    font-size: 1.4rem; color: var(--accent); margin: 3rem 0 1rem;
+    padding-bottom: 0.4rem; border-bottom: 2px solid var(--line);
+  }
+  h2 .num {
+    display: inline-block; background: var(--accent); color: #06283d;
+    border-radius: 8px; padding: 0.05rem 0.6rem; font-size: 1rem; margin-right: 0.6rem;
+  }
+  h3 { color: var(--accent2); margin: 1.4rem 0 0.5rem; font-size: 1.05rem; }
+
+  p { margin: 0.6rem 0; }
+  .dim { color: var(--ink-dim); }
+
+  .card {
+    background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+    padding: 1.2rem 1.4rem; margin: 1rem 0;
+  }
+  .card.tip { border-left: 4px solid var(--good); }
+  .card.warn { border-left: 4px solid var(--warn); }
+  .card.key { border-left: 4px solid var(--accent2); }
+  .card.chat { border-left: 4px solid var(--accent); }
+  .card h4 { color: var(--accent); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.5rem; }
+
+  code {
+    background: var(--code-bg); border: 1px solid var(--line); border-radius: 5px;
+    padding: 0.1rem 0.4rem; font-family: "SF Mono", Menlo, Consolas, monospace; font-size: 0.88em; color: #7dd3fc;
+  }
+  pre.code {
+    background: var(--code-bg); border: 1px solid var(--line); border-radius: 10px;
+    padding: 1rem 1.2rem; overflow-x: auto; font-family: "SF Mono", Menlo, Consolas, monospace;
+    font-size: 0.82rem; line-height: 1.55; color: #a5f3fc; margin: 1rem 0;
+  }
+  pre.code .cm { color: #64748b; }
+  pre.code .kw { color: #c4b5fd; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.92rem; }
+  th { background: var(--card2); color: var(--accent); text-align: left; padding: 0.5rem 0.8rem; border: 1px solid var(--line); }
+  td { padding: 0.5rem 0.8rem; border: 1px solid var(--line); vertical-align: top; }
+
+  /* ============ FIGURES ============ */
+  .stage {
+    background: var(--card2); border: 1px solid var(--line); border-radius: 12px;
+    padding: 1.5rem; margin: 1rem 0; text-align: center;
+  }
+  .stage .caption { color: var(--ink-dim); font-size: 0.85rem; margin-top: 0.8rem; }
+  .stage-title { color: var(--accent2); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; }
+
+  .ctrl { text-align: left; max-width: 460px; margin: 0.8rem auto; }
+  .ctrl label { display: block; font-size: 0.85rem; color: var(--ink-dim); margin: 0.5rem 0 0.2rem; }
+  input[type="range"] { width: 100%; accent-color: var(--accent); cursor: pointer; }
+  .readout { font-family: "SF Mono", Menlo, Consolas, monospace; font-size: 0.85rem; color: var(--ink); margin-top: 0.6rem; }
+  .readout b { color: var(--warn); }
+  .readout .ok { color: var(--good); }
+  .readout .bd { color: var(--bad); }
+
+  .btn {
+    background: var(--card2); color: var(--ink); border: 1px solid var(--line);
+    border-radius: 8px; padding: 0.4rem 0.95rem; font-size: 0.85rem; cursor: pointer; font-family: inherit;
+  }
+  .btn:hover { border-color: var(--accent); color: var(--accent); }
+  .pair { display: flex; justify-content: center; gap: 0.5rem; flex-wrap: wrap; align-items: center; }
+
+  .formula {
+    background: var(--code-bg); border: 1px solid var(--line); border-radius: 10px;
+    padding: 1.2rem; text-align: center; font-size: 1.15rem; margin: 1rem 0; color: #a5f3fc;
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+  }
+  .formula .c1 { color: var(--accent); }
+  .formula .c2 { color: var(--warn); }
+  .formula .c3 { color: var(--good); }
+  .formula.small { font-size: 1.0rem; }
+
+  ul, ol { margin: 0.6rem 0 0.6rem 1.4rem; }
+  li { margin: 0.3rem 0; }
+  .eq { font-family: "SF Mono", Menlo, Consolas, monospace; }
+
+  canvas { display: block; margin: 0 auto; }
+  footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--line); color: var(--ink-dim); font-size: 0.85rem; text-align: center; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>micrograd — The Phase 0 Gate</h1>
+  <p>The ~100 lines that use <em>every</em> piece of Phase 0 at once. Forward pass builds a computation graph; <code>backward()</code> walks it in reverse, multiplying local derivatives along every edge — that's the chain rule, as data; one update line steps downhill. Trace one neuron by hand and you understand deep learning's plumbing; everything else is scale and cleverness.</p>
+  <div>
+    <span class="badge done">🏁 Phase 0 complete</span>
+    <span class="badge">Karpathy</span>
+    <span class="badge">Backprop</span>
+    <span class="badge">Autodiff</span>
+    <span class="badge">Chain Rule</span>
+    <span class="badge">interactive</span>
+  </div>
+</header>
+
+<div class="card key">
+  <h4>One sentence to carry out</h4>
+  <p><strong>"Every node remembers how it was made; backward() asks each node how much the final loss would wiggle if its inputs wiggled, then multiplies those local answers along the graph."</strong> That multiplication is the chain rule; the walking-backwards is backprop.</p>
+</div>
+
+<!-- ============ 1. THE MAP ============ -->
+<h2><span class="num">01</span>The Phase 0 map — every concept, in place</h2>
+
+<p>You didn't learn five separate subjects; you learned the parts of one machine. Here's exactly where each piece fires in micrograd:</p>
+
+<table>
+  <tr><th>Phase 0 piece</th><th>Where it fires in micrograd</th></tr>
+  <tr><td><strong>Chain rule — nested zoom</strong> (Calculus §06)</td><td><code>backward()</code>: local derivative × upstream gradient, walked in reverse topological order</td></tr>
+  <tr><td><strong>Product rule — two strips</strong> (Calculus §05)</td><td><code>__mul__</code>'s backward: two <code>+=</code> contributions, one per strip (§04 below)</td></tr>
+  <tr><td><strong>Derivative = local slope</strong> (Calculus §01)</td><td>the ops table in §02 — every operation hard-codes its own derivative</td></tr>
+  <tr><td><strong>Loss = expectation</strong> (Probability §10)</td><td>(1/n)·Σ(y − ŷ)² — the weighted-average machine, applied to the data</td></tr>
+  <tr><td><strong>Least squares = Gaussian MLE</strong> (Probability §08)</td><td>the same MSE, read as −log-likelihood of the data (§05)</td></tr>
+  <tr><td><strong>Neuron = dot product</strong> (Linear Algebra)</td><td>every neuron computes w·x + b — measuring x against w (§06)</td></tr>
+  <tr><td><strong>Composition of maps</strong> (Linear Algebra)</td><td>layers compose; without the tanh the whole net collapses to one affine map (§06)</td></tr>
+  <tr><td><strong>e and its derivative</strong> (Calculus §07)</td><td>tanh = (e²ˣ−1)/(e²ˣ+1); its derivative collapses to 1−t² (§06)</td></tr>
+  <tr><td><strong>GD = linearize &amp; step</strong> (Optimization §02, Calculus §15)</td><td><code>p.data += −lr·p.grad</code> — the one-line training loop</td></tr>
+  <tr><td><strong>SGD = Monte-Carlo gradient</strong> (Optimization §04)</td><td>the demo is full-batch; minibatching is the same line on a random subset</td></tr>
+</table>
+
+<!-- ============ 2. THE ENGINE ============ -->
+<h2><span class="num">02</span>The engine — Value, and the ops table</h2>
+
+<p>micrograd has one class. A <code>Value</code> holds a number, a list of the Values that made it (<code>_prev</code>), and a function <code>_backward</code> that knows how to push gradients through this one operation:</p>
+
+<pre class="code"><span class="kw">class</span> Value:
+    <span class="kw">def</span> __init__(self, data, _children=(), _op=''):
+        self.data = data
+        self.grad = 0.0
+        self._backward = <span class="kw">lambda</span>: <span class="kw">None</span>
+        self._prev = set(_children)
+        self._op = _op
+
+    <span class="kw">def</span> __add__(self, other):                <span class="cm"># local: d/dself = 1, d/dother = 1</span>
+        other = other <span class="kw">if</span> isinstance(other, Value) <span class="kw">else</span> Value(other)
+        out = Value(self.data + other.data, (self, other), '+')
+        <span class="kw">def</span> _backward():
+            self.grad += out.grad
+            other.grad += out.grad
+        out._backward = _backward
+        <span class="kw">return</span> out
+
+    <span class="kw">def</span> __mul__(self, other):                <span class="cm"># local: d/dself = other, d/dother = self</span>
+        other = other <span class="kw">if</span> isinstance(other, Value) <span class="kw">else</span> Value(other)
+        out = Value(self.data * other.data, (self, other), '*')
+        <span class="kw">def</span> _backward():
+            self.grad += other.data * out.grad
+            other.grad += self.data * out.grad
+        out._backward = _backward
+        <span class="kw">return</span> out
+
+    <span class="kw">def</span> tanh(self):                          <span class="cm"># local: d/dt = 1 − t²</span>
+        x = self.data
+        t = (math.exp(2*x) - 1) / (math.exp(2*x) + 1)
+        out = Value(t, (self,), 'tanh')
+        <span class="kw">def</span> _backward():
+            self.grad += (1 - t**2) * out.grad
+        out._backward = _backward
+        <span class="kw">return</span> out
+
+    <span class="kw">def</span> backward(self):
+        topo = []; visited = set()
+        <span class="kw">def</span> build_topo(v):
+            <span class="kw">if</span> v <span class="kw">not in</span> visited:
+                visited.add(v)
+                <span class="kw">for</span> child <span class="kw">in</span> v._prev: build_topo(child)
+                topo.append(v)
+        build_topo(self)
+        self.grad = 1.0                      <span class="cm"># d loss / d loss</span>
+        <span class="kw">for</span> v <span class="kw">in</span> reversed(topo): v._backward()</pre>
+
+<div class="card key">
+  <h4>The whole library of derivatives, one row each</h4>
+  <table>
+    <tr><th>op</th><th>forward</th><th>local derivative (multiplied by upstream grad)</th></tr>
+    <tr><td><code>+</code></td><td>a + b</td><td>a → 1 · up&nbsp;&nbsp;·&nbsp;&nbsp;b → 1 · up</td></tr>
+    <tr><td><code>×</code></td><td>a · b</td><td>a → b · up&nbsp;&nbsp;·&nbsp;&nbsp;b → a · up</td></tr>
+    <tr><td><code>**k</code></td><td>aᵏ</td><td>a → k·aᵏ⁻¹ · up</td></tr>
+    <tr><td><code>tanh</code></td><td>t</td><td>t → (1 − t²) · up</td></tr>
+    <tr><td><code>exp</code></td><td>eˣ</td><td>→ eˣ · up &nbsp;(= out.data — the "e is its own derivative" fact, in code)</td></tr>
+    <tr><td><code>ReLU</code> (older variant)</td><td>max(0, x)</td><td>→ 1 if x &gt; 0, else 0</td></tr>
+  </table>
+  <p class="dim">Every row is just the derivative table from the calculus page, written as a one-liner. The only "learning" in micrograd is multiplying these rows together along the graph.</p>
+</div>
+
+<!-- ============ 3. MANUAL TRACE ============ -->
+<h2><span class="num">03</span>Trace one neuron by hand — and see the numbers live</h2>
+
+<p>The whole engine in one example (values verified numerically): w = 0.5, x = 2.0, b = 0, target y = 1.</p>
+
+<div class="formula small">n = w·x + b = 1.0 &nbsp;→&nbsp; o = <span class="c1">tanh</span>(1.0) = 0.76159 &nbsp;→&nbsp; loss = (y − o)² = 0.05684</div>
+
+<p>Backward, three multiplications — one per edge of the graph:</p>
+
+<div class="formula small">
+∂loss/∂o = 2(o−y) = <span class="c2">−0.47681</span> &nbsp;·&nbsp; ∂o/∂n = 1−o² = <span class="c2">0.41997</span> &nbsp;·&nbsp; ∂n/∂w = x = <span class="c2">2.0</span><br>
+⇒ ∂loss/∂w = −0.47681 · 0.41997 · 2.0 = <span class="c3">−0.40050</span>
+</div>
+
+<p>The gradient on w is <em>negative</em>, so <code>w += −lr·grad</code> pushes w <em>up</em> — which raises o toward the target. One step at lr = 0.1: w 0.50 → 0.54, loss 0.0568 → 0.0428. Gradient says "which way", lr says "how far".</p>
+
+<div class="stage">
+  <div class="stage-title">Manual backprop — slide w, x, b, y, η and watch the chain</div>
+  <svg id="bpSvg" viewBox="0 0 640 120" style="max-width:640px;background:var(--code-bg);border:1px solid var(--line);border-radius:8px;">
+    <rect x="15" y="28" width="150" height="64" rx="8" fill="#0f172a" stroke="var(--accent)"/>
+    <text x="90" y="48" text-anchor="middle" fill="var(--accent2)" font-size="10" font-family="monospace">n = w·x + b</text>
+    <text id="bpN" x="90" y="70" text-anchor="middle" fill="#a5f3fc" font-size="12" font-family="monospace">1.0000</text>
+    <text id="bpWX" x="90" y="84" text-anchor="middle" fill="var(--ink-dim)" font-size="9" font-family="monospace">w 0.50 · x 2.00 · b 0.00</text>
+    <line x1="168" y1="60" x2="198" y2="60" stroke="var(--line)" stroke-width="2"/>
+    <polygon points="198,60 192,56 192,64" fill="var(--line)"/>
+    <text x="183" y="50" text-anchor="middle" fill="var(--warn)" font-size="9" font-family="monospace">∂o/∂n</text>
+    <rect x="200" y="28" width="150" height="64" rx="8" fill="#0f172a" stroke="var(--accent)"/>
+    <text x="275" y="48" text-anchor="middle" fill="var(--accent2)" font-size="10" font-family="monospace">o = tanh(n)</text>
+    <text id="bpO" x="275" y="70" text-anchor="middle" fill="#a5f3fc" font-size="12" font-family="monospace">0.7616</text>
+    <line x1="353" y1="60" x2="383" y2="60" stroke="var(--line)" stroke-width="2"/>
+    <polygon points="383,60 377,56 377,64" fill="var(--line)"/>
+    <text x="368" y="50" text-anchor="middle" fill="var(--warn)" font-size="9" font-family="monospace">∂loss/∂o</text>
+    <rect x="385" y="28" width="240" height="64" rx="8" fill="#0f172a" stroke="var(--accent)"/>
+    <text x="505" y="48" text-anchor="middle" fill="var(--accent2)" font-size="10" font-family="monospace">loss = (y − o)²</text>
+    <text id="bpL" x="505" y="70" text-anchor="middle" fill="#a5f3fc" font-size="12" font-family="monospace">0.0568</text>
+  </svg>
+  <div class="ctrl" style="max-width:560px;">
+    <div class="pair" style="gap:1.2rem;">
+      <div style="flex:1;min-width:200px;">
+        <label>w: <b id="bpW">0.50</b></label>
+        <input type="range" id="bpWS" min="-2" max="2" step="0.05" value="0.5">
+        <label>x: <b id="bpX">2.00</b></label>
+        <input type="range" id="bpXS" min="-2" max="2" step="0.05" value="2">
+        <label>b: <b id="bpB">0.00</b></label>
+        <input type="range" id="bpBS" min="-2" max="2" step="0.05" value="0">
+      </div>
+      <div style="flex:1;min-width:200px;">
+        <label>target y: <b id="bpY">1.00</b></label>
+        <input type="range" id="bpYS" min="-2" max="2" step="0.1" value="1">
+        <label>learning rate η: <b id="bpLR">0.10</b></label>
+        <input type="range" id="bpLRS" min="0.01" max="1" step="0.01" value="0.1">
+        <label style="margin-top:0.8rem;">&nbsp;</label>
+        <div class="pair" style="justify-content:flex-start;">
+          <button id="bpStep" class="btn">▶ one GD step</button>
+          <button id="bpReset" class="btn">reset</button>
+        </div>
+      </div>
+    </div>
+    <div class="readout" id="bpReadout"></div>
+  </div>
+  <div class="caption">Gradient chain: <span class="eq">∂loss/∂o · ∂o/∂n · ∂n/∂w = ∂loss/∂w</span>. The step button applies <span class="eq">w ← w − η·∂loss/∂w</span> and shows loss before → after. Watch what happens at extreme w: tanh saturates, ∂o/∂n → 0, and the gradient vanishes — nothing to learn. That's the vanishing-gradient phenomenon, live.</div>
+</div>
+
+<!-- ============ 4. FAN-OUT ============ -->
+<h2><span class="num">04</span>The deep idea — <code>+=</code>, not <code>=</code> (fan-out)</h2>
+
+<p>Every grad in micrograd <em>accumulates</em>. Why? A node can feed <strong>many</strong> downstream paths, and the total sensitivity of the loss to that node is the <strong>sum</strong> over every path — the product rule's "two strips" idea, generalized from two to many.</p>
+
+<p>The cleanest case is squaring written as a product: <span class="eq">x·x</span> creates <em>two</em> edges into the same node.</p>
+
+<div class="formula small">x = 3 → out = x·x = 9 &nbsp;&nbsp; backward:&nbsp; x.grad = <span class="c1">3·1</span> + <span class="c1">3·1</span> = 6 = 2x ✓</div>
+
+<p>If micrograd used <code>grad = …</code> instead of <code>grad += …</code>, <code>x*x</code> would return 3 instead of 6, and any weight shared by two paths would silently get half its true gradient. In a real net, shared weights and branching inputs are everywhere (one weight feeds many neurons; the loss is a giant sum) — so the <code>+=</code> is not a detail, it <em>is</em> the multi-path chain rule.</p>
+
+<!-- ============ 5. THE LOSS ============ -->
+<h2><span class="num">05</span>The loss — expectation, MLE, and why "mean" matters</h2>
+
+<p>The demo loss is the mean squared error — and that's two things you already know:</p>
+
+<ul>
+  <li><strong>An expectation</strong> (Probability §10): <span class="eq">(1/n)·Σ(yᵢ − ŷᵢ)²</span> is the weighted-average machine with each sample weighted 1/n — the "long-run average" face of E[X], taken over the empirical distribution of your data.</li>
+  <li><strong>A likelihood, negated</strong> (Probability §08): least squares = maximum likelihood under Gaussian noise. Minimizing MSE is literally maximizing the probability of the data. The LLM connection: cross-entropy loss = −log-likelihood is the same move with a different family (Probability/Info Theory bridge).</li>
+</ul>
+
+<div class="card warn">
+  <h4>Honest caveat — the 1/n is load-bearing, and we have the scar to prove it</h4>
+  <p>Writing the loss as a plain <em>sum</em> Σ(y−ŷ)² (as the classic micrograd demo does) makes the gradient n times bigger. On raw, un-normalized moons data, a fixed lr then <strong>diverges — we reproduced it, in the real micrograd library itself</strong>: loss 171 → 3×10²⁰⁰ in 5 steps. Two fixes, both visible in the primer:</p>
+  <ul>
+    <li><strong>Mean instead of sum</strong> — the primer's loss formula was L = E[ℓ] = (1/n)Σ… all along. The 1/n keeps gradient magnitude independent of dataset size.</li>
+    <li><strong>Decaying learning rate</strong> — lr = 0.1·0.99<sup>steps</sup>: big, fast steps early; careful, small ones late. Exactly the primer's "η is how far you trust the linearization" — early on you trust it a lot, later you don't.</li>
+  </ul>
+  <p class="dim">(Karpathy's current demo.ipynb sidesteps this entirely with a hinge / max-margin loss, whose gradient is bounded — a different fix for the same instability. All three are legitimate engineering; the math under them is identical.)</p>
+</div>
+
+<!-- ============ 6. THE MLP ============ -->
+<h2><span class="num">06</span>The MLP — dot products, nonlinearity, and why tanh is e</h2>
+
+<p>The model is three lines of class definitions over <code>Value</code>:</p>
+
+<pre class="code"><span class="kw">class</span> Neuron:
+    <span class="kw">def</span> __init__(self, nin, nonlin=<span class="kw">True</span>):
+        self.w = [Value(random.uniform(-1, 1)) <span class="kw">for</span> _ <span class="kw">in</span> range(nin)]
+        self.b = Value(0)
+        self.nonlin = nonlin
+
+    <span class="kw">def</span> __call__(self, x):
+        act = sum((wi*xi <span class="kw">for</span> wi, xi <span class="kw">in</span> zip(self.w, x)), self.b)
+        <span class="kw">return</span> act.tanh() <span class="kw">if</span> self.nonlin <span class="kw">else</span> act   <span class="cm"># neuron = w·x + b, then squash</span></pre>
+
+<p>Three ideas, all Phase 0:</p>
+
+<ul>
+  <li><strong>Neuron = dot product</strong> (Linear Algebra): <span class="eq">w·x + b</span> measures x against the weight vector — the same dot-product "measuring" picture. A layer of n neurons is a matrix multiply; each row of the weight matrix is one neuron's w.</li>
+  <li><strong>The nonlinearity is why depth works</strong> (Linear Algebra — composition): a stack of affine maps is itself affine. Ten hidden layers without the tanh would compute <em>exactly</em> what one layer computes — no new directions, no expressivity. The tanh is the only thing stopping the whole net from collapsing into a single linear map, and it's precisely the "composition of transformations" lesson applied.</li>
+  <li><strong>tanh is e, differentiated</strong> (Calculus §07): tanh = (e²ˣ−1)/(e²ˣ+1). Differentiate it and the exponentials collapse — because "e is its own derivative" — into the one-liner <span class="eq">1 − t²</span>. The S-curve's flat ends mean saturated neurons (|t| → 1) pass ~0 gradient; that's the vanishing-gradient trade that motivates ReLU in modern nets.</li>
+</ul>
+
+<p>And the training loop — the whole of the optimization primer, in five lines:</p>
+
+<pre class="code"><span class="kw">for</span> k <span class="kw">in</span> range(150):
+    ypred = [model(x) <span class="kw">for</span> x <span class="kw">in</span> X]                          <span class="cm"># forward</span>
+    loss  = sum((yi - yout)**2 <span class="kw">for</span> yi, yout <span class="kw">in</span> zip(Y, ypred)) / len(Y)  <span class="cm"># loss (mean!)</span>
+    <span class="kw">for</span> p <span class="kw">in</span> model.parameters(): p.grad = 0.0                    <span class="cm"># zero, don't accumulate across steps</span>
+    loss.backward()                                               <span class="cm"># chain rule</span>
+    <span class="kw">for</span> p <span class="kw">in</span> model.parameters():
+        p.data += -lr * p.grad                                    <span class="cm"># step downhill (lr decays)</span></pre>
+
+<!-- ============ 7. LIVE DEMO ============ -->
+<h2><span class="num">07</span>Live demo — train a real 2→16→16→1 MLP in your browser</h2>
+
+<p>This is micrograd's demo, ported to JavaScript: the same autodiff engine (add / mul / pow / tanh), the same mean-squared-error loss, the same update line. The boundary is drawn by forwarding the <em>trained numbers</em> through the net — no autodiff needed once trained, which is itself a lesson: <em>training produces numbers; inference is just arithmetic.</em></p>
+
+<div class="stage">
+  <div class="stage-title">Watch gradient descent carve a nonlinear boundary — click to add your own points</div>
+  <canvas id="mlpCanvas" width="440" height="300" style="background:var(--code-bg);border:1px solid var(--line);border-radius:8px;cursor:crosshair;"></canvas>
+  <div class="ctrl" style="max-width:440px;">
+    <div class="pair">
+      <button id="dsMoons" class="btn">🌙 moons</button>
+      <button id="dsCircles" class="btn">⭕ circles</button>
+      <button id="mlpClear" class="btn">clear points</button>
+      <button id="mlpReset" class="btn">reset weights</button>
+    </div>
+    <div class="pair" style="margin-top:0.4rem;">
+      <button id="mlpStep1" class="btn">train 1 step</button>
+      <button id="mlpStep100" class="btn">train 100 steps</button>
+      <label style="display:flex;align-items:center;gap:0.4rem;font-size:0.85rem;color:var(--ink-dim);">auto <input type="checkbox" id="mlpAuto"></label>
+      <label style="display:flex;align-items:center;gap:0.4rem;font-size:0.85rem;color:var(--ink-dim);">click = <span id="clickClass" style="color:var(--bad);font-weight:700;">red +1</span> <button id="mlpToggle" class="btn" style="padding:0.1rem 0.6rem;">toggle</button></label>
+    </div>
+    <div class="readout" id="mlpReadout" style="text-align:center;">steps 0 · loss — · acc —</div>
+  </div>
+  <canvas id="mlpLoss" width="440" height="70" style="background:var(--code-bg);border:1px solid var(--line);border-radius:8px;margin-top:0.6rem;"></canvas>
+  <div class="caption">100 data points (moons or circles), mean squared error, lr = 0.1·0.99<sup>steps</sup>. The warm/cool shading is the network's raw output z: warm = predicts red (+1), cool = predicts blue (−1). You'll see it start nearly random, then fold the boundary into the data — the same 100-step shape as Karpathy's demo. Try clicking a red point deep in the blue region and retraining: the boundary has to grow a new bump (and may need the hidden layer to cooperate).</div>
+</div>
+
+<!-- ============ 8. CAVEATS ============ -->
+<h2><span class="num">08</span>Honest caveats — what micrograd deliberately doesn't show</h2>
+
+<ul>
+  <li><strong>No minibatching</strong> — this is full-batch GD (all data, one exact gradient). SGD = same line on a random subset (Optimization §04); the wobble of real SGD isn't here.</li>
+  <li><strong>No momentum / Adam</strong> — one global lr per parameter. Adam's per-parameter step sizes are the upgrade for real nets (Optimization §05).</li>
+  <li><strong>tanh, not ReLU</strong> — saturation → vanishing gradients is mild in 2 hidden layers, deadly in 50. That's why modern nets default to ReLU.</li>
+  <li><strong>MSE (or hinge) loss, not cross-entropy</strong> — for LLMs the loss is cross-entropy = −log-likelihood of the next token (Info Theory §04–05). Same autodiff machinery, different loss; you'll see it in Phase 2.</li>
+  <li><strong>Scalar autodiff</strong> — real frameworks backprop over tensors/matrices (your Linear Algebra is exactly what tensor autodiff is: the same chain rule over higher-rank objects). micrograd is the honest minimal core; everything else is a faster, vectorized version of the same five lines.</li>
+  <li><strong>Init matters</strong> — uniform(−1,1) works for this shallow demo; real nets use carefully chosen scales so activations don't saturate at step 0 (the "initialization" design choice from the primer's caveat card).</li>
+</ul>
+
+<div class="card chat">
+  <h4>Gut checks (5 minutes, no notes)</h4>
+  <ul>
+    <li>a = 4, b = 2, out = a·b. What does the <code>__mul__</code> backward accumulate into a.grad? Into b.grad? <em>(2·up and 4·up — derivative of a·b w.r.t. each operand is the other operand.)</em></li>
+    <li>Why is <code>+=</code> mandatory, not <code>=</code>? <em>(Fan-out: one node feeds many paths; total sensitivity is the sum over paths — the multi-path chain rule.)</em></li>
+    <li>In the §03 trace, why does stepping w <em>up</em> reduce the loss? <em>(∂loss/∂w = −0.4 &lt; 0, so w ← w − η·(−0.4) moves w up; o rises toward y.)</em></li>
+    <li>tanh at n = 5 vs n = 0.5: which passes a bigger gradient, and why does that matter for deep nets? <em>(n=0.5: ∂o/∂n ≈ 0.79; n=5: ≈ 0.0009 — saturated → vanishing gradient.)</em></li>
+    <li>The loss is (1/n)Σ(y−ŷ)². What breaks if you delete the 1/n? <em>(Gradients n× bigger; the same steps that were fine on 10 points explode on 1000 — the sum-vs-mean divergence we actually hit.)</em></li>
+    <li>Without the tanh, what would the 2→16→16→1 net compute? <em>(One affine map — composition of linear maps is linear; the whole net collapses. Rank can't grow.)</em></li>
+  </ul>
+</div>
+
+<footer>
+  micrograd — the Phase 0 gate (2026-08-16) · builds on Calculus (chain rule §06, e §07, Taylor §15) · Probability (expectation §10, MLE §08) · Info Theory (cross-entropy §04–05) · Optimization primer (GD §02, SGD §04) · Linear Algebra (dot products, composition) — all five pages, one ~100-line engine
+</footer>
+
+</div>
+
+<script>
+/* ===== mini-autodiff (micrograd port, verified against finite differences) ===== */
+class Value {
+  constructor(data, children = [], op = '') {
+    this.data = data; this.grad = 0; this._children = children; this._op = op; this._backward = () => {};
+  }
+  add(o) {
+    o = o instanceof Value ? o : new Value(o);
+    const out = new Value(this.data + o.data, [this, o], '+');
+    out._backward = () => { this.grad += out.grad; o.grad += out.grad; };
+    return out;
+  }
+  mul(o) {
+    o = o instanceof Value ? o : new Value(o);
+    const out = new Value(this.data * o.data, [this, o], '*');
+    out._backward = () => { this.grad += o.data * out.grad; o.grad += this.data * out.grad; };
+    return out;
+  }
+  pow(k) {
+    const out = new Value(Math.pow(this.data, k), [this], '**');
+    out._backward = () => { this.grad += k * Math.pow(this.data, k - 1) * out.grad; };
+    return out;
+  }
+  tanh() {
+    const t = Math.tanh(this.data);
+    const out = new Value(t, [this], 'tanh');
+    out._backward = () => { this.grad += (1 - t * t) * out.grad; };
+    return out;
+  }
+  neg() { return this.mul(-1); }
+  sub(o) { return this.add(o instanceof Value ? o.neg() : new Value(-o)); }
+  backward() {
+    const topo = [], visited = new Set();
+    const build = (v) => { if (visited.has(v)) return; visited.add(v); for (const c of v._children) build(c); topo.push(v); };
+    build(this);
+    this.grad = 1;
+    for (let i = topo.length - 1; i >= 0; i--) topo[i]._backward();
+  }
+}
+class Neuron {
+  constructor(nin, nonlin = true) {
+    this.w = Array.from({ length: nin }, () => new Value(Math.random() * 2 - 1));
+    this.b = new Value(0);
+    this.nonlin = nonlin;
+  }
+  params() { return [...this.w, this.b]; }
+  call(x) {
+    let act = this.b;
+    for (let i = 0; i < this.w.length; i++) act = act.add(this.w[i].mul(x[i]));
+    return this.nonlin ? act.tanh() : act;
+  }
+}
+class Layer {
+  constructor(nin, nout, nonlin = true) { this.neurons = Array.from({ length: nout }, () => new Neuron(nin, nonlin)); }
+  params() { return this.neurons.flatMap(n => n.params()); }
+  call(x) { return this.neurons.map(n => n.call(x)); }
+}
+class MLP {
+  constructor(nin, nouts) {
+    const sz = [nin, ...nouts];
+    this.layers = [];
+    for (let i = 0; i < nouts.length; i++) this.layers.push(new Layer(sz[i], sz[i + 1], i !== nouts.length - 1));
+  }
+  params() { return this.layers.flatMap(l => l.params()); }
+  call(x) { let o = x; for (const l of this.layers) o = l.call(o); return o; }
+}
+</script>
+
+<script>
+/* ===== 03. Manual backprop trace ===== */
+(function () {
+  var W = document.getElementById('bpWS'), X = document.getElementById('bpXS'), B = document.getElementById('bpBS'),
+      Y = document.getElementById('bpYS'), LR = document.getElementById('bpLRS');
+  var rW = document.getElementById('bpW'), rX = document.getElementById('bpX'), rB = document.getElementById('bpB'),
+      rY = document.getElementById('bpY'), rLR = document.getElementById('bpLR');
+  var nEl = document.getElementById('bpN'), oEl = document.getElementById('bpO'), lEl = document.getElementById('bpL'),
+      wxEl = document.getElementById('bpWX'), ro = document.getElementById('bpReadout');
+  var stepMsg = null;
+
+  function compute() {
+    var w = parseFloat(W.value), x = parseFloat(X.value), b = parseFloat(B.value),
+        y = parseFloat(Y.value), eta = parseFloat(LR.value);
+    rW.textContent = w.toFixed(2); rX.textContent = x.toFixed(2); rB.textContent = b.toFixed(2);
+    rY.textContent = y.toFixed(2); rLR.textContent = eta.toFixed(2);
+    var n = w * x + b, o = Math.tanh(n), loss = (y - o) * (y - o);
+    var dLdO = 2 * (o - y), dOdN = 1 - o * o, dNdW = x, dNdB = 1, dNdX = w;
+    var dLdW = dLdO * dOdN * dNdW, dLdB = dLdO * dOdN * dNdB, dLdX = dLdO * dOdN * dNdX;
+    nEl.textContent = n.toFixed(4); oEl.textContent = o.toFixed(4); lEl.textContent = loss.toFixed(4);
+    wxEl.textContent = 'w ' + w.toFixed(2) + ' · x ' + x.toFixed(2) + ' · b ' + b.toFixed(2);
+    var sat = Math.abs(dOdN) < 0.01;
+    var html = '∂loss/∂o = <b>' + dLdO.toFixed(4) + '</b> · ∂o/∂n = <b>' + dOdN.toFixed(4) + '</b> · ∂n/∂w = <b>' + dNdW.toFixed(4) + '</b> ⇒ ∂loss/∂w = <b>' + dLdW.toFixed(4) + '</b><br>' +
+               '∂loss/∂b = <b>' + dLdB.toFixed(4) + '</b> · ∂loss/∂x = <b>' + dLdX.toFixed(4) + '</b>';
+    if (sat) html += '<br><span class="bd">⚠️ saturated — ∂o/∂n ≈ 0, gradient vanishes, nothing to learn</span>';
+    if (stepMsg) { html += '<br>' + stepMsg; }
+    ro.innerHTML = html;
+    return { w: w, o: o, loss: loss, dLdW: dLdW, eta: eta };
+  }
+
+  function step() {
+    var st = compute();
+    var wNew = st.w - st.eta * st.dLdW;
+    W.value = Math.max(-2, Math.min(2, wNew));
+    var after = compute(); // renders with the updated w
+    var improved = after.loss < st.loss;
+    stepMsg = 'step: loss ' + st.loss.toFixed(4) + ' → ' + after.loss.toFixed(4) +
+              (improved ? ' <span class="ok">✓</span>' : ' <span class="bd">(worse — η too big?)</span>') +
+              ' · w ' + st.w.toFixed(2) + ' → ' + after.w.toFixed(2);
+    compute(); // re-render with the step message
+  }
+  function reset() {
+    W.value = 0.5; X.value = 2; B.value = 0; Y.value = 1; LR.value = 0.1;
+    stepMsg = null; compute();
+  }
+  [W, X, B, Y, LR].forEach(function (el) { el.addEventListener('input', function () { stepMsg = null; compute(); }); });
+  document.getElementById('bpStep').addEventListener('click', step);
+  document.getElementById('bpReset').addEventListener('click', reset);
+  compute();
+})();
+</script>
+
+<script>
+/* ===== 07. Live MLP demo ===== */
+(function () {
+  var canvas = document.getElementById('mlpCanvas'), ctx = canvas.getContext('2d');
+  var lossC = document.getElementById('mlpLoss'), lctx = lossC.getContext('2d');
+  var readout = document.getElementById('mlpReadout');
+  var CW = 440, CH = 300, FEAT = 2; // feature space [-2, 2]^2
+
+  function gauss() { var s = 0; for (var i = 0; i < 3; i++) s += Math.random(); return (s - 1.5) / 1.5; }
+  function makeMoons(n) {
+    var pts = [];
+    for (var i = 0; i < n; i++) {
+      var t = Math.random() * Math.PI;
+      if (i % 2 === 0) pts.push({ x: Math.cos(t) + gauss() * 0.1, y: Math.sin(t) + gauss() * 0.1, yv: 1 });
+      else pts.push({ x: 1 - Math.cos(t) + gauss() * 0.1, y: 0.5 - Math.sin(t) + gauss() * 0.1, yv: -1 });
+    }
+    return pts;
+  }
+  function makeCircles(n) {
+    var pts = [];
+    for (var i = 0; i < n; i++) {
+      var t = Math.random() * 2 * Math.PI;
+      if (i % 2 === 0) { var r = 0.15 + Math.random() * 0.25; pts.push({ x: Math.cos(t) * r, y: Math.sin(t) * r, yv: 1 }); }
+      else { var r = 0.9 + Math.random() * 0.5; pts.push({ x: Math.cos(t) * r, y: Math.sin(t) * r, yv: -1 }); }
+    }
+    return pts;
+  }
+  function px(f) { return (f + 2) / 4 * CW; }
+  function py(f) { return (2 - f) / 4 * CH; }
+  function fx(p) { return p / CW * 4 - 2; }
+  function fy(p) { return 2 - p / CH * 4; }
+
+  // numbers-only forward pass (no autodiff needed for rendering)
+  function fastEval(net, x, y) {
+    var a = [x, y];
+    for (var li = 0; li < net.layers.length; li++) {
+      var layer = net.layers[li], b = [];
+      for (var ni = 0; ni < layer.neurons.length; ni++) {
+        var n = layer.neurons[ni], s = n.b.data;
+        for (var wi = 0; wi < n.w.length; wi++) s += n.w[wi].data * a[wi];
+        b.push(n.nonlin ? Math.tanh(s) : s);
+      }
+      a = b;
+    }
+    return a[0];
+  }
+
+  var pts = makeMoons(100), net = new MLP(2, [16, 16, 1]);
+  var steps = 0, lossHist = [], curLoss = null, curAcc = null, clickClass = 1, autoOn = false, autoTimer = null;
+
+  function render(boundary) {
+    if (boundary) {
+      var cell = 10;
+      for (var gx = 0; gx < CW; gx += cell) {
+        for (var gy = 0; gy < CH; gy += cell) {
+          var z = fastEval(net, fx(gx + cell / 2), fy(gy + cell / 2));
+          var a = 0.05 + 0.32 * Math.min(1, Math.abs(z));
+          ctx.fillStyle = z >= 0 ? 'rgba(248,113,113,' + a + ')' : 'rgba(56,189,248,' + a + ')';
+          ctx.fillRect(gx, gy, cell, cell);
+        }
+      }
+    }
+    for (var i = 0; i < pts.length; i++) {
+      var p = pts[i];
+      ctx.beginPath(); ctx.arc(px(p.x), py(p.y), 4.5, 0, Math.PI * 2);
+      ctx.fillStyle = p.yv > 0 ? '#f87171' : '#38bdf8'; ctx.fill();
+      ctx.lineWidth = 1.5; ctx.strokeStyle = '#e2e8f0'; ctx.stroke();
+    }
+    // sparkline
+    lctx.clearRect(0, 0, 440, 70);
+    if (lossHist.length > 1) {
+      var mn = Math.min.apply(null, lossHist), mx = Math.max.apply(null, lossHist);
+      if (mx - mn < 1e-6) mx = mn + 1;
+      var N = lossHist.length, shown = Math.min(N, 440);
+      lctx.beginPath();
+      for (var k = 0; k < shown; k++) {
+        var v = lossHist[N - shown + k];
+        var Xp = k / (shown - 1) * 440, Yp = 64 - (v - mn) / (mx - mn) * 56;
+        if (k === 0) lctx.moveTo(Xp, Yp); else lctx.lineTo(Xp, Yp);
+      }
+      lctx.strokeStyle = '#38bdf8'; lctx.lineWidth = 1.5; lctx.stroke();
+      lctx.fillStyle = '#94a3b8'; lctx.font = '10px monospace';
+      lctx.fillText('loss ' + curLoss.toFixed(3) + (curAcc !== null ? ' · acc ' + (curAcc * 100).toFixed(0) + '%' : ''), 4, 12);
+    } else {
+      lctx.fillStyle = '#94a3b8'; lctx.font = '10px monospace';
+      lctx.fillText('loss history — press "train 100 steps" and watch it fall', 4, 14);
+    }
+    readout.innerHTML = 'steps <b>' + steps + '</b> · loss <b>' + (curLoss === null ? '—' : curLoss.toFixed(3)) + '</b> · acc <b>' + (curAcc === null ? '—' : (curAcc * 100).toFixed(0) + '%') + '</b>';
+  }
+
+  function step() {
+    if (pts.length === 0) return;
+    var outs = pts.map(function (p) { return net.call([new Value(p.x), new Value(p.y)])[0]; });
+    var lossV = outs.reduce(function (acc, o, i) { return acc.add(new Value(pts[i].yv).sub(o).pow(2)); }, new Value(0));
+    var params = net.params();
+    for (var i = 0; i < params.length; i++) params[i].grad = 0;
+    lossV.backward();
+    var lr = 0.1 * Math.pow(0.99, steps);
+    for (var j = 0; j < params.length; j++) params[j].data += -lr * params[j].grad / pts.length;
+    curLoss = lossV.data / pts.length;
+    lossHist.push(curLoss); if (lossHist.length > 2000) lossHist.shift();
+    var ok = 0;
+    for (var m = 0; m < pts.length; m++) if (Math.sign(outs[m].data) === Math.sign(pts[m].yv)) ok++;
+    curAcc = ok / pts.length;
+    steps++;
+  }
+
+  function doSteps(n, chunk) {
+    var done = 0;
+    (function run() {
+      var c = Math.min(chunk, n - done);
+      for (var i = 0; i < c; i++) step();
+      done += c;
+      render(true);
+      if (done < n) setTimeout(run, 20);
+    })();
+  }
+
+  function newNet() { net = new MLP(2, [16, 16, 1]); steps = 0; lossHist = []; curLoss = null; curAcc = null; render(true); }
+
+  document.getElementById('dsMoons').addEventListener('click', function () { pts = makeMoons(100); newNet(); });
+  document.getElementById('dsCircles').addEventListener('click', function () { pts = makeCircles(100); newNet(); });
+  document.getElementById('mlpClear').addEventListener('click', function () { pts = []; newNet(); });
+  document.getElementById('mlpReset').addEventListener('click', newNet);
+  document.getElementById('mlpStep1').addEventListener('click', function () { step(); render(true); });
+  document.getElementById('mlpStep100').addEventListener('click', function () { doSteps(100, 20); });
+  document.getElementById('mlpAuto').addEventListener('change', function () {
+    autoOn = this.checked;
+    if (autoOn && !autoTimer) {
+      autoTimer = setInterval(function () {
+        if (!autoOn) { clearInterval(autoTimer); autoTimer = null; return; }
+        step();
+        render(steps % 3 === 0);
+      }, 30);
+    }
+  });
+  document.getElementById('mlpToggle').addEventListener('click', function () {
+    clickClass = -clickClass;
+    var el = document.getElementById('clickClass');
+    el.textContent = clickClass > 0 ? 'red +1' : 'blue −1';
+    el.style.color = clickClass > 0 ? 'var(--bad)' : 'var(--accent)';
+  });
+  canvas.addEventListener('mousedown', function (e) {
+    var r = canvas.getBoundingClientRect();
+    var Xp = (e.clientX - r.left) / r.width * CW, Yp = (e.clientY - r.top) / r.height * CH;
+    pts.push({ x: fx(Xp), y: fy(Yp), yv: clickClass });
+    render(false);
+  });
+
+  render(true);
+})();
+</script>
+
+</body>
+</html>

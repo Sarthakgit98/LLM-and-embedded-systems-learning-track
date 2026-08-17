@@ -16,17 +16,17 @@
 
 **Calculus**
 - [x] 3Blue1Brown "Essence of Calculus" (all videos) — *complete 2026-08-11: videos 1–11 incl. e, implicit differentiation, limits/ε-δ, integration & FTC, area↔slope, higher derivatives, Taylor series + radius of convergence. Full summary: `Calculus/calculus-phase0-summary.html` (17 sections)*
-- [ ] Chain rule — can derive backprop by hand *(rule mechanics done — product = two strips, chain = nested zoom; but "derive backprop" deferred until after neural-network basics, since backprop needs a net to backprop through — revisit at Phase 2)*
+- [x] Chain rule — can derive backprop by hand *(✅ UNBLOCKED 2026-08-16: micrograd built → the neural-net prerequisite exists. Rule mechanics (product = two strips, chain = nested zoom) + a full by-hand 1-neuron trace + grad-accumulation (fan-out) walkthrough now live in `Micrograd/micrograd-phase0-gate.html` §03–04. Day-after booster: re-derive the trace from memory, no notes)*
 
 **Probability & Information Theory**
 - [ ] Distributions, Bayes, expectation, MLE *(sources: StatQuest playlist · Blitzstein Harvard Stat 110 · **MIT 6.041 (Bertsekas & Tsitsiklis) — Deisenroth/mml-book SKIPPED by choice 2026-08-15, time constraints**)* — *StatQuest intuition layer done 2026-08-11 (5 distributions, Bayes, prob vs likelihood, MLE — summary: `Probability/probability-phase0-summary.html`, now sections 01–16). Expectation + variance deep-dive done 2026-08-13 (sections 09–10: weighted-average intuition, balance-point + long-run-average views, Var = E[X²]−μ², family fingerprints, Bayes numerator = joint P(A∩B) via chain rule). **MIT 6.041 backbone landed 2026-08-15 (videos 1–12 skimmed): new sections 09 (CDF/PDF), 11 (E[g(X)] — Jensen, E[1/X]=∞, n−1 sequel), 13 (joint), 14 (marginal), 15 (conditional density + continuous Bayes), 16 (conditional expectation — tower property, dice E[S|X]=X+3.5, x+y workhorse) inserted at logical points, renumbering 09–10 → 10/12. **Theory layer COMPLETE (2026-08-15); remaining = HANDS-ON: MIT 6.041 OCW problem-set exercises + the Probability I Review Checklist below** *
 - [ ] Entropy, cross-entropy, KL divergence, perplexity *(sources: Jurafsky & Martin ch. 3 · 3Blue1Brown "coding theory" series · MacKay "Information Theory, Inference, and Learning Algorithms" ch. 1–6)* — *page generated 2026-08-15: `InformationTheory/information-theory-phase0-summary.html` (sections 01–06 — I = −log p + halving ladder, entropy = E[surprise] with interactive H(p) curve, cross entropy H(p,q) = H(p) + KL with two-distribution interactive demo, perplexity = 2^H(p,q), LLM training bridge). Covered (page sections 01–06): intuition, I = −log p, entropy, cross-entropy, KL-as-the-gap, perplexity definition, LLM training bridge. **NOT yet covered (pending 2026-08-15):** KL divergence full treatment (properties, Gibbs inequality, asymmetry), joint & conditional entropy H(X,Y)/H(X|Y) + chain rule, mutual information, differential entropy (continuous), source-coding theorem (why H = min bits/symbol), 3B1B coding-theory primer, Jurafsky ch. 3 perplexity worked examples, MacKay ch. 1–6 reference*
 
 **Optimization**
-- [ ] Gradient descent / SGD / Adam concepts — *concept primer done 2026-08-15: `Optimization/optimization-primer.html` (~20 min — loss as expectation, GD = "linearize (Taylor) &amp; step downhill" with interactive LR demo, local-minima landscape demo, SGD = Monte-Carlo gradient estimate, Adam names-only, bridge to micrograd). GD loop itself lands inside micrograd (Sun)*
+- [x] Gradient descent / SGD / Adam concepts — *concept primer done 2026-08-15: `Optimization/optimization-primer.html` (~20 min — loss as expectation, GD = "linearize (Taylor) &amp; step downhill" with interactive LR demo, local-minima landscape demo, SGD = Monte-Carlo gradient estimate, Adam names-only, bridge to micrograd). **GD loop landed inside micrograd 2026-08-16** (`p.data += −lr·p.grad`, mean-MSE loss, decaying lr — see `Micrograd/micrograd-phase0-gate.html` §05–07; live browser demo)*
 
 **🏁 Milestone: micrograd implemented** (Karpathy video 3, ~100 lines Python)
-- [ ] `micrograd` coded from scratch and trained a tiny net — *🛡️ LOCKED for Sun 2026-08-16 (Phase 0 gate; 2 h hands-on). Prep: read the optimization primer first (20 min), then code. Probability exercises deferred → daily 5-min flashback loop; info-theory gaps deferred → Phase 1/2*
+- [x] `micrograd` coded from scratch and trained a tiny net — *✅ DONE Sun 2026-08-16 (Phase 0 gate passed). Went through it hands-on; session captured 2026-08-17 as `Micrograd/micrograd-phase0-gate.html` (the "Phase 0 through the micrograd lens" map, ops/local-derivative table, manual 1-neuron trace with live sliders, fan-out `+=` insight, mean-MSE = expectation/MLE bridge, live 2→16→16→1 MLP browser demo with moons/circles/click-to-add, honest caveats). Verified numerically: manual trace (∂loss/∂w = −0.4005), fan-out (x·x → 2x), finite-diff on every MLP param, training 8/8 runs ≥98% acc. Bonus finding: plain sum-MSE diverges on raw moons even in the real micrograd library — mean-loss + decaying lr fix it (a real training-dynamics lesson, logged in page §05). Probability exercises → still daily 5-min flashback loop; info-theory gaps → still Phase 1/2*
 
 ---
 
@@ -66,9 +66,9 @@
 
 ---
 
-## ⏳ Phase 0 — Pending (as of 2026-08-15)
+## ⏳ Phase 0 — Pending (as of 2026-08-17)
 
-> Snapshot of what's left before Phase 0 closes. Theory layers are done (probability: StatQuest + MIT 6.041 videos 1–12, summary sections 01–16; info theory: page sections 01–06). The two active pending blocks:
+> Snapshot of what's left before Phase 0 closes. **🏁 THE GATE IS PASSED (2026-08-16): micrograd done — the Phase 0 milestone.** Theory layers are done (probability: StatQuest + MIT 6.041 videos 1–12, summary sections 01–16; info theory: page sections 01–06; optimization + micrograd: page + live demo). Remaining is by choice, not blocker:
 
 **1. Probability — hands-on (turns "watched/read it" into "can derive it"):**
 - [ ] MIT 6.041 OCW problem-set exercises (Bertsekas & Tsitsiklis, free PDF via MIT OCW — the "can derive it" step)
@@ -84,7 +84,7 @@
 - [ ] Jurafsky & Martin ch. 3 — perplexity worked examples on real text
 - [ ] MacKay ch. 1–6 (reference reading)
 
-**3. Optimization → concepts covered by the primer page (2026-08-15); the GD loop itself is folded into micrograd day. micrograd 🛡️ LOCKED for Sun 16 (the Phase 0 gate). Deferred by choice: probability exercises → daily 5-min flashback loop (one Probability I Review Checklist item per morning) + MIT 6.041 exercises to a later weekend; info-theory gaps → Phase 1/2 (they land better with perplexity/attention context)**
+**3. Optimization + micrograd → ✅ DONE 2026-08-16** (primer page + micrograd page with live demo; sum-vs-mean divergence lesson captured in page §05). **Deferred by choice:** probability exercises → daily 5-min flashback loop (one Probability I Review Checklist item per morning) + MIT 6.041 exercises to a later weekend; info-theory gaps → Phase 1/2 (they land better with perplexity/attention context)
 
 ---
 
@@ -243,7 +243,7 @@
 
 **Weeks 1–4 content (actual state)**
 - [x] 3Blue1Brown math — linear algebra ✅ + calculus ✅ (3 days)
-- [ ] micrograd (scheduled: 5-day plan, day 5)
+- [x] micrograd ✅ (scheduled: 5-day plan, day 5 — DONE Sun 16; page + live demo in `Micrograd/`)
 - [ ] C pointers / bit-manip + ARM book ch. 1–4 — not started (embedded begins in parallel from day 3 of the plan)
 - [ ] I2C bit-bang / 8-bit CPU — not started
 
@@ -272,7 +272,7 @@
 | Fri 14→15 (shifted) | **Probability wrap-up — MIT 6.041** — **✅ theory done 2026-08-15** (videos 1–12 skimmed → summary sections 09–16); **⏳ remaining: OCW problem-set exercises + Probability I Review Checklist** (the hands-on step). mml-book/Deisenroth **skipped** | | |
 | Fri 14 | Info theory — entropy, cross-entropy, KL, perplexity (Jurafsky ch. 3; 3B1B coding theory) — **✅ done 2026-08-15 (shifted one day): page generated — entropy + cross-entropy + KL-as-gap + perplexity; Jurafsky/MacKay reference reading still open** | Explain entropy in ≤ 3 sentences out loud | Embedded C I: pointers + memory layout (K&R ch. 5) |
 | Sat 15 | Optimization — gradient descent / SGD / Adam (Karpathy Zero-to-Hero 1–3) — **✅ concepts covered 2026-08-15 via the primer page (`Optimization/optimization-primer.html`); the GD loop itself lands inside micrograd (Sun)** | Link GD to Taylor: "linearize the loss, step downhill" | — |
-| Sun 16 | 🏁 **micrograd from scratch** (2 h, hands-on) — Phase 0 complete — **🛡️ LOCKED (2026-08-15); prep = read the optimization primer (20 min), then code** | After coding it, re-derive backprop by hand, no notes | Phase 1 kickoff: history of NLP timeline (first 3 eras) |
+| Sun 16 | 🏁 **micrograd from scratch** (2 h, hands-on) — Phase 0 complete — **✅ DONE 2026-08-16 — Phase 0 gate passed** (summary page + live MLP demo in `Micrograd/micrograd-phase0-gate.html`, captured 2026-08-17) | After coding it, re-derive backprop by hand, no notes — **✅ the by-hand trace is page §03; re-derive from memory as the booster** | Phase 1 kickoff: history of NLP timeline (first 3 eras) |
 
 **Why this order (retention-first):** probability builds directly on integration (expectation = ∫x·p(x)dx, CDF = antiderivative) — fresh calculus, immediate payoff; info theory builds on probability (entropy = −Σp·ln p); optimization is just Taylor/linearization + the chain rule; micrograd then *uses* every piece. Each day's booster re-activates the previous day, and the two tracks stay in separate sessions.
 
